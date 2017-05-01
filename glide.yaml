@@ -11,3 +11,5 @@ import:
   - go
 - package: github.com/pkg/errors
   version: ^0.8.0
+- package: github.com/codeskyblue/go-sh
+  version: ^0.1.0
