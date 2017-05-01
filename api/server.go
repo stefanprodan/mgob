@@ -1,15 +1,15 @@
 package api
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
 	"github.com/stefanprodan/mgob/config"
-	"fmt"
+	"net/http"
 )
 
 type HttpServer struct {
-	Config *confing.AppConfig
+	Config *config.AppConfig
 }
 
 func (s *HttpServer) Start() {
