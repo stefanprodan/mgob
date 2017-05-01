@@ -1,6 +1,8 @@
-hash: 0f17e64a9401608c55d5bd0208fd0657dc07abcad841024ba2a57ca54a1103bf
-updated: 2017-05-01T20:54:02.221287291+03:00
+hash: 01328825a64863666cf32ca649b07fec26be36342fdd5b7464b47c267b4f9857
+updated: 2017-05-01T21:21:17.037434401+03:00
 imports:
+- name: github.com/prometheus/client_golang
+  version: c5b7fccd204277076155f10851dad72b76a49317
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: golang.org/x/sys
