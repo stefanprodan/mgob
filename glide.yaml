@@ -6,3 +6,6 @@ import:
 - package: gopkg.in/yaml.v2
 - package: github.com/prometheus/client_golang
   version: ^0.8.0
+- package: github.com/prometheus/client_model
+  subpackages:
+  - go
