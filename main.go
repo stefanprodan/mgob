@@ -1,28 +1,37 @@
 package main
 
 import (
+	"flag"
 	"github.com/Sirupsen/logrus"
+	"github.com/stefanprodan/mgob/api"
+	"github.com/stefanprodan/mgob/config"
 	"os"
 	"os/signal"
 	"syscall"
-	"github.com/stefanprodan/mgob/config"
-	"flag"
-	"github.com/stefanprodan/mgob/api"
 )
 
 func main() {
 
-	var config = &confing.AppConfig{}
-	flag.StringVar(&config.LogLevel, "LogLevel", "debug", "logging threshold level: debug|info|warn|error|fatal|panic")
-	flag.IntVar(&config.Port, "Port", 8090, "HTTP port to listen on")
+	var appConfig = &config.AppConfig{}
+	flag.StringVar(&appConfig.LogLevel, "LogLevel", "debug", "logging threshold level: debug|info|warn|error|fatal|panic")
+	flag.IntVar(&appConfig.Port, "Port", 8090, "HTTP port to listen on")
+	flag.StringVar(&appConfig.ConfigPath, "ConfigPath", "/Users/aleph/go/src/github.com/stefanprodan/mgob/test/config", "plan yml files dir")
+	flag.StringVar(&appConfig.StoragePath, "StoragePath", "/Users/aleph/go/src/github.com/stefanprodan/mgob/test/storage", "backup storage")
+	flag.StringVar(&appConfig.TmpPath, "TmpPath", "/Users/aleph/go/src/github.com/stefanprodan/mgob/test/tmp", "temporary backup storage")
 
-	setLogLevel(config.LogLevel)
+	setLogLevel(appConfig.LogLevel)
 
 	server := &api.HttpServer{
-		Config: config,
+		Config: appConfig,
 	}
-	logrus.Infof("Starting HTTP server on port %v", config.Port)
+	logrus.Infof("Starting HTTP server on port %v", appConfig.Port)
 	go server.Start()
+
+	_, err := config.LoadPlans(appConfig.ConfigPath)
+
+	if err != nil {
+		logrus.Fatal(err)
+	}
 
 	//wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
 	sigChan := make(chan os.Signal, 1)
