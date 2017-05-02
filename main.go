@@ -6,10 +6,11 @@ import (
 	"github.com/stefanprodan/mgob/api"
 	"github.com/stefanprodan/mgob/config"
 	_ "github.com/stefanprodan/mgob/mongodump"
+	"github.com/stefanprodan/mgob/scheduler"
+	_ "github.com/stefanprodan/mgob/scheduler"
 	"os"
 	"os/signal"
 	"syscall"
-	"github.com/stefanprodan/mgob/scheduler"
 )
 
 func main() {
@@ -41,7 +42,8 @@ func main() {
 	//}
 	//logrus.Info("done")
 
-	scheduler.Start(plans, appConfig)
+	sch := scheduler.New(plans, appConfig)
+	sch.Start()
 
 	//wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
 	sigChan := make(chan os.Signal, 1)

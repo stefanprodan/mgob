@@ -1,31 +1,44 @@
 package scheduler
 
 import (
-	"github.com/stefanprodan/mgob/config"
-	"github.com/robfig/cron"
-	"github.com/stefanprodan/mgob/mongodump"
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
+	"github.com/robfig/cron"
+	"github.com/stefanprodan/mgob/config"
+	"github.com/stefanprodan/mgob/mongodump"
 )
 
-func Start(plans []config.Plan, conf *config.AppConfig) error {
+type Scheduler struct {
+	Cron   *cron.Cron
+	Plans  []config.Plan
+	Config *config.AppConfig
+}
 
-	c := cron.New()
+func New(plans []config.Plan, conf *config.AppConfig) *Scheduler {
+	s := &Scheduler{
+		Cron:   cron.New(),
+		Plans:  plans,
+		Config: conf,
+	}
+	return s
+}
 
-	for _, plan := range plans {
+func (s *Scheduler) Start() error {
+
+	for _, plan := range s.Plans {
 
 		schedule, err := cron.ParseStandard(plan.Scheduler.Cron)
 		if err != nil {
 			return errors.Wrapf(err, "Invalid cron %v for plan %v", plan.Scheduler.Cron, plan.Name)
 		}
 
-		c.Schedule(schedule, backupJob{plan.Name, plan, conf})
+		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config})
 	}
 
-	c.Start()
+	s.Cron.Start()
 
-	for i, e := range c.Entries() {
-		logrus.Infof("Plan %v next run on %v", plans[i].Name, e.Next)
+	for _, e := range s.Cron.Entries() {
+		logrus.Infof("Plan %v next run on %v", e.Job.(backupJob).name, e.Next)
 	}
 
 	return nil
@@ -37,12 +50,12 @@ type backupJob struct {
 	conf *config.AppConfig
 }
 
-func (b backupJob) Run()  {
+func (b backupJob) Run() {
 	logrus.Infof("Starting job for %v", b.plan.Name)
 	err := mongodump.Run(b.plan, b.conf)
 	if err != nil {
 		logrus.Errorf("Job %v failed %v", b.plan.Name, err)
-	}else {
+	} else {
 		logrus.Infof("Job finished for %v", b.plan.Name)
 	}
 }
