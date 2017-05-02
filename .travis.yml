@@ -14,8 +14,11 @@ before_install:
 before_script:
   - sleep 10
   - mongo --version
+  - lsof -iTCP -sTCP:LISTEN | grep mongo
   - >-
     mongo test --eval 'db.test.insert({item: "item", val: "test" });'
+  - >-
+    mongo test --eval 'db.runCommand({whatsmyuri : 1});'
 
 script:
   - make travis
