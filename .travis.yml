@@ -23,3 +23,6 @@ script:
   - sleep 60
   - curl http://localhost:8090/version
   - docker logs mgob 2>&1 | grep finished
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "release" ]; then make publish; else echo "Docker Hub push skipped" ; fi
