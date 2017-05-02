@@ -2,8 +2,8 @@ target:
   host: "172.18.7.21"
   port: 27017
   database: "mongoclient"
-  username: "t"
-  password: "t"
+  username: ""
+  password: ""
 scheduler:
   cron: "*/1 * * * *"
   retention: 5

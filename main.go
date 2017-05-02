@@ -34,10 +34,11 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	err = mongodump.Dump(plans[0], appConfig)
+	err = mongodump.Run(plans[0], appConfig)
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	logrus.Info("done")
 
 	//wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
 	sigChan := make(chan os.Signal, 1)
