@@ -18,6 +18,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 
 	archive, log, err := dump(plan, tmpPath, t1.UTC())
 	res := Result{
+		Plan: plan.Name,
 		Timestamp: t1.UTC(),
 		Status:    500,
 	}

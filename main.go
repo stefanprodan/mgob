@@ -24,26 +24,28 @@ func main() {
 	setLogLevel(appConfig.LogLevel)
 	logrus.Infof("Starting with config: %+v", appConfig)
 
-	server := &api.HttpServer{
-		Config: appConfig,
-	}
-	logrus.Infof("Starting HTTP server on port %v", appConfig.Port)
-	go server.Start(version)
-
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
+
+	stats := scheduler.NewStats(plans)
+	sch := scheduler.New(plans, appConfig, stats)
+	sch.Start()
 
 	if err != nil {
 		logrus.Fatal(err)
 	}
+
+	server := &api.HttpServer{
+		Config: appConfig,
+		Stats:  stats,
+	}
+	logrus.Infof("Starting HTTP server on port %v", appConfig.Port)
+	go server.Start(version)
 
 	//err = mongodump.Run(plans[0], appConfig)
 	//if err != nil {
 	//	logrus.Fatal(err)
 	//}
 	//logrus.Info("done")
-
-	sch := scheduler.New(plans, appConfig)
-	sch.Start()
 
 	//wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
 	sigChan := make(chan os.Signal, 1)

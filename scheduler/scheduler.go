@@ -15,14 +15,16 @@ type Scheduler struct {
 	Cron    *cron.Cron
 	Plans   []config.Plan
 	Config  *config.AppConfig
+	Stats   *Stats
 	metrics *metrics.BackupMetrics
 }
 
-func New(plans []config.Plan, conf *config.AppConfig) *Scheduler {
+func New(plans []config.Plan, conf *config.AppConfig, stats *Stats) *Scheduler {
 	s := &Scheduler{
 		Cron:    cron.New(),
 		Plans:   plans,
 		Config:  conf,
+		Stats:   stats,
 		metrics: metrics.New("mgob", "scheduler"),
 	}
 
@@ -35,7 +37,7 @@ func (s *Scheduler) Start() error {
 		if err != nil {
 			return errors.Wrapf(err, "Invalid cron %v for plan %v", plan.Scheduler.Cron, plan.Name)
 		}
-		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config, s.metrics})
+		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config, s.Stats,s.metrics})
 	}
 	s.Cron.Start()
 
@@ -49,6 +51,7 @@ type backupJob struct {
 	name    string
 	plan    config.Plan
 	conf    *config.AppConfig
+	stats 	*Stats
 	metrics *metrics.BackupMetrics
 }
 
@@ -69,4 +72,6 @@ func (b backupJob) Run() {
 	t2 := time.Now()
 	b.metrics.Total.WithLabelValues(b.plan.Name, status).Inc()
 	b.metrics.Latency.WithLabelValues(b.plan.Name, status).Observe(t2.Sub(t1).Seconds())
+
+	b.stats.Set(&res)
 }
