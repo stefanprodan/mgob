@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-APP_VERSION?=0.0.1
+APP_VERSION?=0.1
 
 # build vars
 BUILD_DATE:=$(shell date -u +%Y-%m-%d_%H.%M.%S)
@@ -20,23 +20,22 @@ VETARGS:=-asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -rangelo
 
 travis:
 	@echo ">>> Building mgob:build image"
-	@docker build --build-arg APP_VERSION=$(APP_VERSION) -t $(REPOSITORY)/mgob:build -f Dockerfile.build .
+	@docker build --build-arg APP_VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) -t $(REPOSITORY)/mgob:build -f Dockerfile.build .
 	@docker create --name mgob_extract $(REPOSITORY)/mgob:build
 	@docker cp mgob_extract:/dist/mgob ./mgob
 	@docker rm -f mgob_extract
-	@echo ">>> Building mgob:$(APP_VERSION) image"
-	@docker build -t $(REPOSITORY)/mgob:$(APP_VERSION) .
+	@echo ">>> Building mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) image"
+	@docker build -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) .
 	@rm ./mgob
 	@echo ">>> Starting mgob container"
-	@docker run -dp 8090:8090 --name mgob-$(APP_VERSION) \
+	@docker run -dp 8090:8090 --name mgob \
 	    --restart unless-stopped \
 	    -v "$(TRAVIS):/config" \
-        $(REPOSITORY)/mgob:$(APP_VERSION) \
+        $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
 		-ConfigPath=/config \
 		-StoragePath=/storage \
 		-TmpPath=/tmp \
 		-LogLevel=info
-	@curl http://localhost:8090/version
 
 run: build
 	@echo ">>> Starting mgob container"
