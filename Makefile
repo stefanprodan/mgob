@@ -61,7 +61,7 @@ build: clean
 clean:
 	@docker rm -f mgob-$(APP_VERSION) || true
 	@docker rmi $$(docker images | awk '$$1 ~ /mgob/ { print $$3 }') || true
-	@docker volume rm $$(docker volume ls -f dangling=true -q)
+	@docker volume rm $$(docker volume ls -f dangling=true -q) || true
 
 fmt:
 	@echo ">>> Running go fmt $(PACKAGES)"

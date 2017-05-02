@@ -22,4 +22,4 @@ script:
   - make travis
   - sleep 60
   - curl http://localhost:8090/version
-  - docker logs mgob | grep -q finished
+  - docker logs mgob 2>&1 | grep finished
