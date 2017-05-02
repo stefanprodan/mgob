@@ -5,10 +5,11 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/stefanprodan/mgob/api"
 	"github.com/stefanprodan/mgob/config"
-	"github.com/stefanprodan/mgob/mongodump"
+	_ "github.com/stefanprodan/mgob/mongodump"
 	"os"
 	"os/signal"
 	"syscall"
+	"github.com/stefanprodan/mgob/scheduler"
 )
 
 func main() {
@@ -34,11 +35,13 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	err = mongodump.Run(plans[0], appConfig)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	logrus.Info("done")
+	//err = mongodump.Run(plans[0], appConfig)
+	//if err != nil {
+	//	logrus.Fatal(err)
+	//}
+	//logrus.Info("done")
+
+	scheduler.Start(plans, appConfig)
 
 	//wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
 	sigChan := make(chan os.Signal, 1)
