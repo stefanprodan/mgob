@@ -14,3 +14,5 @@ import:
 - package: github.com/codegangsta/inject
 - package: github.com/codeskyblue/go-sh
   version: b097669b1569203c3ce05a6b8717d43140fdb3d5
+- package: github.com/robfig/cron
+  version: df38d32658d8788cd446ba74db4bb5375c4b0cb3

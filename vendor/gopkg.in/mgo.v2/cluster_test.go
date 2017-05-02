@@ -1477,6 +1477,7 @@ func (s *S) TestSecondaryModeWithMongosInsert(c *C) {
 	c.Assert(result.A, Equals, 1)
 }
 
+
 func (s *S) TestRemovalOfClusterMember(c *C) {
 	if *fast {
 		c.Skip("-fast")

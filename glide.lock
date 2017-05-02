@@ -1,5 +1,5 @@
-hash: 9160b4a6676d1d654204b43ca6ea82d17e40505254f4c608bcc897823314264e
-updated: 2017-05-02T02:50:46.494393382+03:00
+hash: be374bccd1ce8cf56b5e67c95e1acd96406f94988c299ab9f5dff6c315e48c5d
+updated: 2017-05-02T13:06:19.175142078+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -38,6 +38,8 @@ imports:
   version: 6ac8c5d890d415025dd5aae7595bcb2a6e7e2fad
   subpackages:
   - xfs
+- name: github.com/robfig/cron
+  version: df38d32658d8788cd446ba74db4bb5375c4b0cb3
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: golang.org/x/sys
