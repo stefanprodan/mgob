@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
 	"io/ioutil"
+	"strings"
 	"time"
 )
 
@@ -56,10 +57,14 @@ func dump(plan config.Plan, tmpPath string) (string, string, error) {
 	}
 
 	output, err := sh.Command("/bin/sh", "-c", dump).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
-	logToFile(log, output)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "mongodump failed, see log %v", log)
+		ex := ""
+		if len(output) > 0 {
+			ex = strings.Replace(string(output), "\n", " ", -1)
+		}
+		return "", "", errors.Wrapf(err, "mongodump log %v", ex)
 	}
+	logToFile(log, output)
 
 	return archive, log, nil
 }
