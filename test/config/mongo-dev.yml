@@ -7,3 +7,4 @@ target:
 scheduler:
   cron: "*/1 * * * *"
   retention: 5
+  timeout: 1

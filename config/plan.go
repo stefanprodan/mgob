@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -28,6 +26,7 @@ type Target struct {
 type Scheduler struct {
 	Cron      string `yaml:"cron"`
 	Retention int    `yaml:"retention"`
+	Timeout   int    `yaml:"timeout"`
 }
 
 func LoadPlans(dir string) ([]Plan, error) {
@@ -59,12 +58,10 @@ func LoadPlans(dir string) ([]Plan, error) {
 			_, filename := filepath.Split(path)
 			plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
 			plans = append(plans, plan)
-
-			logrus.Infof("Plan %v loaded", filename)
 		}
 	}
 	if len(plans) < 1 {
-		return nil, errors.New(fmt.Sprintf("No backup plans found in %v", dir))
+		return nil, errors.Errorf("No backup plans found in %v", dir)
 	}
 
 	return plans, nil

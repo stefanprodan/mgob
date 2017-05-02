@@ -5,6 +5,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/stefanprodan/mgob/api"
 	"github.com/stefanprodan/mgob/config"
+	"github.com/stefanprodan/mgob/mongodump"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,8 +28,13 @@ func main() {
 	logrus.Infof("Starting HTTP server on port %v", appConfig.Port)
 	go server.Start()
 
-	_, err := config.LoadPlans(appConfig.ConfigPath)
+	plans, err := config.LoadPlans(appConfig.ConfigPath)
 
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	err = mongodump.Dump(plans[0], appConfig)
 	if err != nil {
 		logrus.Fatal(err)
 	}
