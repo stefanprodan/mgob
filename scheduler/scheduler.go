@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
 	"github.com/stefanprodan/mgob/config"
-	"github.com/stefanprodan/mgob/mongodump"
+	"github.com/stefanprodan/mgob/backup"
 )
 
 type Scheduler struct {
@@ -52,7 +52,7 @@ type backupJob struct {
 
 func (b backupJob) Run() {
 	logrus.Infof("Starting job for %v", b.plan.Name)
-	err := mongodump.Run(b.plan, b.conf)
+	err := backup.Run(b.plan, b.conf.TmpPath, b.conf.StoragePath)
 	if err != nil {
 		logrus.Errorf("Job %v failed %v", b.plan.Name, err)
 	} else {

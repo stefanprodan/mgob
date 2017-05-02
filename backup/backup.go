@@ -1,4 +1,4 @@
-package mongodump
+package backup
 
 import (
 	"fmt"
@@ -9,18 +9,18 @@ import (
 	"time"
 )
 
-func Run(plan config.Plan, conf *config.AppConfig) error {
+func Run(plan config.Plan, tmpPath string, storagePath string) error {
 
-	planDir := fmt.Sprintf("%v/%v", conf.StoragePath, plan.Name)
+	planDir := fmt.Sprintf("%v/%v", storagePath, plan.Name)
 
-	archive, log, err := dump(plan, conf)
+	archive, log, err := dump(plan, tmpPath)
 	if err != nil {
 		return err
 	}
 
 	err = sh.Command("mkdir", "-p", planDir).Run()
 	if err != nil {
-		return errors.Wrapf(err, "creating dir %v in %v failed", plan.Name, conf.StoragePath)
+		return errors.Wrapf(err, "creating dir %v in %v failed", plan.Name, storagePath)
 	}
 
 	err = sh.Command("mv", archive, planDir).Run()
@@ -43,11 +43,11 @@ func Run(plan config.Plan, conf *config.AppConfig) error {
 	return nil
 }
 
-func dump(plan config.Plan, conf *config.AppConfig) (string, string, error) {
+func dump(plan config.Plan, tmpPath string) (string, string, error) {
 
 	ts := time.Now().UTC().Unix()
-	archive := fmt.Sprintf("%v/%v-%v.gz", conf.TmpPath, plan.Name, ts)
-	log := fmt.Sprintf("%v/%v-%v.log", conf.TmpPath, plan.Name, ts)
+	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts)
+	log := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts)
 
 	dump := fmt.Sprintf("mongodump --archive=%v --gzip --host %v --port %v --db %v ",
 		archive, plan.Target.Host, plan.Target.Port, plan.Target.Database)
@@ -77,14 +77,12 @@ func logToFile(file string, data []byte) error {
 
 func applyRetention(path string, retention int) error {
 	gz := fmt.Sprintf("cd %v && rm -f $(ls -1t *.gz | tail -n +%v)", path, retention+1)
-
 	err := sh.Command("/bin/sh", "-c", gz).Run()
 	if err != nil {
 		return errors.Wrapf(err, "removing old gz files from %v failed", path)
 	}
 
 	log := fmt.Sprintf("cd %v && rm -f $(ls -1t *.log | tail -n +%v)", path, retention+1)
-
 	err = sh.Command("/bin/sh", "-c", log).Run()
 	if err != nil {
 		return errors.Wrapf(err, "removing old log files from %v failed", path)

@@ -5,7 +5,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/stefanprodan/mgob/api"
 	"github.com/stefanprodan/mgob/config"
-	_ "github.com/stefanprodan/mgob/mongodump"
+	_ "github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/scheduler"
 	_ "github.com/stefanprodan/mgob/scheduler"
 	"os"
