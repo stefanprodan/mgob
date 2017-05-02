@@ -28,7 +28,7 @@ travis:
 	@docker build -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) .
 	@rm ./mgob
 	@echo ">>> Starting mgob container"
-	@docker run -dp 8090:8090 --name mgob \
+	@docker run -d --net=host --name mgob \
 	    --restart unless-stopped \
 	    -v "$(TRAVIS):/config" \
         $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
