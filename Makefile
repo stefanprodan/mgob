@@ -37,6 +37,12 @@ travis:
 		-TmpPath=/tmp \
 		-LogLevel=info
 
+publish:
+	@docker login -e "$(DOCKER_EMAIL)" -u "$(DOCKER_USER)" -p "$(DOCKER_PASS)"
+	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:latest
+	@docker push $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER)
+	@docker push $(REPOSITORY)/mgob:latest
+
 run: build
 	@echo ">>> Starting mgob container"
 	@docker run -dp 8090:8090 --name mgob-$(APP_VERSION) \
