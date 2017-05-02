@@ -1,0 +1,10 @@
+target:
+  host: "localhost"
+  port: 27017
+  database: "test"
+  username: ""
+  password: ""
+scheduler:
+  cron: "* * * * *"
+  retention: 5
+  timeout: 60

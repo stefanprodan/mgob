@@ -12,6 +12,7 @@ REPOSITORY?=stefanprodan
 
 #run vars
 CONFIG:=$$(pwd)/test/config
+TRAVIS:=$$(pwd)/test/travis
 
 # go tools
 PACKAGES:=$(shell go list ./... | grep -v '/vendor/')
@@ -26,6 +27,16 @@ travis:
 	@echo ">>> Building mgob:$(APP_VERSION) image"
 	@docker build -t $(REPOSITORY)/mgob:$(APP_VERSION) .
 	@rm ./mgob
+	@echo ">>> Starting mgob container"
+	@docker run -dp 8090:8090 --name mgob-$(APP_VERSION) \
+	    --restart unless-stopped \
+	    -v "$(TRAVIS):/config" \
+        $(REPOSITORY)/mgob:$(APP_VERSION) \
+		-ConfigPath=/config \
+		-StoragePath=/storage \
+		-TmpPath=/tmp \
+		-LogLevel=info
+	@curl http://localhost:8090/version
 
 run: build
 	@echo ">>> Starting mgob container"
