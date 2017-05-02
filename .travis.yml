@@ -1,0 +1,20 @@
+sudo: required
+language: go
+
+go:
+  - 1.8.x
+
+services:
+  - docker
+  - mongodb
+
+before_install:
+  - docker pull alpine:edge
+
+before_script:
+  - sleep 10
+  - mongo --version
+  - mongo test --eval 'var document = {name  : "document_name",title : "document_title",};db.TestCollection.insert(document);'
+
+script:
+  - make build
