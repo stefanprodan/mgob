@@ -1,5 +1,5 @@
-hash: be374bccd1ce8cf56b5e67c95e1acd96406f94988c299ab9f5dff6c315e48c5d
-updated: 2017-05-02T13:06:19.175142078+03:00
+hash: bc87e5e6c481460e8b2844b2eb94f283a23ce194342994ed78c656d62b6c4316
+updated: 2017-05-03T01:10:40.43098254+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -9,6 +9,8 @@ imports:
   version: 37d7f8432a3e684eef9b2edece76bdfa6ac85b39
 - name: github.com/codeskyblue/go-sh
   version: b097669b1569203c3ce05a6b8717d43140fdb3d5
+- name: github.com/dustin/go-humanize
+  version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/golang/protobuf
   version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
   subpackages:
