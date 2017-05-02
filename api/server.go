@@ -15,5 +15,7 @@ type HttpServer struct {
 func (s *HttpServer) Start() {
 	http.Handle("/metrics", promhttp.Handler())
 
+	http.Handle("/", http.FileServer(http.Dir(s.Config.StoragePath)))
+
 	logrus.Error(http.ListenAndServe(fmt.Sprintf(":%v", s.Config.Port), http.DefaultServeMux))
 }

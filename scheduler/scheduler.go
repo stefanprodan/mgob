@@ -4,8 +4,8 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
-	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/backup"
+	"github.com/stefanprodan/mgob/config"
 )
 
 type Scheduler struct {
@@ -24,23 +24,18 @@ func New(plans []config.Plan, conf *config.AppConfig) *Scheduler {
 }
 
 func (s *Scheduler) Start() error {
-
 	for _, plan := range s.Plans {
-
 		schedule, err := cron.ParseStandard(plan.Scheduler.Cron)
 		if err != nil {
 			return errors.Wrapf(err, "Invalid cron %v for plan %v", plan.Scheduler.Cron, plan.Name)
 		}
-
 		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config})
 	}
-
 	s.Cron.Start()
 
 	for _, e := range s.Cron.Entries() {
-		logrus.Infof("Plan %v next run on %v", e.Job.(backupJob).name, e.Next)
+		logrus.Infof("Plan %v next run at %v", e.Job.(backupJob).name, e.Next)
 	}
-
 	return nil
 }
 
