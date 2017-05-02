@@ -18,4 +18,4 @@ before_script:
     mongo test --eval 'db.test.insert({item: "item", val: "test" });'
 
 script:
-  - make build
+  - make travis
