@@ -13,7 +13,6 @@ before_install:
 
 before_script:
   - sleep 10
-  - mongo --version
   - >-
     mongo test --eval 'db.test.insert({item: "item", val: "test" });'
   - >-
@@ -23,4 +22,4 @@ script:
   - make travis
   - sleep 60
   - curl http://localhost:8090/version
-  - docker logs mgob
+  - docker logs mgob | grep -q finished
