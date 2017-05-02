@@ -12,8 +12,12 @@ type HttpServer struct {
 	Config *config.AppConfig
 }
 
-func (s *HttpServer) Start() {
+func (s *HttpServer) Start(version string) {
 	http.Handle("/metrics", promhttp.Handler())
+
+	http.HandleFunc("/version", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprint(w, version)
+	})
 
 	http.Handle("/", http.FileServer(http.Dir(s.Config.StoragePath)))
 

@@ -5,30 +5,30 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/stefanprodan/mgob/api"
 	"github.com/stefanprodan/mgob/config"
-	_ "github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/scheduler"
-	_ "github.com/stefanprodan/mgob/scheduler"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-func main() {
+var version = "undefined"
 
+func main() {
 	var appConfig = &config.AppConfig{}
 	flag.StringVar(&appConfig.LogLevel, "LogLevel", "debug", "logging threshold level: debug|info|warn|error|fatal|panic")
 	flag.IntVar(&appConfig.Port, "Port", 8090, "HTTP port to listen on")
-	flag.StringVar(&appConfig.ConfigPath, "ConfigPath", "/Users/aleph/go/src/github.com/stefanprodan/mgob/test/config", "plan yml files dir")
-	flag.StringVar(&appConfig.StoragePath, "StoragePath", "/Users/aleph/go/src/github.com/stefanprodan/mgob/test/storage", "backup storage")
-	flag.StringVar(&appConfig.TmpPath, "TmpPath", "/Users/aleph/go/src/github.com/stefanprodan/mgob/test/tmp", "temporary backup storage")
-
+	flag.StringVar(&appConfig.ConfigPath, "ConfigPath", "/config", "plan yml files dir")
+	flag.StringVar(&appConfig.StoragePath, "StoragePath", "/storage", "backup storage")
+	flag.StringVar(&appConfig.TmpPath, "TmpPath", "/tmp", "temporary backup storage")
+	flag.Parse()
 	setLogLevel(appConfig.LogLevel)
+	logrus.Infof("Starting with config: %+v", appConfig)
 
 	server := &api.HttpServer{
 		Config: appConfig,
 	}
 	logrus.Infof("Starting HTTP server on port %v", appConfig.Port)
-	go server.Start()
+	go server.Start(version)
 
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
 
