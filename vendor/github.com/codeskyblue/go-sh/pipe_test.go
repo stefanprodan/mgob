@@ -1,10 +1,13 @@
 package sh
 
 import (
+	"encoding/xml"
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestUnmarshalJSON(t *testing.T) {
@@ -17,6 +20,21 @@ func TestUnmarshalJSON(t *testing.T) {
 	}
 	if a != 1 {
 		t.Errorf("expect a tobe 1, but got %d", a)
+	}
+}
+
+func TestUnmarshalXML(t *testing.T) {
+	s := NewSession()
+	xmlSample := `<?xml version="1.0" encoding="utf-8"?>
+<server version="1" />`
+	type server struct {
+		XMLName xml.Name `xml:"server"`
+		Version string   `xml:"version,attr"`
+	}
+	data := &server{}
+	s.Command("echo", xmlSample).UnmarshalXML(data)
+	if data.Version != "1" {
+		t.Error(data)
 	}
 }
 
@@ -36,7 +54,7 @@ func TestPipe(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if out != "hello\n" {
+	if string(out) != "hello\n" {
 		t.Error("capture wrong output:", out)
 	}
 	s.Command("echo", []string{"hello\tworld"}).Command("cut", []string{"-f2"}).Run()
@@ -58,4 +76,51 @@ func TestPipeCommand(t *testing.T) {
 		wc.Close()
 	}
 	c2.Wait()
+}
+
+func TestPipeInput(t *testing.T) {
+	s := NewSession()
+	s.ShowCMD = true
+	s.SetInput("first line\nsecond line\n")
+	out, err := s.Command("grep", "second").Output()
+	if err != nil {
+		t.Error(err)
+	}
+	if string(out) != "second line\n" {
+		t.Error("capture wrong output:", out)
+	}
+}
+
+func TestTimeout(t *testing.T) {
+	s := NewSession()
+	err := s.Command("sleep", "2").Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = s.WaitTimeout(time.Second)
+	if err != ErrExecTimeout {
+		t.Fatal(err)
+	}
+}
+
+func TestSetTimeout(t *testing.T) {
+	s := NewSession()
+	s.SetTimeout(time.Second)
+	defer s.SetTimeout(0)
+	err := s.Command("sleep", "2").Run()
+	if err != ErrExecTimeout {
+		t.Fatal(err)
+	}
+}
+
+func TestCombinedOutput(t *testing.T) {
+	s := NewSession()
+	bytes, err := s.Command("sh", "-c", "echo stderr >&2 ; echo stdout").CombinedOutput()
+	if err != nil {
+		t.Error(err)
+	}
+	stringOutput := string(bytes)
+	if !(strings.Contains(stringOutput, "stdout") && strings.Contains(stringOutput, "stderr")) {
+		t.Errorf("expect output from both output streams, got '%s'", strings.TrimSpace(stringOutput))
+	}
 }

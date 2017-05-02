@@ -1,12 +1,14 @@
-hash: 61c7881c0176b981e9aa1e7ed822706defc5314c7abf59ee3c132a41544a8745
-updated: 2017-05-02T02:23:34.870022117+03:00
+hash: 9160b4a6676d1d654204b43ca6ea82d17e40505254f4c608bcc897823314264e
+updated: 2017-05-02T02:50:46.494393382+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
+- name: github.com/codegangsta/inject
+  version: 37d7f8432a3e684eef9b2edece76bdfa6ac85b39
 - name: github.com/codeskyblue/go-sh
-  version: cb4ec65adea40d534790c023bf746d7a31a0d5d0
+  version: b097669b1569203c3ce05a6b8717d43140fdb3d5
 - name: github.com/golang/protobuf
   version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
   subpackages:

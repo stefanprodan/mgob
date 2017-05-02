@@ -11,5 +11,6 @@ import:
   - go
 - package: github.com/pkg/errors
   version: ^0.8.0
+- package: github.com/codegangsta/inject
 - package: github.com/codeskyblue/go-sh
-  version: ^0.1.0
+  version: b097669b1569203c3ce05a6b8717d43140fdb3d5

@@ -1,95 +1,88 @@
 ## go-sh
-[![Build Status](https://drone.io/github.com/shxsun/go-sh/status.png)](https://drone.io/github.com/shxsun/go-sh/latest)
-[![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/shxsun/go-sh)
+[![wercker status](https://app.wercker.com/status/009acbd4f00ccc6de7e2554e12a50d84/s "wercker status")](https://app.wercker.com/project/bykey/009acbd4f00ccc6de7e2554e12a50d84)
+[![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/codeskyblue/go-sh)
 
-So what is go-sh. Sometimes we need to write some shell scripts, but shell scripts is not good at cross platform, but golang is good at that. Is there a good way to use golang to write scripts like shell? Use go-sh we can do it now.
+*If you depend on the old api, see tag: v.0.1*
 
-go-sh support some shell futures.
+install: `go get github.com/codeskyblue/go-sh`
 
-* shell session
-* `export`: env
-* `alias`: like alias ll='ls -l'
-* `cd`: remember current dir
-* pipe
-* `test`: this is shell build command, very usefull(support -d and -f)
+Pipe Example:
 
-Example is always important. I will show you how to use it.
+	package main
 
+	import "github.com/codeskyblue/go-sh"
 
+	func main() {
+		sh.Command("echo", "hello\tworld").Command("cut", "-f2").Run()
+	}
 
-First give you a full example, I will explain every command below.
+Because I like os/exec, `go-sh` is very much modelled after it. However, `go-sh` provides a better experience.
+
+These are some of its features:
+
+* keep the variable environment (e.g. export)
+* alias support (e.g. alias in shell)
+* remember current dir
+* pipe command
+* shell build-in commands echo & test
+* timeout support
+
+Examples are important:
+
+	sh: echo hello
+	go: sh.Command("echo", "hello").Run()
+
+	sh: export BUILD_ID=123
+	go: s = sh.NewSession().SetEnv("BUILD_ID", "123")
+
+	sh: alias ll='ls -l'
+	go: s = sh.NewSession().Alias('ll', 'ls', '-l')
+
+	sh: (cd /; pwd)
+	go: sh.Command("pwd", sh.Dir("/")).Run()
+
+	sh: test -d data || mkdir data
+	go: if ! sh.Test("dir", "data") { sh.Command("mkdir", "data").Run() }
+
+	sh: cat first second | awk '{print $1}'
+	go: sh.Command("cat", "first", "second").Command("awk", "{print $1}").Run()
+
+	sh: count=$(echo "one two three" | wc -w)
+	go: count, err := sh.Echo("one two three").Command("wc", "-w").Output()
+
+	sh(in ubuntu): timeout 1s sleep 3
+	go: c := sh.Command("sleep", "3"); c.Start(); c.WaitTimeout(time.Second) # default SIGKILL
+	go: out, err := sh.Command("sleep", "3").SetTimeout(time.Second).Output() # set session timeout and get output)
+
+	sh: echo hello | cat
+	go: out, err := sh.Command("cat").SetInput("hello").Output()
+
+	sh: cat # read from stdin
+	go: out, err := sh.Command("cat").SetStdin(os.Stdin).Output()
+
+	sh: ls -l > /tmp/listing.txt # write stdout to file
+	go: err := sh.Command("ls", "-l").WriteStdout("/tmp/listing.txt")
+
+If you need to keep env and dir, it is better to create a session
 
 	session := sh.NewSession()
-	session.Env["PATH"] = "/usr/bin:/bin"
-	session.Stdout = os.Stdout
-	session.Stderr = os.Stderr
-	session.Alias("ll", "ls", "-l")
-	session.ShowCMD = true // enable for debug
-	var err error
-	err = session.Call("ll", "/")
-	if err != nil {
-		log.Fatal(err)
-	}
-	ret, err := session.Capture("pwd", sh.Dir("/home")) # wraper of session.Call
-	if err != nil {
-		log.Fatal(err)
-	}
-	# ret is "/home\n"
-	fmt.Println(ret)
+	session.SetEnv("BUILD_ID", "123")
+	session.SetDir("/")
+	# then call cmd
+	session.Command("echo", "hello").Run()
+	# set ShowCMD to true for easily debug
+	session.ShowCMD = true
 
-create a new Session
-
-	session := sh.NewSession()
-
-use alias like this
-
-	session.Alias("ll", "ls", "-l") # like alias ll='ls -l'
-
-set current env like this
-
-	session.Env["BUILD_ID"] = "123" # like export BUILD_ID=123
-
-set current directory
-
-	session.Set(sh.Dir("/")) # like cd /
-
-pipe is also supported
-
-	session.Command("echo", "hello\tworld").Command("cut", "-f2")
-	// output should be "world"
-	session.Run()
-
-test, the build in command support
-
-	session.Test("d", "dir") // test dir
-	session.Test("f", "file) // test regular file
-
-with `Alias Env Set Call Capture Command` a shell scripts can be easily converted into golang program. below is a shell script.
-
-	#!/bin/bash -
-	#
-	export PATH=/usr/bin:/bin
-	alias ll='ls -l'
-	cd /usr
-	if test -d "local"
-	then
-		ll local | awk '{print $1, $NF}'
-	fi
-
-convert to golang, will be
-
-	s := sh.NewSession()
-	s.Env["PATH"] = "/usr/bin:/bin"
-	s.Set(sh.Dir("/usr"))
-	s.Alias("ll", "ls", "-l")
-	if s.Test("d", "local") {
-		s.Command("ll", "local").Command("awk", "{print $1, $NF}").Run()
-	}
+for more information, it better to see docs.
+[![Go Walker](http://gowalker.org/api/v1/badge)](http://gowalker.org/github.com/codeskyblue/go-sh)
 
 ### contribute
-If you love this project, star it which will encourage the coder. pull requests are welcomed, if you want to add some new fetures.
+If you love this project, starring it will encourage the coder. Pull requests are welcome.
 
 support the author: [alipay](https://me.alipay.com/goskyblue)
 
 ### thanks
 this project is based on <http://github.com/codegangsta/inject>. thanks for the author.
+
+# the reason to use Go shell
+Sometimes we need to write shell scripts, but shell scripts are not good at working cross platform,  Go, on the other hand, is good at that. Is there a good way to use Go to write shell like scripts? Using go-sh we can do this now.
