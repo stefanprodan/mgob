@@ -6,49 +6,65 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
-func Run(plan config.Plan, tmpPath string, storagePath string) error {
-
+func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
+	t1 := time.Now()
 	planDir := fmt.Sprintf("%v/%v", storagePath, plan.Name)
 
-	archive, log, err := dump(plan, tmpPath)
+	archive, log, err := dump(plan, tmpPath, t1.UTC())
+	res := Result{
+		Timestamp: t1.UTC(),
+		Status:    500,
+	}
+	_, res.Name = filepath.Split(archive)
+
 	if err != nil {
-		return err
+		return res, err
 	}
 
 	err = sh.Command("mkdir", "-p", planDir).Run()
 	if err != nil {
-		return errors.Wrapf(err, "creating dir %v in %v failed", plan.Name, storagePath)
+		return res, errors.Wrapf(err, "creating dir %v in %v failed", plan.Name, storagePath)
 	}
+
+	fi, err := os.Stat(archive)
+	if err != nil {
+		return res, errors.Wrapf(err, "stat file %v failed", archive)
+	}
+	res.Size = fi.Size()
 
 	err = sh.Command("mv", archive, planDir).Run()
 	if err != nil {
-		return errors.Wrapf(err, "moving file from %v to %v failed", archive, planDir)
+		return res, errors.Wrapf(err, "moving file from %v to %v failed", archive, planDir)
 	}
 
 	err = sh.Command("mv", log, planDir).Run()
 	if err != nil {
-		return errors.Wrapf(err, "moving file from %v to %v failed", log, planDir)
+		return res, errors.Wrapf(err, "moving file from %v to %v failed", log, planDir)
 	}
 
 	if plan.Scheduler.Retention > 0 {
 		err = applyRetention(planDir, plan.Scheduler.Retention)
 		if err != nil {
-			return errors.Wrap(err, "retention job failed")
+			return res, errors.Wrap(err, "retention job failed")
 		}
 	}
 
-	return nil
+	t2 := time.Now()
+	res.Status = 200
+	res.Duration = t2.Sub(t1)
+	return res, nil
 }
 
-func dump(plan config.Plan, tmpPath string) (string, string, error) {
+func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error) {
 
-	ts := time.Now().UTC().Unix()
-	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts)
-	log := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts)
+	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
+	log := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
 
 	dump := fmt.Sprintf("mongodump --archive=%v --gzip --host %v --port %v --db %v ",
 		archive, plan.Target.Host, plan.Target.Port, plan.Target.Database)

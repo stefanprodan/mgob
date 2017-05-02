@@ -2,26 +2,27 @@ package scheduler
 
 import (
 	"github.com/Sirupsen/logrus"
+	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
-	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/backup"
+	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/metrics"
 	"time"
 )
 
 type Scheduler struct {
-	Cron   *cron.Cron
-	Plans  []config.Plan
-	Config *config.AppConfig
+	Cron    *cron.Cron
+	Plans   []config.Plan
+	Config  *config.AppConfig
 	metrics *metrics.BackupMetrics
 }
 
 func New(plans []config.Plan, conf *config.AppConfig) *Scheduler {
 	s := &Scheduler{
-		Cron:   cron.New(),
-		Plans:  plans,
-		Config: conf,
+		Cron:    cron.New(),
+		Plans:   plans,
+		Config:  conf,
 		metrics: metrics.New("mgob", "scheduler"),
 	}
 
@@ -45,9 +46,9 @@ func (s *Scheduler) Start() error {
 }
 
 type backupJob struct {
-	name string
-	plan config.Plan
-	conf *config.AppConfig
+	name    string
+	plan    config.Plan
+	conf    *config.AppConfig
 	metrics *metrics.BackupMetrics
 }
 
@@ -56,12 +57,13 @@ func (b backupJob) Run() {
 	status := "200"
 	t1 := time.Now()
 
-	err := backup.Run(b.plan, b.conf.TmpPath, b.conf.StoragePath)
+	res, err := backup.Run(b.plan, b.conf.TmpPath, b.conf.StoragePath)
 	if err != nil {
 		status = "500"
 		logrus.Errorf("Job %v failed %v", b.plan.Name, err)
 	} else {
-		logrus.Infof("Job finished for %v", b.plan.Name)
+		logrus.Infof("Job finished for %v in %v archive size %v",
+			b.plan.Name, res.Duration, humanize.Bytes(uint64(res.Size)))
 	}
 
 	t2 := time.Now()
