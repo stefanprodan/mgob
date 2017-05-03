@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"github.com/stefanprodan/mgob/backup"
 )
 
 var version = "undefined"
@@ -23,6 +24,12 @@ func main() {
 	flag.Parse()
 	setLogLevel(appConfig.LogLevel)
 	logrus.Infof("Starting with config: %+v", appConfig)
+
+	info, err := backup.CheckMongodump()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	logrus.Info(info)
 
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
 
