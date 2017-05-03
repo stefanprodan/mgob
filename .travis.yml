@@ -21,6 +21,7 @@ before_script:
 script:
   - make travis
   - sleep 60
+  - docker logs mgob
   - curl http://localhost:8090/version
   - docker logs mgob 2>&1 | grep finished
 

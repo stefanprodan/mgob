@@ -20,7 +20,7 @@ func CheckMongodump() (string, error) {
 }
 
 func CheckMinioClient() (string, error) {
-	output, err := sh.Command("/bin/sh", "-c", "mc --version").CombinedOutput()
+	output, err := sh.Command("/bin/sh", "-c", "mc version").CombinedOutput()
 	if err != nil {
 		ex := ""
 		if len(output) > 0 {
