@@ -70,20 +70,42 @@ Web API:
 * `mgob-host:8090/status` backup jobs status
 * `mgob-host:8090/metrics` Prometheus endpoint
 
+Logs:
+
+View scheduler logs with `docker logs mgob`:
+
+```bash
+time="2017-05-03T17:44:14+03:00" level=info msg="Plan mongo-dev next run at 2017-05-03 17:45:00 +0300 EEST" 
+time="2017-05-03T17:44:14+03:00" level=info msg="Plan mongo-test next run at 2017-05-03 17:46:00 +0300 EEST" 
+time="2017-05-03T17:45:00+03:00" level=info msg="mongo-dev backup started" 
+time="2017-05-03T17:45:02+03:00" level=info msg="mongo-dev backup finished in 2.313856701s archive size 420 kB" 
+time="2017-05-03T17:46:00+03:00" level=info msg="mongo-test backup started" 
+time="2017-05-03T17:46:03+03:00" level=info msg="S3 upload finshied `/Users/aleph/go/src/github.com/stefanprodan/mgob/test/storage/mongo-test/mongo-test-1493822760.gz` -> `mongo-test/bktest/mongo-test-1493822760.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 3.00 KB/s " 
+time="2017-05-03T17:46:03+03:00" level=info msg="mongo-test backup finished in 3.505959481s archive size 1.2 kB" 
+```
+
+The mongodump log is stored along with the backup data (gzip archive) in the `storage` dir:
+
+```bash
+aleph-mbp:test aleph$ ls -lh storage/mongo-dev
+total 4160
+-rw-r--r--  1 aleph  staff   410K May  3 17:46 mongo-dev-1493822760.gz
+-rw-r--r--  1 aleph  staff   1.9K May  3 17:46 mongo-dev-1493822760.log
+-rw-r--r--  1 aleph  staff   410K May  3 17:47 mongo-dev-1493822820.gz
+-rw-r--r--  1 aleph  staff   1.5K May  3 17:47 mongo-dev-1493822820.log
+```
+
 Metrics:
 
 Successful backups counter
 
 ```bash
-# TYPE mgob_scheduler_backup_total counter
 mgob_scheduler_backup_total{plan="mongo-dev",status="200"} 8
 ```
 
 Successful backups duration
 
 ```bash
-# HELP mgob_scheduler_backup_latency Backup duration in seconds.
-# TYPE mgob_scheduler_backup_latency summary
 mgob_scheduler_backup_latency{plan="mongo-dev",status="200",quantile="0.5"} 2.149668417
 mgob_scheduler_backup_latency{plan="mongo-dev",status="200",quantile="0.9"} 2.39848413
 mgob_scheduler_backup_latency{plan="mongo-dev",status="200",quantile="0.99"} 2.39848413
