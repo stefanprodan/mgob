@@ -2,9 +2,9 @@
 
 [![Build Status](https://travis-ci.org/stefanprodan/mgob.svg?branch=master)](https://travis-ci.org/stefanprodan/mgob)
 
-MGOB is a backup manager for MongoDB.
+MGOB is a MongoDB backup automation tool built with golang.
 
-Features:
+#### Features
 
 * schedule backups
 * local backups retention
@@ -13,7 +13,7 @@ Features:
 * http file server for local backups and logs
 * Alpine Docker image
 
-Install:
+#### Install
 
 ```bash
 docker run -dp 8090:8090 --name mgob \
@@ -24,7 +24,7 @@ docker run -dp 8090:8090 --name mgob \
     -LogLevel=info
 ```
 
-Configure:
+#### Configure
 
 At startup MGOB loads the backup plans from the `config` volume.
 
@@ -32,13 +32,20 @@ _Local backup plan_
 
 ```yaml
 target:
+  # mongodb IP or host name
   host: "172.18.7.21"
+  # mongodb port
   port: 27017
-  database: "test" 
+  # mongodb database name
+  database: "test"
+  # leave blank if auth is not enabled
+  username: "admin"
+  password: "secret"
 scheduler:
-  cron: "*/1 * * * *"
+  # run every day at 6:00 and 18:00 UTC
+  cron: "0 6,18 */1 * *"
   # number of backups to keep
-  retention: 7
+  retention: 14
   # backup operation timeout in seconds
   timeout: 60
 ```
@@ -64,13 +71,14 @@ s3:
   api: "S3v4"
 ```
 
-Web API:
+#### Web API
 
 * `mgob-host:8090/` file server
 * `mgob-host:8090/status` backup jobs status
 * `mgob-host:8090/metrics` Prometheus endpoint
+* `mgob-host:8090/version` mgod version
 
-Logs:
+#### Logs
 
 View scheduler logs with `docker logs mgob`:
 
@@ -80,7 +88,7 @@ time="2017-05-03T17:44:14+03:00" level=info msg="Plan mongo-test next run at 201
 time="2017-05-03T17:45:00+03:00" level=info msg="mongo-dev backup started" 
 time="2017-05-03T17:45:02+03:00" level=info msg="mongo-dev backup finished in 2.313856701s archive size 420 kB" 
 time="2017-05-03T17:46:00+03:00" level=info msg="mongo-test backup started" 
-time="2017-05-03T17:46:03+03:00" level=info msg="S3 upload finshied `/Users/aleph/go/src/github.com/stefanprodan/mgob/test/storage/mongo-test/mongo-test-1493822760.gz` -> `mongo-test/bktest/mongo-test-1493822760.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 3.00 KB/s " 
+time="2017-05-03T17:46:03+03:00" level=info msg="S3 upload finshied `/storage/mongo-test/mongo-test-1493822760.gz` -> `mongo-test/bktest/mongo-test-1493822760.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 3.00 KB/s " 
 time="2017-05-03T17:46:03+03:00" level=info msg="mongo-test backup finished in 3.505959481s archive size 1.2 kB" 
 ```
 
@@ -95,7 +103,7 @@ total 4160
 -rw-r--r--  1 aleph  staff   1.5K May  3 17:47 mongo-dev-1493822820.log
 ```
 
-Metrics:
+#### Metrics
 
 Successful backups counter
 
