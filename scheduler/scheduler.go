@@ -56,16 +56,16 @@ type backupJob struct {
 }
 
 func (b backupJob) Run() {
-	logrus.Infof("Starting job for %v", b.plan.Name)
+	logrus.Infof("%v backup started", b.plan.Name)
 	status := "200"
 	t1 := time.Now()
 
 	res, err := backup.Run(b.plan, b.conf.TmpPath, b.conf.StoragePath)
 	if err != nil {
 		status = "500"
-		logrus.Errorf("Job %v failed %v", b.plan.Name, err)
+		logrus.Errorf("%v backup failed %v", b.plan.Name, err)
 	} else {
-		logrus.Infof("Job finished for %v in %v archive size %v",
+		logrus.Infof("%v backup finished in %v archive size %v",
 			b.plan.Name, res.Duration, humanize.Bytes(uint64(res.Size)))
 	}
 

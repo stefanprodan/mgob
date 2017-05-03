@@ -53,12 +53,6 @@ func main() {
 	logrus.Infof("Starting HTTP server on port %v", appConfig.Port)
 	go server.Start(version)
 
-	//err = mongodump.Run(plans[0], appConfig)
-	//if err != nil {
-	//	logrus.Fatal(err)
-	//}
-	//logrus.Info("done")
-
 	//wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
