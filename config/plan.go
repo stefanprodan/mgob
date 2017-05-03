@@ -13,6 +13,7 @@ type Plan struct {
 	Name      string    `yaml:"name"`
 	Target    Target    `yaml:"target"`
 	Scheduler Scheduler `yaml:"scheduler"`
+	S3        *S3       `yaml:"s3"`
 }
 
 type Target struct {
@@ -29,10 +30,18 @@ type Scheduler struct {
 	Timeout   int    `yaml:"timeout"`
 }
 
+type S3 struct {
+	Bucket    string `yaml:"bucket"`
+	AccessKey string `yaml:"accessKey"`
+	API       string `yaml:"api"`
+	SecretKey string `yaml:"secretKey"`
+	URL       string `yaml:"url"`
+}
+
 func LoadPlans(dir string) ([]Plan, error) {
 	files := []string{}
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if strings.Contains(path, "yml") {
+		if strings.Contains(path, "yml") || strings.Contains(path, "yaml") {
 			files = append(files, path)
 		}
 		return nil

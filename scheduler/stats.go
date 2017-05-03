@@ -1,9 +1,9 @@
 package scheduler
 
 import (
-	"sync"
 	"github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/config"
+	"sync"
 )
 
 type Stats struct {

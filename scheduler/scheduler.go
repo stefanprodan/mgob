@@ -37,7 +37,7 @@ func (s *Scheduler) Start() error {
 		if err != nil {
 			return errors.Wrapf(err, "Invalid cron %v for plan %v", plan.Scheduler.Cron, plan.Name)
 		}
-		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config, s.Stats,s.metrics})
+		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config, s.Stats, s.metrics})
 	}
 	s.Cron.Start()
 
@@ -51,7 +51,7 @@ type backupJob struct {
 	name    string
 	plan    config.Plan
 	conf    *config.AppConfig
-	stats 	*Stats
+	stats   *Stats
 	metrics *metrics.BackupMetrics
 }
 

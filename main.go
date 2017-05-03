@@ -4,12 +4,12 @@ import (
 	"flag"
 	"github.com/Sirupsen/logrus"
 	"github.com/stefanprodan/mgob/api"
+	"github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/scheduler"
 	"os"
 	"os/signal"
 	"syscall"
-	"github.com/stefanprodan/mgob/backup"
 )
 
 var version = "undefined"
@@ -32,14 +32,13 @@ func main() {
 	logrus.Info(info)
 
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
+	if err != nil {
+		logrus.Fatal(err)
+	}
 
 	stats := scheduler.NewStats(plans)
 	sch := scheduler.New(plans, appConfig, stats)
 	sch.Start()
-
-	if err != nil {
-		logrus.Fatal(err)
-	}
 
 	server := &api.HttpServer{
 		Config: appConfig,

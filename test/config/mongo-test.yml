@@ -8,3 +8,9 @@ scheduler:
   cron: "*/2 * * * *"
   retention: 5
   timeout: 60
+s3:
+  url: "https://play.minio.io:9000"
+  bucket: "mgob"
+  accessKey: "Q3AM3UQ867SPQQA43P2F"
+  secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+  api: "S3v4"
