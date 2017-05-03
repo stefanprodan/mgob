@@ -61,7 +61,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		if err != nil {
 			return res, err
 		} else {
-			logrus.Infof("S3 upload finshied %v", s3output)
+			logrus.Infof("S3 upload finished %v", s3output)
 		}
 	}
 

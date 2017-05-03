@@ -88,7 +88,7 @@ time="2017-05-03T17:44:14+03:00" level=info msg="Plan mongo-test next run at 201
 time="2017-05-03T17:45:00+03:00" level=info msg="mongo-dev backup started" 
 time="2017-05-03T17:45:02+03:00" level=info msg="mongo-dev backup finished in 2.313856701s archive size 420 kB" 
 time="2017-05-03T17:46:00+03:00" level=info msg="mongo-test backup started" 
-time="2017-05-03T17:46:03+03:00" level=info msg="S3 upload finshied `/storage/mongo-test/mongo-test-1493822760.gz` -> `mongo-test/bktest/mongo-test-1493822760.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 3.00 KB/s " 
+time="2017-05-03T17:46:03+03:00" level=info msg="S3 upload finished `/storage/mongo-test/mongo-test-1493822760.gz` -> `mongo-test/bktest/mongo-test-1493822760.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 3.00 KB/s " 
 time="2017-05-03T17:46:03+03:00" level=info msg="mongo-test backup finished in 3.505959481s archive size 1.2 kB" 
 ```
 
