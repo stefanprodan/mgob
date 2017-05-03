@@ -5,10 +5,12 @@
 MGOB is a backup manager for MongoDB.
 
 Features:
+
 * schedule backups
 * local backups retention
 * upload to S3 Object Storage (Minio, AWS, Google Cloud)
 * instrumentation with Prometheus
+* http file server for local backups and logs
 * Alpine Docker image
 
 Install:
@@ -18,7 +20,7 @@ docker run -dp 8090:8090 --name mgob \
     -v "/mgo/config:/config" \
     -v "/mgo/storage:/storage" \
     -v "/mgo/tmp:/tmp" \
-    stefanprodan/mgo \
+    stefanprodan/mgob \
     -LogLevel=info
 ```
 
@@ -26,7 +28,7 @@ Configure:
 
 At startup MGOB loads the backup plans from the `config` volume.
 
-***Local backup plan***
+_Local backup plan_
 
 ```yaml
 target:
@@ -41,7 +43,7 @@ scheduler:
   timeout: 60
 ```
 
-***Local backup with S3 upload plan***
+_Local backup with S3 upload plan_
 
 ```yaml
 target:
@@ -61,3 +63,9 @@ s3:
   secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
   api: "S3v4"
 ```
+
+Web API:
+
+* `mgob-host:8090/` file server
+* `mgob-host:8090/status` backup jobs status
+* `mgob-host:8090/metrics` Prometheus endpoint
