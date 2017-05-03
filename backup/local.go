@@ -60,16 +60,3 @@ func applyRetention(path string, retention int) error {
 
 	return nil
 }
-
-func CheckMongodump() (string, error) {
-	output, err := sh.Command("/bin/sh", "-c", "mongodump --version").CombinedOutput()
-	if err != nil {
-		ex := ""
-		if len(output) > 0 {
-			ex = strings.Replace(string(output), "\n", " ", -1)
-		}
-		return "", errors.Wrapf(err, "mongodump failed %v", ex)
-	}
-
-	return strings.Replace(string(output), "\n", " ", -1), nil
-}
