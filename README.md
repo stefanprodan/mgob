@@ -38,7 +38,7 @@ scheduler:
   cron: "0 6,18 */1 * *"
   # number of backups to keep locally
   retention: 14
-  # backup operation timeout in seconds
+  # backup operation timeout in minutes
   timeout: 60
 target:
   # mongodb IP or host name
