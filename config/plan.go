@@ -14,6 +14,7 @@ type Plan struct {
 	Target    Target    `yaml:"target"`
 	Scheduler Scheduler `yaml:"scheduler"`
 	S3        *S3       `yaml:"s3"`
+	SMTP      *SMTP     `yaml:"smtp"`
 }
 
 type Target struct {
@@ -36,6 +37,15 @@ type S3 struct {
 	API       string `yaml:"api"`
 	SecretKey string `yaml:"secretKey"`
 	URL       string `yaml:"url"`
+}
+
+type SMTP struct {
+	Server   string   `yaml:"server"`
+	Port     string   `yaml:"port"`
+	Password string   `yaml:"password"`
+	Username string   `yaml:"username"`
+	From     string   `yaml:"from"`
+	To       []string `yaml:"to"`
 }
 
 func LoadPlans(dir string) ([]Plan, error) {

@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
@@ -8,6 +9,7 @@ import (
 	"github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/metrics"
+	"github.com/stefanprodan/mgob/notifier"
 	"time"
 )
 
@@ -64,9 +66,23 @@ func (b backupJob) Run() {
 	if err != nil {
 		status = "500"
 		logrus.WithField("plan", b.plan.Name).Error("Backup failed %v", err)
+		if b.plan.SMTP != nil {
+			if err := notifier.SendEmailNotification(fmt.Sprintf("%v backup failed", b.plan.Name),
+				err.Error(), b.plan.SMTP); err != nil {
+				logrus.WithField("plan", b.plan.Name).Errorf("Notifier failed %v", err)
+			}
+		}
 	} else {
-		logrus.WithField("plan", b.plan.Name).Infof("Backup finished in %v archive size %v",
-			res.Duration, humanize.Bytes(uint64(res.Size)))
+		logrus.WithField("plan", b.plan.Name).Infof("Backup finished in %v archive %v size %v",
+			res.Duration, res.Name, humanize.Bytes(uint64(res.Size)))
+		if b.plan.SMTP != nil {
+			if err := notifier.SendEmailNotification(fmt.Sprintf("%v backup finished", b.plan.Name),
+				fmt.Sprintf("%v backup finished in %v archive size %v",
+					res.Name, res.Duration, humanize.Bytes(uint64(res.Size))),
+				b.plan.SMTP); err != nil {
+				logrus.WithField("plan", b.plan.Name).Errorf("Notifier failed %v", err)
+			}
+		}
 	}
 
 	t2 := time.Now()

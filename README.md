@@ -76,7 +76,7 @@ s3:
 * `mgob-host:8090/` file server
 * `mgob-host:8090/status` backup jobs status
 * `mgob-host:8090/metrics` Prometheus endpoint
-* `mgob-host:8090/version` mgod version
+* `mgob-host:8090/version` mgob version and runtime info
 
 #### Logs
 

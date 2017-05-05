@@ -22,8 +22,14 @@ func (s *HttpServer) Start(version string) {
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, req *http.Request) {
 		info := map[string]string{
-			"version":    version,
-			"repository": "github.com/stefanprodan/mgob",
+			"mgob_version": version,
+			"repository":   "github.com/stefanprodan/mgob",
+			"go_version":   runtime.Version(),
+			"os":           runtime.GOOS,
+			"arch":         runtime.GOARCH,
+			"max_procs":    strconv.FormatInt(int64(runtime.GOMAXPROCS(0)), 10),
+			"goroutines":   strconv.FormatInt(int64(runtime.NumGoroutine()), 10),
+			"cpu_count":    strconv.FormatInt(int64(runtime.NumCPU()), 10),
 		}
 
 		js, err := json.MarshalIndent(info, "", "  ")
@@ -38,26 +44,6 @@ func (s *HttpServer) Start(version string) {
 
 	http.HandleFunc("/status", func(w http.ResponseWriter, req *http.Request) {
 		js, err := json.MarshalIndent(s.Stats.GetAll(), "", "  ")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	})
-
-	http.HandleFunc("/runtime", func(w http.ResponseWriter, req *http.Request) {
-		info := map[string]string{
-			"os":         runtime.GOOS,
-			"arch":       runtime.GOARCH,
-			"golang":     runtime.Version(),
-			"max_procs":  strconv.FormatInt(int64(runtime.GOMAXPROCS(0)), 10),
-			"goroutines": strconv.FormatInt(int64(runtime.NumGoroutine()), 10),
-			"cpu_count":  strconv.FormatInt(int64(runtime.NumCPU()), 10),
-		}
-
-		js, err := json.MarshalIndent(info, "", "  ")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

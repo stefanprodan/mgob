@@ -32,7 +32,7 @@ func s3Upload(file string, plan config.Plan) (string, error) {
 		return "", errors.Wrapf(err, "S3 uploading %v to %v/%v failed %v", file, plan.Name, plan.S3.Bucket, output)
 	}
 
-	if strings.Contains(output, "<ERROR>"){
+	if strings.Contains(output, "<ERROR>") {
 		return "", errors.Errorf("S3 upload failed %v", output)
 	}
 

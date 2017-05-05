@@ -8,3 +8,12 @@ scheduler:
   cron: "*/1 * * * *"
   retention: 5
   timeout: 1
+smtp:
+  server: smtp.mailtrap.io
+  port: 465
+  username: a23ad22c034950
+  password: ef9adf38830350
+  from: mgod@mailtrap.io
+  to:
+    - devops@mailtrap.io
+    - alerts@mailtrap.io
