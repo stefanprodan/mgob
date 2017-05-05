@@ -27,7 +27,8 @@ docker run -dp 8090:8090 --name mgob \
 
 #### Configure
 
-At startup MGOB loads the backup plans from the `config` volume.
+Define a backup plan (yaml format) for each database you want to backup inside the `config` dir. 
+The yaml file name will be used as the backup plan, no white spaces or special characters are allowed. 
 
 _Backup plan_
 
@@ -35,7 +36,7 @@ _Backup plan_
 scheduler:
   # run every day at 6:00 and 18:00 UTC
   cron: "0 6,18 */1 * *"
-  # number of backups to keep
+  # number of backups to keep locally
   retention: 14
   # backup operation timeout in seconds
   timeout: 60
