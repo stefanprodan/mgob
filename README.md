@@ -17,9 +17,9 @@ MGOB is a MongoDB backup automation tool built with golang.
 
 ```bash
 docker run -dp 8090:8090 --name mgob \
-    -v "/mgo/config:/config" \
-    -v "/mgo/storage:/storage" \
-    -v "/mgo/tmp:/tmp" \
+    -v "/mogb/config:/config" \
+    -v "/mogb/storage:/storage" \
+    -v "/mgob/tmp:/tmp" \
     stefanprodan/mgob \
     -LogLevel=info
 ```
@@ -88,7 +88,7 @@ time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:52:00
 time="2017-05-05T16:51:00+03:00" level=info msg="Backup started" plan=mongo-dev 
 time="2017-05-05T16:51:02+03:00" level=info msg="Backup finished in 2.359901432s archive size 448 kB" plan=mongo-dev 
 time="2017-05-05T16:52:00+03:00" level=info msg="Backup started" plan=mongo-test
-time="2017-05-05T16:52:02+03:00" level=info msg="S3 upload finished `/Users/aleph/go/src/github.com/stefanprodan/mgob/test/storage/mongo-test/mongo-test-1493992320.gz` -> `mongo-test/bktest/mongo-test-1493992320.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 2.96 KB/s " plan=mongo-test 
+time="2017-05-05T16:52:02+03:00" level=info msg="S3 upload finished `/storage/mongo-test/mongo-test-1493992320.gz` -> `mongo-test/bktest/mongo-test-1493992320.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 2.96 KB/s " plan=mongo-test 
 time="2017-05-05T16:52:02+03:00" level=info msg="Backup finished in 2.855078717s archive size 1.2 kB" plan=mongo-test 
 ```
 
