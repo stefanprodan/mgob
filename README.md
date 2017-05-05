@@ -83,13 +83,13 @@ s3:
 View scheduler logs with `docker logs mgob`:
 
 ```bash
-time="2017-05-03T17:44:14+03:00" level=info msg="Plan mongo-dev next run at 2017-05-03 17:45:00 +0300 EEST" 
-time="2017-05-03T17:44:14+03:00" level=info msg="Plan mongo-test next run at 2017-05-03 17:46:00 +0300 EEST" 
-time="2017-05-03T17:45:00+03:00" level=info msg="mongo-dev backup started" 
-time="2017-05-03T17:45:02+03:00" level=info msg="mongo-dev backup finished in 2.313856701s archive size 420 kB" 
-time="2017-05-03T17:46:00+03:00" level=info msg="mongo-test backup started" 
-time="2017-05-03T17:46:03+03:00" level=info msg="S3 upload finished `/storage/mongo-test/mongo-test-1493822760.gz` -> `mongo-test/bktest/mongo-test-1493822760.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 3.00 KB/s " 
-time="2017-05-03T17:46:03+03:00" level=info msg="mongo-test backup finished in 3.505959481s archive size 1.2 kB" 
+time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:51:00 +0300 EEST" plan=mongo-dev 
+time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:52:00 +0300 EEST" plan=mongo-test 
+time="2017-05-05T16:51:00+03:00" level=info msg="Backup started" plan=mongo-dev 
+time="2017-05-05T16:51:02+03:00" level=info msg="Backup finished in 2.359901432s archive size 448 kB" plan=mongo-dev 
+time="2017-05-05T16:52:00+03:00" level=info msg="Backup started" plan=mongo-test
+time="2017-05-05T16:52:02+03:00" level=info msg="S3 upload finished `/Users/aleph/go/src/github.com/stefanprodan/mgob/test/storage/mongo-test/mongo-test-1493992320.gz` -> `mongo-test/bktest/mongo-test-1493992320.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 2.96 KB/s " plan=mongo-test 
+time="2017-05-05T16:52:02+03:00" level=info msg="Backup finished in 2.855078717s archive size 1.2 kB" plan=mongo-test 
 ```
 
 The mongodump log is stored along with the backup data (gzip archive) in the `storage` dir:

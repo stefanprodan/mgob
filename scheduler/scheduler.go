@@ -42,7 +42,7 @@ func (s *Scheduler) Start() error {
 	s.Cron.Start()
 
 	for _, e := range s.Cron.Entries() {
-		logrus.Infof("Plan %v next run at %v", e.Job.(backupJob).name, e.Next)
+		logrus.WithField("plan", e.Job.(backupJob).name).Infof("Next run at %v", e.Next)
 	}
 	return nil
 }
@@ -56,17 +56,17 @@ type backupJob struct {
 }
 
 func (b backupJob) Run() {
-	logrus.Infof("%v backup started", b.plan.Name)
+	logrus.WithField("plan", b.plan.Name).Info("Backup started")
 	status := "200"
 	t1 := time.Now()
 
 	res, err := backup.Run(b.plan, b.conf.TmpPath, b.conf.StoragePath)
 	if err != nil {
 		status = "500"
-		logrus.Errorf("%v backup failed %v", b.plan.Name, err)
+		logrus.WithField("plan", b.plan.Name).Error("Backup failed %v", err)
 	} else {
-		logrus.Infof("%v backup finished in %v archive size %v",
-			b.plan.Name, res.Duration, humanize.Bytes(uint64(res.Size)))
+		logrus.WithField("plan", b.plan.Name).Infof("Backup finished in %v archive size %v",
+			res.Duration, humanize.Bytes(uint64(res.Size)))
 	}
 
 	t2 := time.Now()
