@@ -85,3 +85,4 @@ vet:
 		echo "go vet failed"; \
 	fi
 
+.PHONY: build
