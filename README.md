@@ -9,7 +9,7 @@ MGOB is a MongoDB backup automation tool built with golang.
 * schedule backups
 * local backups retention
 * upload to S3 Object Storage (Minio, AWS, Google Cloud)
-* email notifications
+* notifications (Email, Slack)
 * instrumentation with Prometheus
 * http file server for local backups and logs
 * Alpine Docker image
@@ -67,6 +67,11 @@ smtp:
   to:
     - devops@company.com
     - alerts@company.com
+# slack notifications (optional)
+slack:
+  url: https://hooks.slack.com/services/xxxx/xxx/xx
+  channel: devops-alerts
+  username: mgob
 ```
 
 #### Web API
