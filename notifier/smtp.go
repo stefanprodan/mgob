@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func SendEmailNotification(subject string, body string, config *config.SMTP) error {
+func sendEmailNotification(subject string, body string, config *config.SMTP) error {
 
 	msg := "From: \"MGOB\" <" + config.From + ">\r\n" +
 		"To: " + strings.Join(config.To, ", ") + "\r\n" +
