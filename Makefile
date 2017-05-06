@@ -3,12 +3,8 @@ SHELL:=/bin/bash
 APP_VERSION?=0.1
 
 # build vars
-BUILD_DATE:=$(shell date -u +%Y-%m-%d_%H.%M.%S)
-GIT_REPOSITORY:=github.com/stefanprodan/mgob
-GIT_COMMIT:=$(shell git rev-parse HEAD)
-GIT_BRANCH:=$(shell git symbolic-ref --short HEAD)
-MAINTAINER:="Stefan Prodan"
-REPOSITORY?=stefanprodan
+BUILD_DATE:=$(shell date -u %Y-%m-%dT%H:%M:%SZ)
+REPOSITORY:=stefanprodan
 
 #run vars
 CONFIG:=$$(pwd)/test/config
@@ -20,12 +16,17 @@ VETARGS:=-asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -rangelo
 
 travis:
 	@echo ">>> Building mgob:build image"
-	@docker build --build-arg APP_VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) -t $(REPOSITORY)/mgob:build -f Dockerfile.build .
+	@docker build --build-arg APP_VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
+	    -t $(REPOSITORY)/mgob:build -f Dockerfile.build .
 	@docker create --name mgob_extract $(REPOSITORY)/mgob:build
 	@docker cp mgob_extract:/dist/mgob ./mgob
 	@docker rm -f mgob_extract
 	@echo ">>> Building mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) image"
-	@docker build -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) .
+	@docker build \
+	    --build-arg BUILD_DATE=$(BUILD_DATE) \
+	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
+	    -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) .
 	@rm ./mgob
 	@echo ">>> Starting mgob container"
 	@docker run -d --net=host --name mgob \
