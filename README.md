@@ -57,7 +57,7 @@ s3:
   accessKey: "Q3AM3UQ867SPQQA43P2F"
   secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
   api: "S3v4"
-# email notifications (optional)
+# Email notifications (optional)
 smtp:
   server: smtp.company.com
   port: 465
@@ -67,7 +67,7 @@ smtp:
   to:
     - devops@company.com
     - alerts@company.com
-# slack notifications (optional)
+# Slack notifications (optional)
 slack:
   url: https://hooks.slack.com/services/xxxx/xxx/xx
   channel: devops-alerts
@@ -91,9 +91,11 @@ time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:52:00
 time="2017-05-05T16:51:00+03:00" level=info msg="Backup started" plan=mongo-dev 
 time="2017-05-05T16:51:02+03:00" level=info msg="Backup finished in 2.359901432s archive size 448 kB" plan=mongo-dev 
 time="2017-05-05T16:52:00+03:00" level=info msg="Backup started" plan=mongo-test
-time="2017-05-05T16:52:02+03:00" level=info msg="S3 upload finished `/storage/mongo-test/mongo-test-1493992320.gz` -> `mongo-test/bktest/mongo-test-1493992320.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 2.96 KB/s " plan=mongo-test 
+time="2017-05-05T16:52:02+03:00" level=info msg="S3 upload finished `/storage/mongo-test/mongo-test-1493992320.gz` -> `bktest/mongo-test-1493992320.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 2.96 KB/s " plan=mongo-test 
 time="2017-05-05T16:52:02+03:00" level=info msg="Backup finished in 2.855078717s archive size 1.2 kB" plan=mongo-test 
 ```
+
+The success/fail logs will be sent via SMTP and/or Slack if notifications are enabled.
 
 The mongodump log is stored along with the backup data (gzip archive) in the `storage` dir:
 
