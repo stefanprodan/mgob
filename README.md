@@ -12,7 +12,7 @@ MGOB is a MongoDB backup automation tool built with golang.
 * notifications (Email, Slack)
 * instrumentation with Prometheus
 * http file server for local backups and logs
-* Alpine Docker image
+* distributed as a Alpine Docker image
 
 #### Install
 
@@ -28,7 +28,7 @@ docker run -dp 8090:8090 --name mgob \
 #### Configure
 
 Define a backup plan (yaml format) for each database you want to backup inside the `config` dir. 
-The yaml file name will be used as the backup plan, no white spaces or special characters are allowed. 
+The yaml file name is being used as the backup plan ID, no white spaces or special characters are allowed. 
 
 _Backup plan_
 

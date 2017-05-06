@@ -26,4 +26,4 @@ script:
   - docker logs mgob 2>&1 | grep finished
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "release" ]; then make publish; else echo "Docker Hub push skipped" ; fi
+  - make publish
