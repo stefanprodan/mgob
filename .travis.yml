@@ -27,3 +27,10 @@ script:
 
 after_success:
   - make publish
+
+deploy:
+  provider: script
+  script: make release
+  on:
+    tags: true
+    branch: master
