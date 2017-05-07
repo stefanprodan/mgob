@@ -5,19 +5,6 @@ target:
   username: ""
   password: ""
 scheduler:
-  cron: "*/1 * * * *"
+  cron: "*/3 * * * *"
   retention: 5
   timeout: 1
-smtp:
-  server: smtp.mailtrap.io
-  port: 465
-  username: a23ad22c034950
-  password: ef9adf38830350
-  from: mgod@mailtrap.io
-  to:
-    - devops@mailtrap.io
-    - alerts@mailtrap.io
-slack:
-  url: https://hooks.slack.com/services/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
-  channel: devops-alerts
-  username: mgob
