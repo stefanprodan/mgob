@@ -1,5 +1,5 @@
-hash: bc87e5e6c481460e8b2844b2eb94f283a23ce194342994ed78c656d62b6c4316
-updated: 2017-05-03T01:10:40.43098254+03:00
+hash: 5eb03e9a4f41fdfed978cec3d371d72e6defe0fb02c16e48ba1a379931c8413d
+updated: 2017-05-07T10:44:07.715091375+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -21,6 +21,8 @@ imports:
   - pbutil
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/pkg/sftp
+  version: dddd9cf3c7889aa0fefd2e8a529367a3e1f3b669
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
