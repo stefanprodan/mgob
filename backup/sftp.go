@@ -52,7 +52,7 @@ func sftpUpload(file string, plan config.Plan) (string, error) {
 	}
 	sf.Close()
 
-	listSftpBackups(sftpClient, plan.SFTP.Dir)
+	//listSftpBackups(sftpClient, plan.SFTP.Dir)
 
 	return fmt.Sprintf("SFTP %v:%v upload %v finished", plan.SFTP.Host, plan.SFTP.Port, dstPath), nil
 }
