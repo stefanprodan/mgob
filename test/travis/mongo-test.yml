@@ -1,10 +1,14 @@
-target:
-  host: "127.0.0.1"
-  port: 27017
-  database: "test"
-  username: ""
-  password: ""
 scheduler:
   cron: "* * * * *"
   retention: 5
   timeout: 60
+target:
+  host: "127.0.0.1"
+  port: 27017
+  database: test
+sftp:
+  host: "127.0.0.1"
+  port: 20022
+  username: test
+  password: test
+  dir: backup

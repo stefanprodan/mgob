@@ -10,13 +10,12 @@ services:
 
 before_install:
   - docker pull alpine:edge
+  - docker run -p 20022:22 -d atmoz/sftp:alpine test:test:::backup
 
 before_script:
   - sleep 10
   - >-
     mongo test --eval 'db.test.insert({item: "item", val: "test" });'
-  - >-
-    mongo test --eval 'db.runCommand({whatsmyuri : 1});'
 
 script:
   - make travis
