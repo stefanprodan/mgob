@@ -95,7 +95,7 @@ slack:
 
 #### Web API
 
-* `mgob-host:8090/` file server
+* `mgob-host:8090/storage` file server
 * `mgob-host:8090/status` backup jobs status
 * `mgob-host:8090/metrics` Prometheus endpoint
 * `mgob-host:8090/version` mgob version and runtime info
@@ -159,11 +159,11 @@ mgob_scheduler_backup_latency_count{plan="mongo-test",status="500"} 4
 
 In order to restore from a local backup you have two options:
 
-Browse `mgob-host:8090/` to identify the backup you want to restore. 
+Browse `mgob-host:8090/storage` to identify the backup you want to restore. 
 Login to your MongoDB server and download the archive using `curl` and restore the backup with `mongorestore` command line.
 
 ```bash
-curl -o /tmp/mongo-test-1494056760.gz http://mgob-host:8090/mongo-test/mongo-test-1494056760.gz
+curl -o /tmp/mongo-test-1494056760.gz http://mgob-host:8090/storage/mongo-test/mongo-test-1494056760.gz
 mongorestore --gzip --archive=/tmp/mongo-test-1494056760.gz --db test
 ```
 
