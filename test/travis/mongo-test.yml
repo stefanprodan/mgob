@@ -6,6 +6,12 @@ target:
   host: "127.0.0.1"
   port: 27017
   database: test
+s3:
+  url: "https://127.0.0.1:9000"
+  bucket: "backup"
+  accessKey: "AKIAIOSFODNN7EXAMPLE"
+  secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  api: "S3v4"
 sftp:
   host: "127.0.0.1"
   port: 20022

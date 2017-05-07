@@ -9,13 +9,17 @@ services:
   - mongodb
 
 before_install:
-  - docker pull alpine:edge
-  - docker run -p 20022:22 -d atmoz/sftp:alpine test:test:::backup
+  - docker run -dp 9000:9000 -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" minio/minio server /export
+  - curl -o /usr/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/mc
+  - chmod u+x /usr/bin/mc
+  - docker run -dp 20022:22 atmoz/sftp:alpine test:test:::backup
 
 before_script:
   - sleep 10
   - >-
     mongo test --eval 'db.test.insert({item: "item", val: "test" });'
+  - mc config host add local http://127.0.0.1:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY S3v4
+  - mc mb local/backup
 
 script:
   - make travis
