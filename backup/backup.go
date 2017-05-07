@@ -55,13 +55,23 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		}
 	}
 
-	if plan.S3 != nil {
-		file := filepath.Join(planDir, res.Name)
-		s3output, err := s3Upload(file, plan)
+	file := filepath.Join(planDir, res.Name)
+
+	if plan.SFTP != nil {
+		sftpOutput, err := sftpUpload(file, plan)
 		if err != nil {
 			return res, err
 		} else {
-			logrus.WithField("plan", plan.Name).Infof("S3 upload finished %v", s3output)
+			logrus.WithField("plan", plan.Name).Info(sftpOutput)
+		}
+	}
+
+	if plan.S3 != nil {
+		s3Output, err := s3Upload(file, plan)
+		if err != nil {
+			return res, err
+		} else {
+			logrus.WithField("plan", plan.Name).Infof("S3 upload finished %v", s3Output)
 		}
 	}
 

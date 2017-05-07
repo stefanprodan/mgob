@@ -14,6 +14,7 @@ type Plan struct {
 	Target    Target    `yaml:"target"`
 	Scheduler Scheduler `yaml:"scheduler"`
 	S3        *S3       `yaml:"s3"`
+	SFTP      *SFTP     `yaml:"sftp"`
 	SMTP      *SMTP     `yaml:"smtp"`
 	Slack     *Slack    `yaml:"slack"`
 }
@@ -38,6 +39,14 @@ type S3 struct {
 	API       string `yaml:"api"`
 	SecretKey string `yaml:"secretKey"`
 	URL       string `yaml:"url"`
+}
+
+type SFTP struct {
+	Dir      string `yaml:"dir"`
+	Host     string `yaml:"host"`
+	Password string `yaml:"password"`
+	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
 }
 
 type SMTP struct {

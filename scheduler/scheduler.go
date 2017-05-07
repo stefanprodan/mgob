@@ -65,7 +65,7 @@ func (b backupJob) Run() {
 	res, err := backup.Run(b.plan, b.conf.TmpPath, b.conf.StoragePath)
 	if err != nil {
 		status = "500"
-		logrus.WithField("plan", b.plan.Name).Error("Backup failed %v", err)
+		logrus.WithField("plan", b.plan.Name).Errorf("Backup failed %v", err)
 		if err := notifier.SendNotification(fmt.Sprintf("%v backup failed", b.plan.Name),
 			err.Error(), true, b.plan); err != nil {
 			logrus.WithField("plan", b.plan.Name).Errorf("Notifier failed %v", err)
