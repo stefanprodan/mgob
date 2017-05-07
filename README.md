@@ -18,6 +18,15 @@ MGOB is a MongoDB backup automation tool built with golang.
 
 #### Install
 
+MGOB is available on Docker Hub at [stefanprodan/mgob](https://hub.docker.com/r/stefanprodan/mgob/). 
+
+Supported tags:
+
+* `stefanprodan/mgob:latest` latest stable [release](https://github.com/stefanprodan/mgob/releases)
+* `stefanprodan/mgob:edge` master branch latest successful [build](https://travis-ci.org/stefanprodan/mgob)
+
+Run:
+
 ```bash
 docker run -dp 8090:8090 --name mgob \
     -v "/mogb/config:/config" \
