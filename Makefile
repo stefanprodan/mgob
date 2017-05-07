@@ -3,7 +3,7 @@ SHELL:=/bin/bash
 APP_VERSION?=0.1
 
 # build vars
-BUILD_DATE:=$(shell date -u %Y-%m-%dT%H:%M:%SZ)
+BUILD_DATE:=$(shell date -u +%Y-%m-%d_%H.%M.%S)
 REPOSITORY:=stefanprodan
 
 #run vars
