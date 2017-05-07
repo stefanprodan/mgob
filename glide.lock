@@ -1,5 +1,5 @@
-hash: 1c636da27cb7f7a97047aa3cdfd104f949423988ad7e7c6de1b25b0d4152d988
-updated: 2017-05-07T11:08:50.113317995+03:00
+hash: 053287e3ffec1204cd333647cd0a908b341e7675c410b3814898bab42281b7f6
+updated: 2017-05-08T01:16:35.077391729+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -25,6 +25,8 @@ imports:
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pkg/sftp
   version: dddd9cf3c7889aa0fefd2e8a529367a3e1f3b669
+- name: github.com/pressly/chi
+  version: e6033ea75479391a4bce3918fc119cad31e1cb30
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:

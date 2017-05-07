@@ -23,3 +23,5 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - ssh
+- package: github.com/pressly/chi
+  version: ^2.1.0
