@@ -10,9 +10,11 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func sftpUpload(file string, plan config.Plan) (string, error) {
+	t1 := time.Now()
 	sshConf := &ssh.ClientConfig{
 		User: plan.SFTP.Username,
 		Auth: []ssh.AuthMethod{ssh.Password(plan.SFTP.Password)},
@@ -54,7 +56,10 @@ func sftpUpload(file string, plan config.Plan) (string, error) {
 
 	//listSftpBackups(sftpClient, plan.SFTP.Dir)
 
-	return fmt.Sprintf("SFTP %v:%v upload %v finished", plan.SFTP.Host, plan.SFTP.Port, dstPath), nil
+	t2 := time.Now()
+	msg := fmt.Sprintf("SFTP %v:%v upload %v finished in %v",
+		plan.SFTP.Host, plan.SFTP.Port, dstPath, t2.Sub(t1))
+	return msg, nil
 }
 
 func listSftpBackups(client *sftp.Client, dir string) error {
