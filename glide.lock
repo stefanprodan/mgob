@@ -1,5 +1,5 @@
-hash: 5eb03e9a4f41fdfed978cec3d371d72e6defe0fb02c16e48ba1a379931c8413d
-updated: 2017-05-07T10:44:07.715091375+03:00
+hash: 1c636da27cb7f7a97047aa3cdfd104f949423988ad7e7c6de1b25b0d4152d988
+updated: 2017-05-07T11:08:50.113317995+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -15,6 +15,8 @@ imports:
   version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
   subpackages:
   - proto
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/matttproud/golang_protobuf_extensions
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
@@ -46,6 +48,13 @@ imports:
   version: df38d32658d8788cd446ba74db4bb5375c4b0cb3
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: golang.org/x/crypto
+  version: 5a033cc77e57eca05bdb50522851d29e03569cbe
+  subpackages:
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
+  - ssh
 - name: golang.org/x/sys
   version: 9ccfe848b9db8435a24c424abbc07a921adf1df5
   subpackages:
