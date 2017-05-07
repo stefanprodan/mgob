@@ -145,3 +145,24 @@ mgob_scheduler_backup_latency{plan="mongo-test",status="500",quantile="0.99"} 2.
 mgob_scheduler_backup_latency_sum{plan="mongo-test",status="500"} 9.679809477
 mgob_scheduler_backup_latency_count{plan="mongo-test",status="500"} 4
 ```
+
+#### Restore
+
+In order to restore from a local backup you have two options:
+
+Browse `mgob-host:8090/` to identify the backup you want to restore. 
+Login to your MongoDB server and download the archive using `curl` and restore the backup with `mongorestore` command line.
+
+```bash
+curl -o /tmp/mongo-test-1494056760.gz http://mgob-host:8090/mongo-test/mongo-test-1494056760.gz
+mongorestore --gzip --archive=/tmp/mongo-test-1494056760.gz --db test
+```
+
+You can also restore a backup from within mgob container. 
+Exec into mgob, identify the backup you want to restore and use `mongorestore` to connect to your MongoDB server.
+
+```bash
+docker exec -it mgob sh
+ls /storage/mongo-test
+mongorestore --gzip --archive=/storage/mongo-test/mongo-test-1494056760.gz --host mongohost:27017 --db test
+```
