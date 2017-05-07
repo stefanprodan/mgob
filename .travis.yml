@@ -26,7 +26,12 @@ script:
   - sleep 60
   - docker logs mgob
   - curl http://localhost:8090/version
-  - docker logs mgob 2>&1 | grep finished
+  - echo 'SFTP integration test'
+  - docker logs mgob 2>&1 | grep 'SFTP upload finished'
+  - echo 'S3 integration test'
+  - docker logs mgob 2>&1 | grep 'S3 upload finished'
+  - echo 'Local backup integration test'
+  - docker logs mgob 2>&1 | grep 'Backup finished'
 
 after_success:
   - make publish
