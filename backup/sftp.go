@@ -57,8 +57,8 @@ func sftpUpload(file string, plan config.Plan) (string, error) {
 	//listSftpBackups(sftpClient, plan.SFTP.Dir)
 
 	t2 := time.Now()
-	msg := fmt.Sprintf("SFTP %v:%v upload %v finished in %v",
-		plan.SFTP.Host, plan.SFTP.Port, dstPath, t2.Sub(t1))
+	msg := fmt.Sprintf("SFTP upload finished `%v` -> `%v` Duration: %v",
+		file, dstPath, t2.Sub(t1))
 	return msg, nil
 }
 
