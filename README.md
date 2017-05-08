@@ -100,6 +100,25 @@ slack:
 * `mgob-host:8090/metrics` Prometheus endpoint
 * `mgob-host:8090/version` mgob version and runtime info
 
+On demand backup:
+
+* HTTP POST `mgob-host:8090/backup/:planID`
+
+```bash
+curl -X POST http://mgob-host:8090/backup/mongo-debug
+```
+
+```json
+{
+  "name": "mongo-debug-1494241186.gz",
+  "plan": "mongo-debug",
+  "duration": 3987586336,
+  "size": 453343,
+  "status": 200,
+  "timestamp": "2017-05-08T10:59:46.627351656Z"
+}
+```
+
 #### Logs
 
 View scheduler logs with `docker logs mgob`:
