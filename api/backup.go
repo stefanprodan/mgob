@@ -11,6 +11,7 @@ import (
 	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/notifier"
 	"net/http"
+	"time"
 )
 
 func configCtx(data config.AppConfig) func(next http.Handler) http.Handler {
@@ -32,7 +33,7 @@ func postBackup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logrus.WithField("plan", planID).Infof("On demand backup started %v", plan)
+	logrus.WithField("plan", planID).Info("On demand backup started")
 
 	res, err := backup.Run(plan, cfg.TmpPath, cfg.StoragePath)
 	if err != nil {
@@ -52,6 +53,24 @@ func postBackup(w http.ResponseWriter, r *http.Request) {
 			false, plan); err != nil {
 			logrus.WithField("plan", plan.Name).Errorf("Notifier failed for on demand backup %v", err)
 		}
-		render.JSON(w, r, res)
+		render.JSON(w, r, toBackupResult(res))
+	}
+}
+
+type backupResult struct {
+	Plan      string    `json:"plan"`
+	File      string    `json:"file"`
+	Duration  string    `json:"duration"`
+	Size      string    `json:"size"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+func toBackupResult(res backup.Result) backupResult {
+	return backupResult{
+		Plan:      res.Plan,
+		Duration:  fmt.Sprintf("%v", res.Duration),
+		File:      res.Name,
+		Size:      humanize.Bytes(uint64(res.Size)),
+		Timestamp: res.Timestamp,
 	}
 }

@@ -110,12 +110,11 @@ curl -X POST http://mgob-host:8090/backup/mongo-debug
 
 ```json
 {
-  "name": "mongo-debug-1494241186.gz",
   "plan": "mongo-debug",
-  "duration": 3987586336,
-  "size": 453343,
-  "status": 200,
-  "timestamp": "2017-05-08T10:59:46.627351656Z"
+  "file": "mongo-debug-1494256295.gz",
+  "duration": "3.635186255s",
+  "size": "455 kB",
+  "timestamp": "2017-05-08T15:11:35.940141701Z"
 }
 ```
 
