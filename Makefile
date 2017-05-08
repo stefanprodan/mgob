@@ -3,7 +3,7 @@ SHELL:=/bin/bash
 APP_VERSION?=0.2
 
 # build vars
-BUILD_DATE:=$(shell date -u +%Y-%m-%d_%H.%M.%S)
+BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 REPOSITORY:=stefanprodan
 
 #run vars
@@ -75,6 +75,16 @@ clean:
 	@docker rm -f mgob-$(APP_VERSION) || true
 	@docker rmi $$(docker images | awk '$$1 ~ /mgob/ { print $$3 }') || true
 	@docker volume rm $$(docker volume ls -f dangling=true -q) || true
+
+backend:
+	@docker run -dp 20022:22 atmoz/sftp:alpine test:test:::backup
+	@docker run -dp 20099:9000 \
+	    -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
+	    -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
+	    minio/minio server /export
+	@mc config host add local http://localhost:20099 \
+	    AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY S3v4
+	@mc mb local/backup
 
 fmt:
 	@echo ">>> Running go fmt $(PACKAGES)"
