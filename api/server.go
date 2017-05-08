@@ -24,6 +24,7 @@ func (s *HttpServer) Start(version string) {
 	}
 
 	r.Mount("/metrics", metricsRouter())
+	r.Mount("/debug", middleware.Profiler())
 
 	r.Route("/version", func(r chi.Router) {
 		r.Use(appVersionCtx(version))
