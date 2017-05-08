@@ -36,6 +36,11 @@ func (s *HttpServer) Start(version string) {
 		r.Get("/", getStatus)
 	})
 
+	r.Route("/backup", func(r chi.Router) {
+		r.Use(configCtx(*s.Config))
+		r.Post("/:planID", postBackup)
+	})
+
 	r.FileServer("/storage", http.Dir(s.Config.StoragePath))
 
 	logrus.Error(http.ListenAndServe(fmt.Sprintf(":%v", s.Config.Port), r))

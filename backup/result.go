@@ -3,10 +3,10 @@ package backup
 import "time"
 
 type Result struct {
-	Name      string
-	Plan      string
-	Duration  time.Duration
-	Size      int64
-	Status    int
-	Timestamp time.Time
+	Name      string        `json:"name"`
+	Plan      string        `json:"plan"`
+	Duration  time.Duration `json:"duration"`
+	Size      int64         `json:"size"`
+	Status    int           `json:"status"`
+	Timestamp time.Time     `json:"timestamp"`
 }

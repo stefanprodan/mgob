@@ -64,6 +64,38 @@ type Slack struct {
 	Username string `yaml:"username"`
 }
 
+func LoadPlan(dir string, name string) (Plan, error) {
+	plan := Plan{}
+	planPath := ""
+	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
+		if strings.Contains(path, name+".yml") || strings.Contains(path, name+".yaml") {
+			planPath = path
+		}
+		return nil
+	})
+
+	if err != nil {
+		return plan, errors.Wrapf(err, "Reading from %v failed", dir)
+	}
+
+	if len(planPath) < 1 {
+		return plan, errors.Errorf("Plan %v not found", name)
+	}
+
+	data, err := ioutil.ReadFile(planPath)
+	if err != nil {
+		return plan, errors.Wrapf(err, "Reading %v failed", planPath)
+	}
+
+	if err := yaml.Unmarshal(data, &plan); err != nil {
+		return plan, errors.Wrapf(err, "Parsing %v failed", planPath)
+	}
+	_, filename := filepath.Split(planPath)
+	plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
+
+	return plan, nil
+}
+
 func LoadPlans(dir string) ([]Plan, error) {
 	files := []string{}
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
@@ -74,26 +106,25 @@ func LoadPlans(dir string) ([]Plan, error) {
 	})
 
 	if err != nil {
-		return nil, errors.Wrapf(err, "reading from %v failed", dir)
+		return nil, errors.Wrapf(err, "Reading from %v failed", dir)
 	}
 
 	plans := make([]Plan, 0)
 
 	for _, path := range files {
 		var plan Plan
-		if strings.Contains(path, "yml") {
-			data, err := ioutil.ReadFile(path)
-			if err != nil {
-				return nil, errors.Wrapf(err, "reading %v failed", path)
-			}
-
-			if err := yaml.Unmarshal(data, &plan); err != nil {
-				return nil, errors.Wrapf(err, "parsering %v failed", path)
-			}
-			_, filename := filepath.Split(path)
-			plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
-			plans = append(plans, plan)
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			return nil, errors.Wrapf(err, "Reading %v failed", path)
 		}
+
+		if err := yaml.Unmarshal(data, &plan); err != nil {
+			return nil, errors.Wrapf(err, "Parsing %v failed", path)
+		}
+		_, filename := filepath.Split(path)
+		plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
+		plans = append(plans, plan)
+
 	}
 	if len(plans) < 1 {
 		return nil, errors.Errorf("No backup plans found in %v", dir)

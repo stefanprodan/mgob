@@ -1,9 +1,9 @@
 package config
 
 type AppConfig struct {
-	LogLevel    string
-	Port        int
-	ConfigPath  string
-	StoragePath string
-	TmpPath     string
+	LogLevel    string `json:"log_level"`
+	Port        int    `json:"port"`
+	ConfigPath  string `json:"config_path"`
+	StoragePath string `json:"storage_path"`
+	TmpPath     string `json:"tmp_path"`
 }
