@@ -20,6 +20,6 @@ RUN chmod u+x /usr/bin/mc
 WORKDIR /root/
 COPY mgob    .
 
-VOLUME ["config", "storage", "tmp"]
+VOLUME ["/config", "/storage", "/tmp"]
 
 ENTRYPOINT [ "./mgob" ]
