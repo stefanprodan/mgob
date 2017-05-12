@@ -1,10 +1,12 @@
-hash: 053287e3ffec1204cd333647cd0a908b341e7675c410b3814898bab42281b7f6
-updated: 2017-05-08T01:16:35.077391729+03:00
+hash: acec8082cfe044645ab3b208f3fd9e14bca096f93f2bfd52225672fad69ca86d
+updated: 2017-05-13T00:49:22.725974804+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
+- name: github.com/boltdb/bolt
+  version: 583e8937c61f1af6513608ccc75c97b6abdf4ff9
 - name: github.com/codegangsta/inject
   version: 37d7f8432a3e684eef9b2edece76bdfa6ac85b39
 - name: github.com/codeskyblue/go-sh
@@ -24,9 +26,12 @@ imports:
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pkg/sftp
-  version: dddd9cf3c7889aa0fefd2e8a529367a3e1f3b669
+  version: a5f8514e29e90a859e93871b1582e5c81f466f82
 - name: github.com/pressly/chi
   version: e6033ea75479391a4bce3918fc119cad31e1cb30
+  subpackages:
+  - middleware
+  - render
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -51,7 +56,7 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: golang.org/x/crypto
-  version: 5a033cc77e57eca05bdb50522851d29e03569cbe
+  version: ab89591268e0c8b748cbe4047b00197516011af5
   subpackages:
   - curve25519
   - ed25519
