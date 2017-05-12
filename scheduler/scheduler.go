@@ -41,11 +41,22 @@ func (s *Scheduler) Start() error {
 		}
 		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config, s.Stats, s.metrics})
 	}
+
+	s.Cron.AddFunc("0 0 */1 * *", func() {
+		backup.TmpCleanup(s.Config.TmpPath)
+	})
+
 	s.Cron.Start()
 
 	for _, e := range s.Cron.Entries() {
-		logrus.WithField("plan", e.Job.(backupJob).name).Infof("Next run at %v", e.Next)
+		switch e.Job.(type) {
+		case backupJob:
+			logrus.WithField("plan", e.Job.(backupJob).name).Infof("Next run at %v", e.Next)
+		default:
+			logrus.Infof("Next tmp cleanup run at %v", e.Next)
+		}
 	}
+
 	return nil
 }
 

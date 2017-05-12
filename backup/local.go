@@ -60,3 +60,14 @@ func applyRetention(path string, retention int) error {
 
 	return nil
 }
+
+// TmpCleanup remove files older than one day
+func TmpCleanup(path string) error {
+	rm := fmt.Sprintf("find %v -mtime +%v -type f -delete", path, 1)
+	err := sh.Command("/bin/sh", "-c", rm).Run()
+	if err != nil {
+		return errors.Wrapf(err, "%v cleanup failed", path)
+	}
+
+	return nil
+}
