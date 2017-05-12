@@ -77,13 +77,15 @@ clean:
 	@docker volume rm $$(docker volume ls -f dangling=true -q) || true
 
 backend:
-	@docker run -dp 20022:22 atmoz/sftp:alpine test:test:::backup
-	@docker run -dp 20099:9000 \
+	@docker run -dp 20022:22 --name mgob-sftp \
+	    atmoz/sftp:alpine test:test:::backup
+	@docker run -dp 20099:9000 --name mgob-s3 \
 	    -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
 	    -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
 	    minio/minio server /export
 	@mc config host add local http://localhost:20099 \
 	    AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY S3v4
+	@sleep 5
 	@mc mb local/backup
 
 fmt:
