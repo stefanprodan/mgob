@@ -21,6 +21,7 @@ func main() {
 	flag.StringVar(&appConfig.ConfigPath, "ConfigPath", "/config", "plan yml files dir")
 	flag.StringVar(&appConfig.StoragePath, "StoragePath", "/storage", "backup storage")
 	flag.StringVar(&appConfig.TmpPath, "TmpPath", "/tmp", "temporary backup storage")
+	flag.StringVar(&appConfig.DataPath, "DataPath", "/data", "db dir")
 	flag.Parse()
 	setLogLevel(appConfig.LogLevel)
 	logrus.Infof("Starting with config: %+v", appConfig)
