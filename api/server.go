@@ -2,11 +2,12 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/pressly/chi"
 	"github.com/pressly/chi/middleware"
 	"github.com/stefanprodan/mgob/config"
-	"net/http"
 	"github.com/stefanprodan/mgob/db"
 )
 

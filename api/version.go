@@ -2,10 +2,11 @@ package api
 
 import (
 	"context"
-	"github.com/pressly/chi/render"
 	"net/http"
 	"runtime"
 	"strconv"
+
+	"github.com/pressly/chi/render"
 )
 
 type appVersion map[string]string

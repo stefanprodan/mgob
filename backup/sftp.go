@@ -2,15 +2,16 @@ package backup
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/pkg/sftp"
-	"github.com/stefanprodan/mgob/config"
-	"golang.org/x/crypto/ssh"
 	"io"
 	"net"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/pkg/sftp"
+	"github.com/stefanprodan/mgob/config"
+	"golang.org/x/crypto/ssh"
 )
 
 func sftpUpload(file string, plan config.Plan) (string, error) {

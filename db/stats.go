@@ -1,19 +1,20 @@
 package db
 
-import(
-	"github.com/pkg/errors"
-	"github.com/boltdb/bolt"
-	"time"
+import (
 	"encoding/json"
+	"time"
+
 	"github.com/Sirupsen/logrus"
+	"github.com/boltdb/bolt"
+	"github.com/pkg/errors"
 )
 
 type Status struct {
-	Plan string `json:"plan"`
-	NextRun time.Time `json:"next_run"`
-	LastRun *time.Time `json:"last_run,omitempty"`
-	LastRunStatus string `json:"last_run_status,omitempty"`
-	LastRunLog string `json:"last_run_log,omitempty"`
+	Plan          string     `json:"plan"`
+	NextRun       time.Time  `json:"next_run"`
+	LastRun       *time.Time `json:"last_run,omitempty"`
+	LastRunStatus string     `json:"last_run_status,omitempty"`
+	LastRunLog    string     `json:"last_run_log,omitempty"`
 }
 
 type StatusStore struct {
@@ -22,12 +23,12 @@ type StatusStore struct {
 }
 
 // NewStatusStore creates bucket if not found
-func NewStatusStore(store *Store) (*StatusStore, error)  {
+func NewStatusStore(store *Store) (*StatusStore, error) {
 	bucket := []byte("scheduler_status")
 
 	err := store.NewBucket(bucket)
-	if err != nil{
-		return nil, errors.Wrap(err,"Status store bucket init failed")
+	if err != nil {
+		return nil, errors.Wrap(err, "Status store bucket init failed")
 	}
 
 	return &StatusStore{store, bucket}, nil
@@ -49,7 +50,7 @@ func (db *StatusStore) Put(status *Status) error {
 }
 
 // Sync plans found on disk with db
-func (db *StatusStore) Sync(stats []*Status) error  {
+func (db *StatusStore) Sync(stats []*Status) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(db.bucket)
 
@@ -65,7 +66,7 @@ func (db *StatusStore) Sync(stats []*Status) error  {
 			dbStats = append(dbStats, &status)
 			return nil
 		})
-		if err != nil{
+		if err != nil {
 			return err
 		}
 
@@ -80,7 +81,7 @@ func (db *StatusStore) Sync(stats []*Status) error  {
 						return errors.Wrapf(err, "Json marshal for %v failed", oldS.Plan)
 					}
 					err = b.Put([]byte(oldS.Plan), buf)
-					if err != nil{
+					if err != nil {
 						return errors.Wrapf(err, "Updating %v to store failed", oldS.Plan)
 					}
 					logrus.WithField("plan", oldS.Plan).Infof("Next run at %v", oldS.NextRun)
@@ -96,7 +97,7 @@ func (db *StatusStore) Sync(stats []*Status) error  {
 					return errors.Wrapf(err, "Json marshal for %v failed", newS.Plan)
 				}
 				err = b.Put([]byte(newS.Plan), buf)
-				if err != nil{
+				if err != nil {
 					return errors.Wrapf(err, "Saving %v to store failed", newS.Plan)
 				}
 				logrus.WithField("plan", newS.Plan).Infof("Next run at %v", newS.NextRun)
@@ -112,10 +113,10 @@ func (db *StatusStore) Sync(stats []*Status) error  {
 				}
 			}
 
-			if !found{
+			if !found {
 				logrus.WithField("plan", oldS.Plan).Info("Plan not found on disk, removing from store")
 				err = b.Delete([]byte(oldS.Plan))
-				if err != nil{
+				if err != nil {
 					return errors.Wrapf(err, "Removing %v from store failed", oldS.Plan)
 				}
 			}
@@ -127,10 +128,10 @@ func (db *StatusStore) Sync(stats []*Status) error  {
 }
 
 // GetAll loads all jobs stats from db
-func (db *StatusStore) GetAll() ([]*Status, error){
+func (db *StatusStore) GetAll() ([]*Status, error) {
 	stats := make([]*Status, 0)
 
-	err:= db.View(func(tx *bolt.Tx) error {
+	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(db.bucket))
 
 		return b.ForEach(func(k, v []byte) error {
@@ -144,9 +145,9 @@ func (db *StatusStore) GetAll() ([]*Status, error){
 		})
 	})
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
-	return  stats, nil
+	return stats, nil
 }

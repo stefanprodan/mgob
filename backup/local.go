@@ -2,12 +2,13 @@ package backup
 
 import (
 	"fmt"
-	"github.com/codeskyblue/go-sh"
-	"github.com/pkg/errors"
-	"github.com/stefanprodan/mgob/config"
 	"io/ioutil"
 	"strings"
 	"time"
+
+	"github.com/codeskyblue/go-sh"
+	"github.com/pkg/errors"
+	"github.com/stefanprodan/mgob/config"
 )
 
 func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error) {

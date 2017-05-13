@@ -1,12 +1,13 @@
 package config
 
 import (
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 type Plan struct {

@@ -2,13 +2,14 @@ package backup
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {

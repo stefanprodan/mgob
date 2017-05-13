@@ -2,10 +2,11 @@ package api
 
 import (
 	"context"
-	"github.com/pressly/chi/render"
 	"net/http"
-	"github.com/stefanprodan/mgob/db"
+
 	"github.com/pressly/chi"
+	"github.com/pressly/chi/render"
+	"github.com/stefanprodan/mgob/db"
 )
 
 type appStatus []*db.Status

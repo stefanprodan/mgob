@@ -1,9 +1,10 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/pressly/chi"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
 )
 
 func metricsRouter() http.Handler {

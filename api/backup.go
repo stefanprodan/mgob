@@ -3,6 +3,9 @@ package api
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/pressly/chi"
@@ -10,8 +13,6 @@ import (
 	"github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/notifier"
-	"net/http"
-	"time"
 )
 
 func configCtx(data config.AppConfig) func(next http.Handler) http.Handler {

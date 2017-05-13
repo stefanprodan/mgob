@@ -1,9 +1,10 @@
 package db
 
-import(
-	"github.com/pkg/errors"
-	"github.com/boltdb/bolt"
+import (
 	"time"
+
+	"github.com/boltdb/bolt"
+	"github.com/pkg/errors"
 )
 
 type Store struct {
@@ -15,7 +16,7 @@ func Open(path string) (*Store, error) {
 	config := &bolt.Options{Timeout: 1 * time.Second}
 	d, err := bolt.Open(path, 0600, config)
 	if err != nil {
-		return nil, errors.Wrapf(err,"Opening store %s failed", path)
+		return nil, errors.Wrapf(err, "Opening store %s failed", path)
 	}
 
 	return &Store{d}, nil

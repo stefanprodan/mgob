@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/stefanprodan/mgob/config"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
+	"github.com/stefanprodan/mgob/config"
 )
 
 type slackPayload struct {

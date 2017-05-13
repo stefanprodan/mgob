@@ -2,16 +2,17 @@ package scheduler
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
 	"github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/config"
+	"github.com/stefanprodan/mgob/db"
 	"github.com/stefanprodan/mgob/metrics"
 	"github.com/stefanprodan/mgob/notifier"
-	"time"
-	"github.com/stefanprodan/mgob/db"
 )
 
 type Scheduler struct {
@@ -53,7 +54,7 @@ func (s *Scheduler) Start() error {
 		switch e.Job.(type) {
 		case backupJob:
 			status := &db.Status{
-				Plan: e.Job.(backupJob).name,
+				Plan:    e.Job.(backupJob).name,
 				NextRun: e.Next,
 			}
 			stats = append(stats, status)
@@ -112,10 +113,10 @@ func (b backupJob) Run() {
 	b.metrics.Latency.WithLabelValues(b.plan.Name, status).Observe(t2.Sub(t1).Seconds())
 
 	s := &db.Status{
-		LastRun: &res.Timestamp,
+		LastRun:       &res.Timestamp,
 		LastRunStatus: status,
-		Plan: b.plan.Name,
-		LastRunLog: log,
+		Plan:          b.plan.Name,
+		LastRunLog:    log,
 	}
 
 	for _, e := range b.cron.Entries() {
@@ -128,6 +129,7 @@ func (b backupJob) Run() {
 		}
 	}
 
+	logrus.WithField("plan", b.plan.Name).Infof("Next run at %v", s.NextRun)
 	if err := b.stats.Put(s); err != nil {
 		logrus.WithField("plan", b.plan.Name).Errorf("Status store failed %v", err)
 	}

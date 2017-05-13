@@ -2,16 +2,17 @@ package main
 
 import (
 	"flag"
+	"os"
+	"os/signal"
+	"path"
+	"syscall"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/stefanprodan/mgob/api"
 	"github.com/stefanprodan/mgob/backup"
 	"github.com/stefanprodan/mgob/config"
-	"github.com/stefanprodan/mgob/scheduler"
-	"os"
-	"os/signal"
-	"syscall"
 	"github.com/stefanprodan/mgob/db"
-	"path"
+	"github.com/stefanprodan/mgob/scheduler"
 )
 
 var version = "undefined"

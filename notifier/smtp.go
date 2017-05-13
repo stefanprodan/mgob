@@ -2,10 +2,11 @@ package notifier
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/stefanprodan/mgob/config"
 	"net/smtp"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/stefanprodan/mgob/config"
 )
 
 func sendEmailNotification(subject string, body string, config *config.SMTP) error {

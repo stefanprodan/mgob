@@ -1,9 +1,10 @@
 package backup
 
 import (
+	"strings"
+
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 func CheckMongodump() (string, error) {

@@ -2,11 +2,12 @@ package backup
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
-	"strings"
-	"time"
 )
 
 func s3Upload(file string, plan config.Plan) (string, error) {
