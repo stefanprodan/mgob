@@ -32,6 +32,7 @@ docker run -dp 8090:8090 --name mgob \
     -v "/mogb/config:/config" \
     -v "/mogb/storage:/storage" \
     -v "/mgob/tmp:/tmp" \
+    -v "/mgob/data:/data" \
     stefanprodan/mgob \
     -LogLevel=info
 ```
@@ -116,6 +117,34 @@ curl -X POST http://mgob-host:8090/backup/mongo-debug
   "size": "455 kB",
   "timestamp": "2017-05-08T15:11:35.940141701Z"
 }
+```
+
+Scheduler status:
+
+* HTTP GET `mgob-host:8090/status`
+
+```bash
+curl -X GET http://mgob-host:8090/status
+```
+
+```json
+[
+  {
+    "plan": "mongo-debug",
+    "next_run": "2017-05-13T14:32:00+03:00",
+    "last_run": "2017-05-13T11:31:00.000622589Z",
+    "last_run_status": "200",
+    "last_run_log": "Backup finished in 2.339055539s archive mongo-debug-1494675060.gz size 527 kB"
+  },
+  {
+    "plan": "mongo-dev",
+    "next_run": "2017-05-13T14:33:00+03:00"
+  },
+  {
+    "plan": "mongo-test",
+    "next_run": "2017-05-13T14:32:00+03:00"
+  }
+]
 ```
 
 #### Logs
