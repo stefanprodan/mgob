@@ -48,21 +48,22 @@ func (s *Scheduler) Start() error {
 	})
 
 	s.Cron.Start()
-
+	stats := make([]*db.Status, 0)
 	for _, e := range s.Cron.Entries() {
 		switch e.Job.(type) {
 		case backupJob:
-			logrus.WithField("plan", e.Job.(backupJob).name).Infof("Next run at %v", e.Next)
 			status := &db.Status{
 				Plan: e.Job.(backupJob).name,
 				NextRun: e.Next,
 			}
-			if err := s.Stats.Put(status); err != nil {
-				logrus.WithField("plan", e.Job.(backupJob).name).Errorf("Status store failed %v", err)
-			}
+			stats = append(stats, status)
 		default:
 			logrus.Infof("Next tmp cleanup run at %v", e.Next)
 		}
+	}
+
+	if err := s.Stats.Sync(stats); err != nil {
+		logrus.Errorf("Status store sync failed %v", err)
 	}
 
 	return nil
