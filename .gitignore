@@ -27,3 +27,4 @@ _testmain.go
 /test/storage/
 /test/tmp/
 /test/config/mongo-debug.yml
+/test/data/

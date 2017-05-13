@@ -6,13 +6,13 @@ import (
 	"github.com/pressly/chi"
 	"github.com/pressly/chi/middleware"
 	"github.com/stefanprodan/mgob/config"
-	"github.com/stefanprodan/mgob/scheduler"
 	"net/http"
+	"github.com/stefanprodan/mgob/db"
 )
 
 type HttpServer struct {
 	Config *config.AppConfig
-	Stats  *scheduler.Stats
+	Stats  *db.StatusStore
 }
 
 func (s *HttpServer) Start(version string) {
@@ -32,7 +32,7 @@ func (s *HttpServer) Start(version string) {
 	})
 
 	r.Route("/status", func(r chi.Router) {
-		r.Use(statusCtx(s.Stats.GetAll()))
+		r.Use(statusCtx(s.Stats))
 		r.Get("/", getStatus)
 	})
 

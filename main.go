@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"github.com/stefanprodan/mgob/db"
+	"path"
 )
 
 var version = "undefined"
@@ -43,13 +45,20 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	stats := scheduler.NewStats(plans)
-	sch := scheduler.New(plans, appConfig, stats)
+	store, err := db.Open(path.Join(appConfig.DataPath, "mgob.db"))
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	statusStore, err := db.NewStatusStore(store)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	sch := scheduler.New(plans, appConfig, statusStore)
 	sch.Start()
 
 	server := &api.HttpServer{
 		Config: appConfig,
-		Stats:  stats,
+		Stats:  statusStore,
 	}
 	logrus.Infof("Starting HTTP server on port %v", appConfig.Port)
 	go server.Start(version)
