@@ -34,6 +34,7 @@ func (s *HttpServer) Start(version string) {
 	r.Route("/status", func(r chi.Router) {
 		r.Use(statusCtx(s.Stats))
 		r.Get("/", getStatus)
+		r.Get("/:planID", getPlanStatus)
 	})
 
 	r.Route("/backup", func(r chi.Router) {

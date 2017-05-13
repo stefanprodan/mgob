@@ -122,29 +122,20 @@ curl -X POST http://mgob-host:8090/backup/mongo-debug
 Scheduler status:
 
 * HTTP GET `mgob-host:8090/status`
+* HTTP GET `mgob-host:8090/status/:planID`
 
 ```bash
-curl -X GET http://mgob-host:8090/status
+curl -X GET http://mgob-host:8090/status/mongo-debug
 ```
 
 ```json
-[
-  {
-    "plan": "mongo-debug",
-    "next_run": "2017-05-13T14:32:00+03:00",
-    "last_run": "2017-05-13T11:31:00.000622589Z",
-    "last_run_status": "200",
-    "last_run_log": "Backup finished in 2.339055539s archive mongo-debug-1494675060.gz size 527 kB"
-  },
-  {
-    "plan": "mongo-dev",
-    "next_run": "2017-05-13T14:33:00+03:00"
-  },
-  {
-    "plan": "mongo-test",
-    "next_run": "2017-05-13T14:32:00+03:00"
-  }
-]
+{
+  "plan": "mongo-debug",
+  "next_run": "2017-05-13T14:32:00+03:00",
+  "last_run": "2017-05-13T11:31:00.000622589Z",
+  "last_run_status": "200",
+  "last_run_log": "Backup finished in 2.339055539s archive mongo-debug-1494675060.gz size 527 kB"
+}
 ```
 
 #### Logs

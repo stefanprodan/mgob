@@ -5,6 +5,7 @@ import (
 	"github.com/pressly/chi/render"
 	"net/http"
 	"github.com/stefanprodan/mgob/db"
+	"github.com/pressly/chi"
 )
 
 type appStatus []*db.Status
@@ -32,4 +33,18 @@ func statusCtx(store *db.StatusStore) func(next http.Handler) http.Handler {
 func getStatus(w http.ResponseWriter, r *http.Request) {
 	data := r.Context().Value("app.status").(appStatus)
 	render.JSON(w, r, data)
+}
+
+func getPlanStatus(w http.ResponseWriter, r *http.Request) {
+	data := r.Context().Value("app.status").(appStatus)
+	planID := chi.URLParam(r, "planID")
+	for _, s := range data {
+		if s.Plan == planID {
+			render.JSON(w, r, s)
+			return
+		}
+	}
+
+	render.Status(r, 404)
+	render.JSON(w, r, map[string]string{"error": "Plan not found"})
 }
