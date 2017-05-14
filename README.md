@@ -83,7 +83,7 @@ smtp:
   port: 465
   username: user
   password: secret
-  from: mgod@company.com
+  from: mgob@company.com
   to:
     - devops@company.com
     - alerts@company.com
@@ -100,6 +100,7 @@ slack:
 * `mgob-host:8090/status` backup jobs status
 * `mgob-host:8090/metrics` Prometheus endpoint
 * `mgob-host:8090/version` mgob version and runtime info
+* `mgob-host:8090/debug` pprof endpoint
 
 On demand backup:
 
