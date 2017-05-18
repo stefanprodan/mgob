@@ -1,5 +1,5 @@
 target:
-  host: "172.18.7.21"
+  host: "172.18.7.40"
   port: 27017
   database: "mongoclient"
   username: ""
