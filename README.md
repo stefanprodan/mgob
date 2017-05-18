@@ -203,7 +203,7 @@ Login to your MongoDB server and download the archive using `curl` and restore t
 
 ```bash
 curl -o /tmp/mongo-test-1494056760.gz http://mgob-host:8090/storage/mongo-test/mongo-test-1494056760.gz
-mongorestore --gzip --archive=/tmp/mongo-test-1494056760.gz --db test
+mongorestore --gzip --archive=/tmp/mongo-test-1494056760.gz --drop
 ```
 
 You can also restore a backup from within mgob container. 
@@ -212,5 +212,5 @@ Exec into mgob, identify the backup you want to restore and use `mongorestore` t
 ```bash
 docker exec -it mgob sh
 ls /storage/mongo-test
-mongorestore --gzip --archive=/storage/mongo-test/mongo-test-1494056760.gz --host mongohost:27017 --db test
+mongorestore --gzip --archive=/storage/mongo-test/mongo-test-1494056760.gz --host mongohost:27017 --drop
 ```
