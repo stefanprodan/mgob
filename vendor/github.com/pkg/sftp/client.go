@@ -14,11 +14,31 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// MaxPacket sets the maximum size of the payload.
-func MaxPacket(size int) func(*Client) error {
+// InternalInconsistency indicates the packets sent and the data queued to be
+// written to the file don't match up. It is an unusual error and if you get it
+// you should file a ticket.
+var InternalInconsistency = errors.New("internal inconsistency")
+
+// A ClientOption is a function which applies configuration to a Client.
+type ClientOption func(*Client) error
+
+// This is based on Openssh's max accepted size of 1<<18 - overhead
+const maxMaxPacket = (1 << 18) - 1024
+
+// MaxPacket sets the maximum size of the payload. The size param must be
+// between 32768 (1<<15) and 261120 ((1 << 18) - 1024). The minimum size is
+// given by the RFC, while the maximum size is a de-facto standard based on
+// Openssh's SFTP server which won't accept packets much larger than that.
+//
+// Note if you aren't using Openssh's sftp server and get the error "failed to
+// send packet header: EOF" when copying a large file try lowering this number.
+func MaxPacket(size int) ClientOption {
 	return func(c *Client) error {
 		if size < 1<<15 {
 			return errors.Errorf("size must be greater or equal to 32k")
+		}
+		if size > maxMaxPacket {
+			return errors.Errorf("max packet size is too large (see docs)")
 		}
 		c.maxPacket = size
 		return nil
@@ -27,7 +47,7 @@ func MaxPacket(size int) func(*Client) error {
 
 // NewClient creates a new SFTP client on conn, using zero or more option
 // functions.
-func NewClient(conn *ssh.Client, opts ...func(*Client) error) (*Client, error) {
+func NewClient(conn *ssh.Client, opts ...ClientOption) (*Client, error) {
 	s, err := conn.NewSession()
 	if err != nil {
 		return nil, err
@@ -50,7 +70,7 @@ func NewClient(conn *ssh.Client, opts ...func(*Client) error) (*Client, error) {
 // NewClientPipe creates a new SFTP client given a Reader and a WriteCloser.
 // This can be used for connecting to an SFTP server over TCP/TLS or by using
 // the system's ssh client program (e.g. via exec.Command).
-func NewClientPipe(rd io.Reader, wr io.WriteCloser, opts ...func(*Client) error) (*Client, error) {
+func NewClientPipe(rd io.Reader, wr io.WriteCloser, opts ...ClientOption) (*Client, error) {
 	sftp := &Client{
 		clientConn: clientConn{
 			conn: conn{
@@ -611,7 +631,7 @@ func (c *Client) Mkdir(path string) error {
 
 // applyOptions applies options functions to the Client.
 // If an error is encountered, option processing ceases.
-func (c *Client) applyOptions(opts ...func(*Client) error) error {
+func (c *Client) applyOptions(opts ...ClientOption) error {
 	for _, f := range opts {
 		if err := f(c); err != nil {
 			return err
@@ -653,7 +673,9 @@ func (f *File) Read(b []byte) (int, error) {
 	inFlight := 0
 	desiredInFlight := 1
 	offset := f.offset
-	ch := make(chan result, 2)
+	// maxConcurrentRequests buffer to deal with broadcastErr() floods
+	// also must have a buffer of max value of (desiredInFlight - inFlight)
+	ch := make(chan result, maxConcurrentRequests)
 	type inflightRead struct {
 		b      []byte
 		offset uint64
@@ -748,7 +770,8 @@ func (f *File) WriteTo(w io.Writer) (int64, error) {
 	offset := f.offset
 	writeOffset := offset
 	fileSize := uint64(fi.Size())
-	ch := make(chan result, 2)
+	// see comment on same line in Read() above
+	ch := make(chan result, maxConcurrentRequests)
 	type inflightRead struct {
 		b      []byte
 		offset uint64
@@ -788,7 +811,7 @@ func (f *File) WriteTo(w io.Writer) (int64, error) {
 
 		if inFlight == 0 {
 			if firstErr.err == nil && len(pendingWrites) > 0 {
-				return copied, errors.New("internal inconsistency")
+				return copied, InternalInconsistency
 			}
 			break
 		}
@@ -890,8 +913,8 @@ func (f *File) Write(b []byte) (int, error) {
 	inFlight := 0
 	desiredInFlight := 1
 	offset := f.offset
-	// chan must have a buffer of max value of (desiredInFlight - inFlight)
-	ch := make(chan result, 2)
+	// see comment on same line in Read() above
+	ch := make(chan result, maxConcurrentRequests)
 	var firstErr error
 	written := len(b)
 	for len(b) > 0 || inFlight > 0 {
@@ -951,8 +974,8 @@ func (f *File) ReadFrom(r io.Reader) (int64, error) {
 	inFlight := 0
 	desiredInFlight := 1
 	offset := f.offset
-	// chan must have a buffer of max value of (desiredInFlight - inFlight)
-	ch := make(chan result, 2)
+	// see comment on same line in Read() above
+	ch := make(chan result, maxConcurrentRequests)
 	var firstErr error
 	read := int64(0)
 	b := make([]byte, f.c.maxPacket)

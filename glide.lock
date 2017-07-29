@@ -1,18 +1,24 @@
-hash: acec8082cfe044645ab3b208f3fd9e14bca096f93f2bfd52225672fad69ca86d
-updated: 2017-05-13T00:49:22.725974804+03:00
+hash: 182fbb7e85303115a78f13d6cbd3e71caea139faca52ebc9aa85dc256b805b8a
+updated: 2017-07-29T17:09:23.420528308+03:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
 - name: github.com/boltdb/bolt
-  version: 583e8937c61f1af6513608ccc75c97b6abdf4ff9
+  version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
 - name: github.com/codegangsta/inject
   version: 37d7f8432a3e684eef9b2edece76bdfa6ac85b39
 - name: github.com/codeskyblue/go-sh
   version: b097669b1569203c3ce05a6b8717d43140fdb3d5
 - name: github.com/dustin/go-humanize
   version: 259d2a102b871d17f30e3cd9881a642961a1e486
+- name: github.com/go-chi/chi
+  version: b8567b6442e27704bfeb725095091581cbe82a00
+  subpackages:
+  - middleware
+- name: github.com/go-chi/render
+  version: 9f855fadd4b8cde7773f9ef51f6b2705af239519
 - name: github.com/golang/protobuf
   version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
   subpackages:
@@ -26,12 +32,7 @@ imports:
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pkg/sftp
-  version: a5f8514e29e90a859e93871b1582e5c81f466f82
-- name: github.com/pressly/chi
-  version: e6033ea75479391a4bce3918fc119cad31e1cb30
-  subpackages:
-  - middleware
-  - render
+  version: 22f089b9c4056cf774ebd695b687d469f2ad4650
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -56,7 +57,7 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: golang.org/x/crypto
-  version: ab89591268e0c8b748cbe4047b00197516011af5
+  version: 558b6879de74bc843225cde5686419267ff707ca
   subpackages:
   - curve25519
   - ed25519
