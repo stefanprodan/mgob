@@ -5,10 +5,11 @@ import (
 	"net/http"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/pressly/chi"
-	"github.com/pressly/chi/middleware"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/db"
+	"strings"
 )
 
 type HttpServer struct {
@@ -43,7 +44,25 @@ func (s *HttpServer) Start(version string) {
 		r.Post("/:planID", postBackup)
 	})
 
-	r.FileServer("/storage", http.Dir(s.Config.StoragePath))
+	FileServer(r,"/storage", http.Dir(s.Config.StoragePath))
 
 	logrus.Error(http.ListenAndServe(fmt.Sprintf(":%v", s.Config.Port), r))
+}
+
+func FileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit URL parameters.")
+	}
+
+	fs := http.StripPrefix(path, http.FileServer(root))
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	}))
 }

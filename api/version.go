@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"github.com/pressly/chi/render"
+	"github.com/go-chi/render"
 )
 
 type appVersion map[string]string

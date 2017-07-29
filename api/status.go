@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/pressly/chi"
-	"github.com/pressly/chi/render"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
 	"github.com/stefanprodan/mgob/db"
 )
 
