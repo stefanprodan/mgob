@@ -29,6 +29,10 @@ type slackAttachment struct {
 }
 
 func sendSlackNotification(subject string, body string, warn bool, cfg *config.Slack) error {
+	if !warn && cfg.WarnOnly {
+		return nil
+	}
+
 	payload := slackPayload{
 		Channel:  cfg.Channel,
 		Username: cfg.Username,

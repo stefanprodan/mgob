@@ -92,6 +92,8 @@ slack:
   url: https://hooks.slack.com/services/xxxx/xxx/xx
   channel: devops-alerts
   username: mgob
+  # 'true' to notify only on failures 
+  warnOnly: false
 ```
 
 #### Web API
