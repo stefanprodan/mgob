@@ -63,6 +63,7 @@ type Slack struct {
 	URL      string `yaml:"url"`
 	Channel  string `yaml:"channel"`
 	Username string `yaml:"username"`
+	WarnOnly bool   `yaml:"warnOnly"`
 }
 
 func LoadPlan(dir string, name string) (Plan, error) {
