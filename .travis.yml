@@ -34,7 +34,9 @@ script:
   - docker logs mgob 2>&1 | grep 'Backup finished'
 
 after_success:
-  - make publish
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    make publish;
+    fi
 
 deploy:
   provider: script
