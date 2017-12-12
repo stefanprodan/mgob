@@ -41,6 +41,12 @@ func main() {
 	}
 	logrus.Info(info)
 
+	info, err = backup.CheckGCloudClient()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	logrus.Info(info)
+
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
 	if err != nil {
 		logrus.Fatal(err)

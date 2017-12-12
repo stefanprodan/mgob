@@ -76,6 +76,15 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		}
 	}
 
+	if plan.GCloud != nil {
+		gCloudOutput, err := gCloudUpload(file, plan)
+		if err != nil {
+			return res, err
+		} else {
+			logrus.WithField("plan", plan.Name).Infof("GCloud upload finished %v", gCloudOutput)
+		}
+	}
+
 	t2 := time.Now()
 	res.Status = 200
 	res.Duration = t2.Sub(t1)

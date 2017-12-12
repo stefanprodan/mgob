@@ -10,6 +10,7 @@ MGOB is a MongoDB backup automation tool built with golang.
 * schedule backups
 * local backups retention
 * upload to S3 Object Storage (Minio, AWS, Google Cloud)
+* upload to gcloud storage
 * upload to SFTP
 * notifications (Email, Slack)
 * instrumentation with Prometheus
@@ -69,6 +70,10 @@ s3:
   accessKey: "Q3AM3UQ867SPQQA43P2F"
   secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
   api: "S3v4"
+# GCloud upload (optional)
+gcloud:
+  bucket: "backup"
+  keyFilePath: /path/to/service-account.json
 # SFTP upload (optional)
 sftp:
   host: sftp.company.com
