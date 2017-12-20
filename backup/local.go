@@ -16,8 +16,11 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
 	log := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
 
-	dump := fmt.Sprintf("mongodump --archive=%v --gzip --host %v --port %v --db %v ",
-		archive, plan.Target.Host, plan.Target.Port, plan.Target.Database)
+	dump := fmt.Sprintf("mongodump --archive=%v --gzip --host %v --port %v ",
+		archive, plan.Target.Host, plan.Target.Port)
+	if plan.Target.Database != "" {
+		dump += fmt.Sprintf("--db %v ", plan.Target.Database)
+	}
 	if plan.Target.Username != "" && plan.Target.Password != "" {
 		dump += fmt.Sprintf("-u %v -p %v", plan.Target.Username, plan.Target.Password)
 	}

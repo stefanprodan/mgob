@@ -58,7 +58,7 @@ target:
   host: "172.18.7.21"
   # mongodb port
   port: 27017
-  # mongodb database name
+  # mongodb database name, leave blank to backup all databases
   database: "test"
   # leave blank if auth is not enabled
   username: "admin"
