@@ -34,8 +34,10 @@ script:
   - docker logs mgob 2>&1 | grep 'Backup finished'
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-    make publish;
+  - if [ -z "DOCKER_USER" ]; then
+      echo "PR build, skipping Docker Hub push";
+    else
+      make publish;
     fi
 
 deploy:
