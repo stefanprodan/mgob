@@ -44,7 +44,7 @@ type S3 struct {
 }
 
 type GCloud struct {
-	Bucket string `yaml:"bucket"`
+	Bucket      string `yaml:"bucket"`
 	KeyFilePath string `yaml:"keyFilePath"`
 }
 
@@ -131,6 +131,18 @@ func LoadPlans(dir string) ([]Plan, error) {
 		}
 		_, filename := filepath.Split(path)
 		plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
+
+		duplicate := false
+		for _, p := range plans {
+			if p.Name == plan.Name {
+				duplicate = true
+				break
+			}
+		}
+		if duplicate {
+			continue
+		}
+
 		plans = append(plans, plan)
 
 	}
