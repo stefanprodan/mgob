@@ -1,3 +1,5 @@
+# XFS is not supported by GKE COS, use Ubuntu
+# ref https://github.com/kubernetes/kubernetes/issues/47125
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -7,6 +9,7 @@ metadata:
 provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-ssd
+  #fsType: xfs
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -16,4 +19,4 @@ metadata:
 provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-standard
-
+  #fsType: xfs
