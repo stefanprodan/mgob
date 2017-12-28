@@ -1,0 +1,27 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  labels:
+    role: backup
+  name: mgob-config
+  namespace: db
+data:
+  test1.yml: |
+    target:
+      host: "mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mongo.db"
+      port: 27017
+      database: "test1"
+    scheduler:
+      cron: "*/1 * * * *"
+      retention: 5
+      timeout: 60
+  test2.yml: |
+    target:
+      host: "mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mongo.db"
+      port: 27017
+      database: "test2"
+    scheduler:
+      cron: "*/2 * * * *"
+      retention: 10
+      timeout: 60
