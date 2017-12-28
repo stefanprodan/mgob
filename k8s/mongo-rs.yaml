@@ -36,7 +36,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 10
       containers:
-        - name: mongo
+        - name: mongod
           image: mongo:3.6
           command:
             - mongod

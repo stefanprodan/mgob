@@ -15,7 +15,7 @@ $ git clone https://github.com/stefanprodan/mgob.git
 $ cd mgob/k8s
 ```
 
-### Create a MongoDB Replica Set with Stateful Sets
+### Create a MongoDB RS with Stateful Sets
 
 Create the `db` namespace:
 
@@ -75,11 +75,10 @@ po/mongo-1   2/2       Running   0          7m
 po/mongo-2   2/2       Running   0          6m
 ```
 
-You can run a temporary _mongo-cli_ pod inside the `db` namespace to create a `test` database and insert some data:
+Connect to the container running in `mongo-0` pod, create a `test` database and insert some data:
 
 ```bash
-$ kubectl -n db run -it --rm --restart=Never mongo-cli --image=mongo --command -- sh
-mongo "mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017/dbname_?"
+$ kubectl -n db exec -it mongo-0 -c mongod mongo
 rs0:PRIMARY> use test
 rs0:PRIMARY> db.inventory.insert({item: "one", val: "two" })
 WriteResult({ "nInserted" : 1 })
@@ -88,6 +87,15 @@ WriteResult({ "nInserted" : 1 })
 Each MongoDB replica has its own DNS address as in `<pod-name>.<service-name>.<namespace>`.
 If you need to access the _Replica Set_ from another namespace use the following connection url:
 
-```bash
+```
 mongodb://mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mongo.db:27017/dbname_?
+```
+
+Test the connectivity by creating a temporary pod in the default namespace:
+
+```
+$ kubectl run -it --rm --restart=Never mongo-cli --image=mongo --command -- /bin/bash
+root@mongo-cli:/# mongo "mongodb://mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mongo.db:27017/test"
+rs0:PRIMARY> db.getCollectionNames()
+[ "inventory" ]
 ```
