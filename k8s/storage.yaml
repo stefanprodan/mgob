@@ -1,0 +1,19 @@
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: ssd
+  namespace: db
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: hdd
+  namespace: db
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+
