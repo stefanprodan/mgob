@@ -1,0 +1,31 @@
+---
+kind: DaemonSet
+apiVersion: apps/v1beta2
+metadata:
+  name: startup-script
+  namespace: db
+spec:
+  selector:
+    matchLabels:
+      role: startup-script
+  template:
+    metadata:
+      labels:
+        role: startup-script
+    spec:
+      hostPID: true
+      containers:
+      - name: startup-script
+        image: gcr.io/google-containers/startup-script:v1
+        securityContext:
+          privileged: true
+        env:
+        - name: STARTUP_SCRIPT
+          value: |
+            #! /bin/bash
+            set -o errexit
+            set -o pipefail
+            set -o nounset
+
+            echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled
+            echo 'never' > /sys/kernel/mm/transparent_hugepage/defrag
