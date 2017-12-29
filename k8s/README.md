@@ -208,7 +208,7 @@ mongorestore --gzip --archive=/storage/test1/test1-1514492640.gz --host mongo-0.
 
 ### Monitoring and alerting
 
-For each backup plan you configure alerting via email or Slack:
+For each backup plan you can configure alerting via email or Slack:
 
 ```yaml
 # Email notifications (optional)
@@ -255,7 +255,7 @@ backups on disk.
 First you need to create an GCP service account key from the `API & Services` page. Download the JSON file 
 and rename it to `service-account.json`. 
 
-Store the JSON file as a secret in GKE:
+Store the JSON file as a secret in the `db` namespace:
 
 ```bash
 kubectl -n db create secret generic gcp-key --from-file=service-account.json=service-account.json
@@ -308,3 +308,6 @@ msg="Backup started" plan=test
 msg="GCloud upload finished Copying file:///storage/test/test-1514544660.gz"
 ```
 
+Weave Cloud explore view:
+
+![vms](https://github.com/stefanprodan/mgob/blob/master/screens/mgob-gcp.png)
