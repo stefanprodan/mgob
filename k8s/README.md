@@ -51,7 +51,7 @@ clusterrolebinding "system:serviceaccount:db:default" configured
 ```
 
 The above command creates a _Headless Service_ and a _Stateful Set_ for the Mongo _Replica Set_ and a _Service Account_ for the Mongo sidecar.
-Each pod contains a Mongo instance and a [Mongo sidecar](https://github.com/cvallance/mongo-k8s-sidecar). 
+Each pod contains a Mongo instance and a sidecar.
 The sidecar will initialize the _Replica Set_ and will add the rs members as soon as the pods are up.
 You can safely scale up or down the _Stateful Set_ replicas, the sidecar will add or remove rs members.
 
@@ -100,6 +100,9 @@ root@mongo-cli:/# mongo "mongodb://mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mon
 rs0:PRIMARY> db.getCollectionNames()
 [ "inventory" ]
 ```
+
+The [mongo-k8s-sidecar](https://github.com/cvallance/mongo-k8s-sidecar) deals with ReplicaSet provisioning only. 
+if you want to run a sharded cluster on GKE, take a look at [pkdone/gke-mongodb-shards-demo](https://github.com/pkdone/gke-mongodb-shards-demo). 
 
 ### Create a MongoDB Backup agent with Stateful Sets
 
@@ -184,7 +187,7 @@ kubectl -n db exec -it mgob-0 -- curl -XPOST mgob-0.mgob.db:8090/backup/test2
 {"plan":"test2","file":"test2-1514492080.gz","duration":"61.109042ms","size":"313 B","timestamp":"2017-12-28T20:14:40.604057546Z"}
 ```
 
-You can also restore a backup from within mgob container. 
+You can restore a backup from within mgob container. 
 Exec into mgob and identify the backup you want to restore, the backups are in `/storage/<plan-name>`.
 
 ```bash
@@ -201,4 +204,45 @@ Use `mongorestore` to connect to your MongoDB server and restore a backup:
 ```bash
 $ kubectl -n db exec -it mgob-0 /bin/bash
 mongorestore --gzip --archive=/storage/test1/test1-1514492640.gz --host mongo-0.mongo.db:27017 --drop
+```
+
+### Monitoring and alerting
+
+For each backup plan you configure alerting via email or Slack:
+
+```yaml
+# Email notifications (optional)
+smtp:
+  server: smtp.company.com
+  port: 465
+  username: user
+  password: secret
+  from: mgob@company.com
+  to:
+    - devops@company.com
+    - alerts@company.com
+# Slack notifications (optional)
+slack:
+  url: https://hooks.slack.com/services/xxxx/xxx/xx
+  channel: devops-alerts
+  username: mgob
+  # 'true' to notify only on failures 
+  warnOnly: false
+```
+
+Mgob exposes Prometheus metrics on the `/metrics` endpoint. 
+
+Successful/failed backups counter:
+
+```
+mgob_scheduler_backup_total{plan="test1",status="200"} 8
+mgob_scheduler_backup_total{plan="test2",status="500"} 2
+```
+
+Backup duration:
+
+```
+mgob_scheduler_backup_latency{plan="test1",status="200",quantile="0.5"} 2.149668417
+mgob_scheduler_backup_latency{plan="test1",status="200",quantile="0.9"} 2.39848413
+mgob_scheduler_backup_latency{plan="test1",status="200",quantile="0.99"} 2.39848413
 ```
