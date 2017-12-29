@@ -246,3 +246,65 @@ mgob_scheduler_backup_latency{plan="test1",status="200",quantile="0.5"} 2.149668
 mgob_scheduler_backup_latency{plan="test1",status="200",quantile="0.9"} 2.39848413
 mgob_scheduler_backup_latency{plan="test1",status="200",quantile="0.99"} 2.39848413
 ```
+
+### Backup to GCP Storage Bucket
+
+For long term backup storage you could use a GCP Bucket since is a cheaper option than keeping all 
+backups on disk.
+
+First you need to create an GCP service account key from the `API & Services` page. Download the JSON file 
+and rename it to `service-account.json`. 
+
+Store the JSON file as a secret in GKE:
+
+```bash
+kubectl -n db create secret generic gcp-key --from-file=service-account.json=service-account.json
+```
+
+From the GCP web UI, navigate to _Storage_ and create a regional bucket named `mgob`. 
+If the bucket name is taken you'll need to change it in the `mgob-gstore-cfg.yaml` file:
+
+```yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  labels:
+    role: mongo-backup
+  name: mgob-gstore-config
+  namespace: db
+data:
+  test.yml: |
+    target:
+      host: "mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mongo.db"
+      port: 27017
+      database: "test"
+    scheduler:
+      cron: "*/1 * * * *"
+      retention: 1
+      timeout: 60
+    gcloud:
+      bucket: "mgob"
+      keyFilePath: /etc/mgob/service-account.json
+```
+
+Apply the config:
+
+```bash
+kubectl apply -f ./mgob-gstore-cfg.yaml
+```
+
+Deploy mgob with the `gcp-key` secret map to a volume:
+
+```bash
+kubectl apply -f ./mgob-gstore-dep.yaml
+```
+
+After one minute the backup will be uploaded to the GCP bucket:
+
+```bash
+$ kubectl -n db logs -f mgob-0 
+msg="Google Cloud SDK 181.0.0 bq 2.0.27 core 2017.11.28 gsutil 4.28"
+msg="Backup started" plan=test
+msg="GCloud upload finished Copying file:///storage/test/test-1514544660.gz"
+```
+
