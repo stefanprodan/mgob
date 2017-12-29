@@ -28,3 +28,5 @@ _testmain.go
 /test/tmp/
 /test/config/mongo-debug.yml
 /test/data/
+
+/k8s/service-account.json
