@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mgob
+  namespace: db
+  labels:
+    name: mgob
+spec:
+  ports:
+  - port: 8090
+    targetPort: 8090
+  clusterIP: None
+  selector:
+    role: mongo-backup
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: mgob
+  namespace: db
+spec:
+  serviceName: "mgob"
+  replicas: 1
+  selector:
+    matchLabels:
+      role: mongo-backup
+  template:
+    metadata:
+      labels:
+        role: mongo-backup
+    spec:
+      containers:
+      - name: mgobd
+        image: stefanprodan/mgob:edge
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8090
+          protocol: TCP
+        volumeMounts:
+        - name: mgob-storage
+          mountPath: /storage
+        - name: mgob-data
+          mountPath: /data
+        - name: mgob-data
+          mountPath: /tmp
+        - name: mgob-gstore-config
+          mountPath: /config/test.yml
+          subPath: test.yml
+        - name: gcp-key
+          mountPath: "/etc/mgob"
+          readOnly: true
+      volumes:
+        - name: mgob-gstore-config
+          configMap:
+            name: mgob-gstore-config
+            items:
+              - key: test.yml
+                path: test.yml
+        - name: gcp-key
+          secret:
+            secretName: gcp-key
+  volumeClaimTemplates:
+  - metadata:
+      name: mgob-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "hdd"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 3Gi
+  - metadata:
+      name: mgob-data
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "hdd"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

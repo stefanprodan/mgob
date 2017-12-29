@@ -1,0 +1,21 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  labels:
+    role: mongo-backup
+  name: mgob-gstore-config
+  namespace: db
+data:
+  test.yml: |
+    target:
+      host: "mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mongo.db"
+      port: 27017
+      database: "test"
+    scheduler:
+      cron: "*/1 * * * *"
+      retention: 1
+      timeout: 60
+    gcloud:
+      bucket: "mgob"
+      keyFilePath: /etc/mgob/service-account.json
