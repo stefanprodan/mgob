@@ -15,6 +15,14 @@ $ git clone https://github.com/stefanprodan/mgob.git
 $ cd mgob/k8s
 ```
 
+Create a cluster admin user:
+
+```bash
+kubectl create clusterrolebinding "cluster-admin-$(whoami)" \
+    --clusterrole=cluster-admin \
+    --user="$(gcloud config get-value core/account)"
+```
+
 ### Create a MongoDB RS with Stateful Sets
 
 Create the `db` namespace:
