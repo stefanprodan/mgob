@@ -22,7 +22,10 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		dump += fmt.Sprintf("--db %v ", plan.Target.Database)
 	}
 	if plan.Target.Username != "" && plan.Target.Password != "" {
-		dump += fmt.Sprintf("-u %v -p %v", plan.Target.Username, plan.Target.Password)
+		dump += fmt.Sprintf("-u %v -p %v ", plan.Target.Username, plan.Target.Password)
+	}
+	if plan.Target.Params != "" {
+		dump += fmt.Sprintf("%v", plan.Target.Params)
 	}
 
 	output, err := sh.Command("/bin/sh", "-c", dump).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
