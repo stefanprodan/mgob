@@ -34,7 +34,7 @@ script:
   - docker logs mgob 2>&1 | grep 'Backup finished'
 
 after_success:
-  - if [ -z "DOCKER_USER" ]; then
+  - if [ -z "$DOCKER_USER" ]; then
       echo "PR build, skipping Docker Hub push";
     else
       make publish;
