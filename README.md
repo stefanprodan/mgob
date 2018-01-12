@@ -67,8 +67,8 @@ target:
   # leave blank if auth is not enabled
   username: "admin"
   password: "secret"
-  # add custom params to mongodump (eg. SSL support), leave blank if not needed
-  params: "--ssl"
+  # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
+  params: "--ssl --authenticationDatabase admin"
 # S3 upload (optional)
 s3:
   url: "https://play.minio.io:9000"
