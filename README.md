@@ -58,7 +58,7 @@ scheduler:
   # backup operation timeout in minutes
   timeout: 60
 target:
-  # mongodb IP or host name
+  # mongod IP or host name
   host: "172.18.7.21"
   # mongodb port
   port: 27017
@@ -105,6 +105,27 @@ slack:
   username: mgob
   # 'true' to notify only on failures 
   warnOnly: false
+```
+
+ReplicaSet example:
+
+```yaml
+target:
+  host: "mongo-0.mongo.db,mongo-1.mongo.db,mongo-2.mongo.db"
+  port: 27017
+  database: "test"
+```
+
+Sharded cluster with authentication and SSL example:
+
+```yaml
+target:
+  host: "mongos-0.db,mongos-1.db"
+  port: 27017
+  database: "test"
+  username: "admin"
+  password: "secret"
+  params: "--ssl --authenticationDatabase admin"
 ```
 
 #### Web API
