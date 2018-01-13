@@ -316,6 +316,3 @@ msg="Backup started" plan=test
 msg="GCloud upload finished Copying file:///storage/test/test-1514544660.gz"
 ```
 
-Weave Cloud explore view:
-
-![vms](https://github.com/stefanprodan/mgob/blob/master/screens/mgob-gcp.png)
