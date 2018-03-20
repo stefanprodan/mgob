@@ -104,4 +104,16 @@ vet:
 		echo "go vet failed"; \
 	fi
 
+devimg       = mgobdev
+packagename  = github.com/$(REPOSITORY)/mgob
+workdir      = /go/src/$(packagename)
+rundev       = docker run -ti --rm -v `pwd`:$(workdir) --workdir $(workdir) $(devimg)
+
+imagedev:
+	docker build -t $(devimg) -f ./hack/Dockerfile.dev .
+
+check: imagedev
+	$(rundev) ./hack/check.sh $(pkg) $(test)
+
+
 .PHONY: build
