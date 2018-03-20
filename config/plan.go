@@ -30,6 +30,10 @@ type Target struct {
 	Params   string `yaml:"params"`
 }
 
+type Restore struct {
+	check string `yaml:"check"`
+}
+
 type Scheduler struct {
 	Cron      string `yaml:"cron"`
 	Retention int    `yaml:"retention"`
