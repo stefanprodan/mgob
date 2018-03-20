@@ -1,6 +1,12 @@
 package restore
 
 import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/codeskyblue/go-sh"
+	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
 )
 
@@ -10,14 +16,14 @@ import (
 // - Download backup from one source
 // - Restore backup using mongorestore
 // - Testing restoring using queries defined by plan
-func Restore(plan plan.Config, archive string) error {
+func Restore(plan config.Plan, archive string) error {
 	restore := fmt.Sprintf("mongorestore --archive=%v --gzip --host %v --port %v ",
 		archive, plan.Target.Host, plan.Target.Port)
 	if plan.Target.Database != "" {
-		dump += fmt.Sprintf("--db %v ", plan.Target.Database)
+		restore += fmt.Sprintf("--db %v ", plan.Target.Database)
 	}
 
-	output, err := sh.Command("/bin/sh", "-c", dump).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
+	output, err := sh.Command("/bin/sh", "-c", restore).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if err != nil {
 		ex := ""
 		if len(output) > 0 {
