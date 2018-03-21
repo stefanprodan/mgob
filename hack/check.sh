@@ -7,7 +7,7 @@ timeout=10s
 if [ $# -eq 0 ]
   then
         for d in $(go list ./...); do
-            go test -timeout $timeout -race $d
+            go test -v -timeout $timeout -race $d
         done
         exit
 fi
