@@ -21,28 +21,10 @@ func assertNoError(t *testing.T, err error) {
 	}
 }
 
-func TestMongoRestoreReturnErrorOnInvalidHost(t *testing.T) {
-	target := config.Target{
-		Host: "invalid",
-		Port: 27017,
-	}
-	sched := config.Scheduler{Timeout: 60}
-	plan := config.Plan{
-		Target:    target,
-		Scheduler: sched,
-	}
-	err := restore.Restore(plan, "invalid")
-	assertError(t, err)
-}
-
 func TestMongoRestoreReturnErrorOnInvalidArchive(t *testing.T) {
-	target := config.Target{
-		Host: "localhost",
-		Port: 27017,
-	}
 	sched := config.Scheduler{Timeout: 60}
 	plan := config.Plan{
-		Target:    target,
+		Target:    config.Target{},
 		Scheduler: sched,
 	}
 	err := restore.Restore(plan, "invalid")
