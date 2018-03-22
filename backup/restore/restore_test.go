@@ -36,6 +36,11 @@ func setUp(localhost string, port int) config.Plan {
 		Host: "localhost",
 		Port: 27017,
 	}
+	restore := config.Restore{
+		Database:   "garden",
+		Collection: "parameters",
+		Count:      "5",
+	}
 	sched := config.Scheduler{Timeout: 60}
 	plan := config.Plan{
 		Target:    target,

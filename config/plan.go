@@ -19,6 +19,7 @@ type Plan struct {
 	SFTP      *SFTP     `yaml:"sftp"`
 	SMTP      *SMTP     `yaml:"smtp"`
 	Slack     *Slack    `yaml:"slack"`
+	Restore   *Restore  `yaml:"restore"`
 }
 
 type Target struct {
@@ -31,7 +32,9 @@ type Target struct {
 }
 
 type Restore struct {
-	check string `yaml:"check"`
+	Database  string `yaml:"database"`
+	Colletion string `yaml:"colletion"`
+	Count     int    `yaml:"count"`
 }
 
 type Scheduler struct {

@@ -45,14 +45,14 @@ func Restore(plan config.Plan, archive string) error {
 		return errors.Wrapf(err, "mongorestore log %v", ex)
 	}
 	fmt.Printf("%s\n", output)
-	err = checkRestore(host, port)
+	err = checkRestore(host, port, plan.Restore.Database, plan.Restore.Colletion, plan.Restore.Count)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func checkRestore(host string, port int) error {
+func checkRestore(host string, port int, database string, collection string, count int) error {
 	mongoURL := fmt.Sprintf("mongodb://%v:%d", host, port)
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
@@ -61,13 +61,16 @@ func checkRestore(host string, port int) error {
 	defer session.Close()
 
 	session.SetSafe(&mgo.Safe{})
-	c := session.DB("garden").C("parameters")
+	c := session.DB(database).C(collection)
 
-	count, err2 := c.Find(bson.M{}).Count()
+	countRestored, err2 := c.Find(bson.M{}).Count()
 	if err2 != nil {
 		return err
 	}
-	fmt.Printf("total  parameters count = %d\n", count)
+	if countRestored < count {
+		return errors.New("Count in restore database don'n match")
+	}
+	fmt.Printf("total  parameters count = %d\n", countRestored)
 	return nil
 }
 
