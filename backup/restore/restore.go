@@ -45,7 +45,7 @@ func Restore(plan config.Plan, archive string) error {
 		return errors.Wrapf(err, "mongorestore log %v", ex)
 	}
 	fmt.Printf("%s\n", output)
-	err = checkRestore(host, port, plan.Restore.Database, plan.Restore.Colletion, plan.Restore.Count)
+	err = checkRestore(host, port, plan.Restore.Database, plan.Restore.Collection, plan.Restore.Count)
 	if err != nil {
 		return err
 	}
