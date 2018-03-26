@@ -12,3 +12,5 @@ RUN apt-get update -y \
     && apt-get install -y --allow-unauthenticated mongodb-org-tools
 
 COPY ./backup/restore/dump_test.gz /tmp/dump_test.gz
+
+WORKDIR /go/src/github.com/stefanprodan/mgob
