@@ -7,6 +7,7 @@ import (
 	"github.com/stefanprodan/mgob/config"
 )
 
+//TODO test if mongo was cleanned
 func assertError(t *testing.T, err error) {
 	t.Log(err)
 	if err == nil {
@@ -31,10 +32,10 @@ func TestMongoRestoreReturnErrorOnInvalidArchive(t *testing.T) {
 	assertError(t, err)
 }
 
-func setUp(localhost string, port int) config.Plan {
+func setUp(host string, port int) config.Plan {
 	target := config.Target{
-		Host: "localhost",
-		Port: 27017,
+		Host: host,
+		Port: port,
 	}
 	restore := config.Restore{
 		Database:   "garden",
