@@ -9,6 +9,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
+	"github.com/stefanprodan/mgob/backup/restore"
 	"github.com/stefanprodan/mgob/config"
 )
 
@@ -26,6 +27,13 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 
 	if err != nil {
 		return res, err
+	}
+
+	restoreOutput, err := restore.Restore(plan, archive)
+	if err != nil {
+		return res, err
+	} else {
+		logrus.WithField("plan", plan.Name).Infof("Restore finished %v", restoreOutput)
 	}
 
 	err = sh.Command("mkdir", "-p", planDir).Run()
