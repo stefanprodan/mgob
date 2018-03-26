@@ -115,5 +115,13 @@ imagedev:
 check: imagedev
 	$(rundev) ./hack/check.sh $(pkg) $(test)
 
+check-integration: imagedev
+	docker-compose run --rm mgob ./hack/check-integration.sh "integration"
+
+stop:
+	docker-compose stop
+
+cleanup: stop
+	docker-compose rm -f -v
 
 .PHONY: build
