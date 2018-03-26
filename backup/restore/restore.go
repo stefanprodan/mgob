@@ -24,10 +24,10 @@ var (
 // - Download backup from one source
 // - Restore backup using mongorestore
 // - Testing restoring using queries defined by plan
-func Restore(plan config.Plan, archive string) error {
+func Restore(plan config.Plan, archive string) (string, error) {
 	err := startMongoToRestore()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer shutdownMongo()
 	restore := fmt.Sprintf("mongorestore --archive=%v --gzip --host %v --port %v ",
@@ -42,14 +42,14 @@ func Restore(plan config.Plan, archive string) error {
 		if len(output) > 0 {
 			ex = strings.Replace(string(output), "\n", " ", -1)
 		}
-		return errors.Wrapf(err, "mongorestore log %v", ex)
+		return "", errors.Wrapf(err, "mongorestore log %v", ex)
 	}
 	fmt.Printf("%s\n", output)
 	err = checkRestore(host, port, plan.Restore.Database, plan.Restore.Collection, plan.Restore.Count)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return "restore finish with success", nil
 }
 
 func checkRestore(host string, port int, database string, collection string, count int) error {

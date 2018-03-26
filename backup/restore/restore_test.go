@@ -27,7 +27,7 @@ func TestMongoRestoreReturnErrorOnInvalidArchive(t *testing.T) {
 		Target:    config.Target{},
 		Scheduler: sched,
 	}
-	err := restore.Restore(plan, "invalid")
+	_, err := restore.Restore(plan, "invalid")
 	assertError(t, err)
 }
 
@@ -52,6 +52,6 @@ func setUp(localhost string, port int) config.Plan {
 
 func TestMongoRestoreWithSucess(t *testing.T) {
 	plan := setUp("localhost", 27017)
-	err := restore.Restore(plan, "/tmp/dump_test.gz")
+	_, err := restore.Restore(plan, "/tmp/dump_test.gz")
 	assertNoError(t, err)
 }
