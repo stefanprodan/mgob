@@ -39,12 +39,13 @@ func setUp(localhost string, port int) config.Plan {
 	restore := config.Restore{
 		Database:   "garden",
 		Collection: "parameters",
-		Count:      "5",
+		Count:      5,
 	}
 	sched := config.Scheduler{Timeout: 60}
 	plan := config.Plan{
 		Target:    target,
 		Scheduler: sched,
+		Restore:   restore,
 	}
 	return plan
 }
