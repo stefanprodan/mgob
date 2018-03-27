@@ -52,6 +52,21 @@ func Restore(plan config.Plan, archive string) (string, error) {
 	return "restore finish with success", nil
 }
 
+func cleanMongo(s *mgo.Session) error {
+	names, err := s.DatabaseNames()
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = s.DB(name).DropDatabase()
+		fmt.Printf("droping database  = %v\n", name)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func checkRestore(host string, port int, database string, collection string, count int) error {
 	mongoURL := fmt.Sprintf("mongodb://%v:%d", host, port)
 	session, err := mgo.Dial(mongoURL)
@@ -71,6 +86,10 @@ func checkRestore(host string, port int, database string, collection string, cou
 		return errors.New("Count in restore database don'n match")
 	}
 	fmt.Printf("total  parameters count = %d\n", countRestored)
+	err = cleanMongo(session)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
