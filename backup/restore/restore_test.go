@@ -52,7 +52,7 @@ func setUp(host string, port int) config.Plan {
 	return plan
 }
 
-func TestMongoRestoreWithSucess(t *testing.T) {
+func TestMongoRestoreWithSuccess(t *testing.T) {
 	plan := setUp("localhost", 27017)
 	_, err := restore.Restore(plan, "/tmp/dump_test.gz")
 	assertNoError(t, err)
