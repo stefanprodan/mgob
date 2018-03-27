@@ -113,10 +113,10 @@ imagedev:
 	docker build -t $(devimg) -f ./hack/Dockerfile.dev .
 
 check: imagedev
-	$(rundev) ./hack/check.sh $(pkg) $(test)
+	$(rundev) ./hack/check.sh "unit"
 
 check-integration: imagedev
-	docker-compose run --rm mgob ./hack/check-integration.sh "integration"
+	docker-compose run --rm mgob ./hack/check.sh "integration"
 
 stop:
 	docker-compose stop
