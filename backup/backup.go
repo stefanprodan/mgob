@@ -33,7 +33,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 	if err != nil {
 		return res, err
 	} else {
-		logrus.WithField("plan", plan.Name).Infof("Restore finished %v", restoreOutput)
+		logrus.WithField("plan", plan.Name).Infof("Restore status %v", restoreOutput)
 	}
 
 	err = sh.Command("mkdir", "-p", planDir).Run()

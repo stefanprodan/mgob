@@ -9,7 +9,6 @@ import (
 	"github.com/stefanprodan/mgob/config"
 )
 
-//TODO test if mongo was cleanned
 func assertError(t *testing.T, err error) {
 	t.Log(err)
 	if err == nil {
