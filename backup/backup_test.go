@@ -40,9 +40,7 @@ func setUp(host string, port int, restore config.Restore) config.Plan {
 
 func TestShouldGetErrorOnInvalidHost(t *testing.T) {
 	restore := config.Restore{
-		Database:   "whatever",
-		Collection: "parameters",
-		Count:      5,
+		Database: "whatever",
 	}
 	plan := setUp("invalid.com", 0, restore)
 	tmpPath := "/tmp"
@@ -56,9 +54,7 @@ func TestShouldGetErrorOnInvalidDatabase(t *testing.T) {
 	assertNoError(t, err)
 	host := os.Getenv("MONGODB_PORT_27017_TCP_ADDR")
 	restore := config.Restore{
-		Database:   "wrong",
-		Collection: "parameters",
-		Count:      5,
+		Database: "wrong",
 	}
 	plan := setUp(host, port, restore)
 	tmpPath := "/tmp"
@@ -72,17 +68,23 @@ func TestShouldRunBackupCorrectly(t *testing.T) {
 	port, err := strconv.Atoi(os.Getenv("MONGODB_PORT_27017_TCP_PORT"))
 	assertNoError(t, err)
 	host := os.Getenv("MONGODB_PORT_27017_TCP_ADDR")
+	collections := []config.Collection{
+		{
+			Name:  "parameters",
+			Count: 15,
+		},
+	}
 	restore := config.Restore{
-		Database:   "garden",
-		Collection: "parameters",
-		Count:      15,
+		Database:          "garden",
+		Collections:       collections,
+		CollectionsLength: 1,
 	}
 	plan := setUp(host, port, restore)
 	s, err := getMongoSession(host, port)
 	assertNoError(t, err)
 	docsLength := 20
-	insertMongoData(t, s, restore.Database, restore.Collection, docsLength)
-	defer tearDown(t, s, restore.Database, restore.Collection)
+	insertMongoData(t, s, restore.Database, collections[0].Name, docsLength)
+	defer tearDown(t, s, restore.Database)
 	tmpPath := "/tmp"
 	storagePath := "/storage"
 	res, err := backup.Run(plan, tmpPath, storagePath)
@@ -90,7 +92,7 @@ func TestShouldRunBackupCorrectly(t *testing.T) {
 	assertNoError(t, err)
 }
 
-func tearDown(t *testing.T, s *mgo.Session, database, collection string) {
+func tearDown(t *testing.T, s *mgo.Session, database string) {
 	names, err := s.DatabaseNames()
 	assertNoError(t, err)
 	for _, name := range names {
