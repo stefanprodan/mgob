@@ -45,7 +45,7 @@ func Restore(plan config.Plan, archive string) (string, error) {
 		return "", errors.Wrapf(err, "mongorestore log %v", ex)
 	}
 	fmt.Printf("%s\n", output)
-	err = checkRestore(host, port, plan.Restore.Database, plan.Restore.Collection, plan.Restore.Count)
+	err = checkRestore(host, port, plan.Restore.Database, plan.Restore)
 	if err != nil {
 		return "", err
 	}
@@ -67,7 +67,7 @@ func cleanMongo(s *mgo.Session) error {
 	return nil
 }
 
-func checkRestore(host string, port int, database string, collection string, count int) error {
+func checkRestore(host string, port int, database string, r config.Restore) error {
 	mongoURL := fmt.Sprintf("mongodb://%v:%d", host, port)
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
@@ -76,16 +76,20 @@ func checkRestore(host string, port int, database string, collection string, cou
 	defer session.Close()
 
 	session.SetSafe(&mgo.Safe{})
-	c := session.DB(database).C(collection)
+	for _, collec := range r.Collections {
+		c := session.DB(database).C(collec.Name)
+		countRestored, err2 := c.Find(bson.M{}).Count()
+		if err2 != nil {
+			return err
+		}
 
-	countRestored, err2 := c.Find(bson.M{}).Count()
-	if err2 != nil {
-		return err
+		if countRestored < collec.Count {
+			return errors.New(
+				fmt.Sprintf("Count in collection {%v}  don'n match", collec.Name))
+		}
+		fmt.Printf("collection = %v | count = %d | expected count =%d \n", collec.Name, countRestored, collec.Count)
 	}
-	if countRestored < count {
-		return errors.New("Count in restore database don'n match")
-	}
-	fmt.Printf("total  parameters count = %d\n", countRestored)
+
 	err = cleanMongo(session)
 	if err != nil {
 		return err
