@@ -89,7 +89,18 @@ func checkRestore(host string, port int, database string, r config.Restore) erro
 		}
 		fmt.Printf("collection = %v | count = %d | expected count =%d \n", collec.Name, countRestored, collec.Count)
 	}
+	collNames, err := session.DB(database).CollectionNames()
+	if err != nil {
+		return err
+	}
+	if len(collNames) != r.CollectionsLength {
+		return errors.New(
+			fmt.Sprintf(
+				"Collection length don't match , got %d, expected %d",
+				len(collNames),
+				r.CollectionsLength))
 
+	}
 	err = cleanMongo(session)
 	if err != nil {
 		return err
