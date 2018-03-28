@@ -32,9 +32,14 @@ type Target struct {
 }
 
 type Restore struct {
-	Database   string `yaml:"database"`
-	Collection string `yaml:"collection"`
-	Count      int    `yaml:"count"`
+	Database          string       `yaml:"database"`
+	Collections       []Collection `yaml:"collections"`
+	CollectionsLength int          `yaml:"collectionsLength"`
+}
+
+type Collection struct {
+	Name  string `yaml:name`
+	Count int    `yaml:count`
 }
 
 type Scheduler struct {
