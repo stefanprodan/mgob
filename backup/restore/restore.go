@@ -45,11 +45,11 @@ func Restore(plan config.Plan, archive string) (string, error) {
 		return "", errors.Wrapf(err, "mongorestore log %v", ex)
 	}
 	fmt.Printf("%s\n", output)
-	err = checkRestore(host, port, plan.Restore.Database, plan.Restore)
+	checkMsg, err := checkRestore(host, port, plan.Restore.Database, plan.Restore)
 	if err != nil {
 		return "", err
 	}
-	return "restore finish with success", nil
+	return checkMsg, nil
 }
 
 func cleanMongo(s *mgo.Session) error {
@@ -67,45 +67,43 @@ func cleanMongo(s *mgo.Session) error {
 	return nil
 }
 
-func checkRestore(host string, port int, database string, r config.Restore) error {
+func checkRestore(host string, port int, database string, r config.Restore) (string, error) {
 	mongoURL := fmt.Sprintf("mongodb://%v:%d", host, port)
 	session, err := mgo.Dial(mongoURL)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer session.Close()
+	defer cleanMongo(session)
 
 	session.SetSafe(&mgo.Safe{})
 	for _, collec := range r.Collections {
 		c := session.DB(database).C(collec.Name)
 		countRestored, err2 := c.Find(bson.M{}).Count()
 		if err2 != nil {
-			return err
+			return "", err
 		}
 
 		if countRestored < collec.Count {
-			return errors.New(
+			return "", errors.New(
 				fmt.Sprintf("Count in collection {%v}  don'n match", collec.Name))
 		}
-		fmt.Printf("collection = %v | count = %d | expected count =%d \n", collec.Name, countRestored, collec.Count)
+		fmt.Printf("collection = %v | count = %d | expected count = %d \n", collec.Name, countRestored, collec.Count)
 	}
 	collNames, err := session.DB(database).CollectionNames()
 	if err != nil {
-		return err
+		return "", err
 	}
 	if len(collNames) != r.CollectionsLength {
-		return errors.New(
+		return "", errors.New(
 			fmt.Sprintf(
 				"Collection length don't match , got %d, expected %d",
 				len(collNames),
 				r.CollectionsLength))
 
 	}
-	err = cleanMongo(session)
-	if err != nil {
-		return err
-	}
-	return nil
+	return fmt.Sprintf("restore check with success\n Total collections restored = %d",
+		len(collNames)), nil
 }
 
 func wrapShError(prefix string, output []byte, err error) error {

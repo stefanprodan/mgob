@@ -35,7 +35,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 	} else {
 		logrus.WithField("plan", plan.Name).Infof("Restore status %v", restoreOutput)
 	}
-
+	res.Log = restoreOutput
 	err = sh.Command("mkdir", "-p", planDir).Run()
 	if err != nil {
 		return res, errors.Wrapf(err, "creating dir %v in %v failed", plan.Name, storagePath)
