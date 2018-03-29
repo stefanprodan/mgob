@@ -28,3 +28,17 @@ func TestPlanReturnErrorOnInvalidPath(t *testing.T) {
 	_, err := config.LoadPlan(planDir, planName)
 	assertError(t, err)
 }
+
+func TestPlanReturnErrorOnInvalidYAML(t *testing.T) {
+	planDir := "./resources"
+	planName := "wrong_example"
+	_, err := config.LoadPlan(planDir, planName)
+	assertError(t, err)
+}
+
+func TestShouldValidatePlanYAMLCorrectly(t *testing.T) {
+	planDir := "./resources"
+	planName := "correctly_example"
+	_, err := config.LoadPlan(planDir, planName)
+	assertNoError(t, err)
+}
