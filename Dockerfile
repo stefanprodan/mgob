@@ -18,6 +18,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.schema-version="1.0"
 
 # install mongo
+RUN mkdir  /data
 RUN mkdir -p /data/db /data/configdb
 RUN apk add --no-cache mongodb
 
