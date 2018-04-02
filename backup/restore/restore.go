@@ -15,7 +15,7 @@ import (
 
 var (
 	host = "127.0.0.1"
-	port = 27017
+	port = 27016
 )
 
 // Responsible to restore backup from one source
@@ -30,12 +30,8 @@ func Restore(plan config.Plan, archive string) (string, error) {
 		return "", err
 	}
 	defer shutdownMongo()
-	restore := fmt.Sprintf("mongorestore --archive=%v --gzip --host %v --port %v ",
+	restore := fmt.Sprintf("mongorestore --archive=%v --gzip --host=%v --port=%d ",
 		archive, host, port)
-	if plan.Target.Database != "" {
-		restore += fmt.Sprintf("--db %v ", plan.Target.Database)
-	}
-
 	output, err := sh.Command("/bin/sh", "-c", restore).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if err != nil {
 		ex := ""
@@ -116,7 +112,7 @@ func wrapShError(prefix string, output []byte, err error) error {
 }
 
 func startMongoToRestore() error {
-	mongo := "mongod --fork --logpath /var/log/mongodb.log"
+	mongo := fmt.Sprintf("mongod --fork --logpath /var/log/mongodb.log --port %d", port)
 	cmd := exec.Command("sh", "-c", mongo)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
@@ -127,7 +123,7 @@ func startMongoToRestore() error {
 }
 
 func shutdownMongo() {
-	shutdown := "mongo --eval \"db.getSiblingDB('admin').shutdownServer()\""
+	shutdown := fmt.Sprintf("mongo --port %d --eval \"db.getSiblingDB('admin').shutdownServer()\"", port)
 	cmd := exec.Command("sh", "-c", shutdown)
 	stdoutStderr, err := cmd.CombinedOutput()
 	fmt.Printf("%s\n", stdoutStderr)
