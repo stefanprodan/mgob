@@ -3,7 +3,7 @@
 set -o errexit
 set -o nounset
 
-timeout=10s
+timeout=60s
 
 for d in $(go list ./...); do
     go test -v -timeout $timeout -tags $1 -race $d
