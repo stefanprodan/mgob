@@ -33,11 +33,7 @@ func TestMongoRestoreReturnErrorOnInvalidArchive(t *testing.T) {
 	assertError(t, err)
 }
 
-func setUp(host string, port int, collCount int, collsLength int) config.Plan {
-	target := config.Target{
-		Host: host,
-		Port: port,
-	}
+func setUp(collCount int, collsLength int) config.Plan {
 	collections := []config.Collection{
 		{
 			Name:  "parameters",
@@ -51,7 +47,6 @@ func setUp(host string, port int, collCount int, collsLength int) config.Plan {
 	}
 	sched := config.Scheduler{Timeout: 60}
 	plan := config.Plan{
-		Target:    target,
 		Scheduler: sched,
 		Restore:   restore,
 	}
@@ -61,7 +56,7 @@ func setUp(host string, port int, collCount int, collsLength int) config.Plan {
 func TestMongoRestoreWithSuccess(t *testing.T) {
 	collCount := 5
 	collsLength := 1
-	plan := setUp("localhost", 27017, collCount, collsLength)
+	plan := setUp(collCount, collsLength)
 	_, err := restore.Restore(plan, "/tmp/dump_test.gz")
 	assertNoError(t, err)
 }
@@ -69,7 +64,7 @@ func TestMongoRestoreWithSuccess(t *testing.T) {
 func TestShouldGetErrorOnInvalidCount(t *testing.T) {
 	collCount := 10
 	collsLength := 1
-	plan := setUp("localhost", 27017, collCount, collsLength)
+	plan := setUp(collCount, collsLength)
 	_, err := restore.Restore(plan, "/tmp/dump_test.gz")
 	assertError(t, err)
 }
@@ -77,7 +72,7 @@ func TestShouldGetErrorOnInvalidCount(t *testing.T) {
 func TestShouldGetErrorOnInvalidCollectionLength(t *testing.T) {
 	collCount := 5
 	collsLength := 2
-	plan := setUp("localhost", 27017, collCount, collsLength)
+	plan := setUp(collCount, collsLength)
 	_, err := restore.Restore(plan, "/tmp/dump_test.gz")
 	assertError(t, err)
 }
