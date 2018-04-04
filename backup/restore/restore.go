@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
 	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var (
@@ -75,8 +74,8 @@ func checkRestore(host string, port int, database string, r config.Restore) (str
 	session.SetSafe(&mgo.Safe{})
 	for _, collec := range r.Collections {
 		c := session.DB(database).C(collec.Name)
-		countRestored, err2 := c.Find(bson.M{}).Count()
-		if err2 != nil {
+		countRestored, err := c.Count()
+		if err != nil {
 			return "", err
 		}
 
