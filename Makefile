@@ -39,12 +39,12 @@ travis:
 		-LogLevel=info
 
 publish:
-	@docker login -u "$(DOCKER_USER)" -p "$(DOCKER_PASS)"
+	@echo $(DOCKER_PASS) | docker login -u "$(DOCKER_USER)" --password-stdin
 	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:edge
 	@docker push $(REPOSITORY)/mgob:edge
 
 release:
-	@docker login -u "$(DOCKER_USER)" -p "$(DOCKER_PASS)"
+	@echo $(DOCKER_PASS) | docker login -u "$(DOCKER_USER)" --password-stdin
 	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:$(APP_VERSION)
 	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:latest
 	@docker push $(REPOSITORY)/mgob:$(APP_VERSION)
