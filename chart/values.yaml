@@ -1,0 +1,92 @@
+# Default values for mgob.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# Note that two backup plans are provided as templates - they contain dummy values and should be changed before
+# attempting to apply the chart to your cluster.
+replicaCount: 1
+image:
+  repository: stefanprodan/mgob
+  pullPolicy: IfNotPresent
+
+  # We need edge to be able to use the "configMap.data[name].target.params", required to set the auth db.
+  # When this is official, update to the proper stable release.
+  #
+  # @see https://github.com/stefanprodan/mgob/commit/b70e86b3acba8c82447a568cfcdd31fbd5ee3f7c
+  tag: edge
+service:
+  name: mgob
+  externalPort: 8090
+  internalPort: 8090
+selector:
+  role: mongo-backup
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+storage:
+  longTerm:
+    accessMode: "ReadWriteOnce"
+    storageClass: "gp2" # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    name: "mgob-storage"
+    size: 10Gi
+  tmp:
+    accessMode: "ReadWriteOnce"
+    storageClass: "gp2" # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    name: "mgob-tmp"
+    size: 3Gi
+configMap:
+  name: "mgob-config"
+  data:
+    # Add each plan as per below.
+    the-first-database.yml: |
+      target:
+        host: "mongodb-replicaset"
+        port: 27017
+        database: "my-database"
+        username: "mongodb-backup"
+        password: "backup-user-pwd"
+        params: "--authenticationDatabase admin"
+      scheduler:
+        cron: "0 5 * * *"
+        retention: 7
+        timeout: 60
+      s3:
+        url: "https://s3.amazonaws.com"
+        bucket: "my-db-backups"
+        accessKey: "ABCDEFGHIJKLMNOPQRST"
+        secretKey: "be0da49b599b24115c7f53c92c729cbb2c8a17e5"
+        api: "S3v4"
+      slack:
+        url: "https://hooks.slack.com/services/..."
+        channel: mongochan
+        username: mgob
+        # 'true' to notify only on failures
+        warnOnly: false
+
+    the-second-database.yml: |
+      target:
+        host: "mongodb-replicaset"
+        port: 27017
+        database: "my-database"
+        username: "mongodb-backup"
+        password: "backup-user-pwd"
+        params: "--authenticationDatabase admin"
+      scheduler:
+        cron: "0 5 * * *"
+        retention: 7
+        timeout: 60
+      s3:
+        url: "https://s3.amazonaws.com"
+        bucket: "my-db-backups"
+        accessKey: "ABCDEFGHIJKLMNOPQRST"
+        secretKey: "be0da49b599b24115c7f53c92c729cbb2c8a17e5"
+        api: "S3v4"
+      slack:
+        url: "https://hooks.slack.com/services/..."
+        channel: mongochan
+        username: mgob
+        # 'true' to notify only on failures
+        warnOnly: false
