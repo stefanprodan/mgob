@@ -9,4 +9,5 @@ type Result struct {
 	Size      int64         `json:"size"`
 	Status    int           `json:"status"`
 	Timestamp time.Time     `json:"timestamp"`
+	Log       string        `json:"log"`
 }

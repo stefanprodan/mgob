@@ -101,8 +101,8 @@ func (b backupJob) Run() {
 
 		logrus.WithField("plan", b.plan.Name).Info(log)
 		if err := notifier.SendNotification(fmt.Sprintf("%v backup finished", b.plan.Name),
-			fmt.Sprintf("%v backup finished in %v archive size %v",
-				res.Name, res.Duration, humanize.Bytes(uint64(res.Size))),
+			fmt.Sprintf("%v backup finished in %v archive size %v \n%v",
+				res.Name, res.Duration, humanize.Bytes(uint64(res.Size)), res.Log),
 			false, b.plan); err != nil {
 			logrus.WithField("plan", b.plan.Name).Errorf("Notifier failed %v", err)
 		}

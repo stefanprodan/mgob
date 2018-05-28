@@ -1,0 +1,20 @@
+scheduler:
+  # run every day at 6:00 and 18:00 UTC
+  cron: "*/45 * * * *"
+  # number of backups to keep locally
+  retention: 0
+  # backup operation timeout in minutes
+  timeout: 60
+target:
+  # mongod IP or host name
+  host: "127.0.0.1"
+  # mongodb port
+  port: 27017
+restore:
+  database: "input"
+  collections: 
+    - collection:
+      name: "infogroup"
+      count: 100
+  collectionsLength: 10
+# S3 upload (optional)

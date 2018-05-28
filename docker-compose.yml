@@ -1,0 +1,9 @@
+mgob:
+  image: mgobdev
+  volumes:
+    - ./:/go/src/github.com/stefanprodan/mgob
+  links:
+    - mongodb
+
+mongodb:
+  image: mongo:3.4

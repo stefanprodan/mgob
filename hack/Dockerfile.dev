@@ -1,0 +1,16 @@
+FROM golang:1.9
+
+RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
+RUN mkdir -p /data/db /data/configdb \
+	&& chown -R mongodb:mongodb /data/db /data/configdb
+
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+RUN echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+RUN echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list
+RUN apt-get update -y \
+    && apt-get install -y --allow-unauthenticated mongodb-org \ 
+    && apt-get install -y --allow-unauthenticated mongodb-org-tools
+
+COPY ./backup/restore/dump_test.gz /tmp/dump_test.gz
+
+WORKDIR /go/src/github.com/stefanprodan/mgob
