@@ -19,6 +19,7 @@ type Plan struct {
 	SFTP      *SFTP     `yaml:"sftp"`
 	SMTP      *SMTP     `yaml:"smtp"`
 	Slack     *Slack    `yaml:"slack"`
+	Restore   Restore   `yaml:"restore"`
 }
 
 type Target struct {
@@ -28,6 +29,17 @@ type Target struct {
 	Port     int    `yaml:"port"`
 	Username string `yaml:"username"`
 	Params   string `yaml:"params"`
+}
+
+type Restore struct {
+	Database          string       `yaml:"database"`
+	Collections       []Collection `yaml:"collections"`
+	CollectionsLength int          `yaml:"collectionsLength"`
+}
+
+type Collection struct {
+	Name  string `yaml:name`
+	Count int    `yaml:count`
 }
 
 type Scheduler struct {
