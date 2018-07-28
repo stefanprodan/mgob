@@ -4,6 +4,7 @@ ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 
+ENV MONGODB_TOOLS_VERSION 3.4.4-r2
 ENV GOOGLE_CLOUD_SDK_VERSION 181.0.0
 ENV PATH /root/google-cloud-sdk/bin:$PATH
 
@@ -17,7 +18,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
 
-RUN apk add --no-cache mongodb-tools ca-certificates
+RUN apk add --no-cache ca-certificates mongodb-tools=${MONGODB_TOOLS_VERSION}
 ADD https://dl.minio.io/client/mc/release/linux-amd64/mc /usr/bin
 RUN chmod u+x /usr/bin/mc
 
