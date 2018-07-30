@@ -77,6 +77,7 @@ s3:
   bucket: "backup"
   accessKey: "Q3AM3UQ867SPQQA43P2F"
   secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+  # For Minio and AWS use S3v4 for GCP use S3v2 
   api: "S3v4"
 # GCloud upload (optional)
 gcloud:
