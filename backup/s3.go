@@ -12,7 +12,7 @@ import (
 
 func s3Upload(file string, plan config.Plan) (string, error) {
 
-	register := fmt.Sprintf("mc config host add %v %v %v %v %v",
+	register := fmt.Sprintf("mc config host add %v %v %v %v --api %v",
 		plan.Name, plan.S3.URL, plan.S3.AccessKey, plan.S3.SecretKey, plan.S3.API)
 
 	result, err := sh.Command("/bin/sh", "-c", register).CombinedOutput()
