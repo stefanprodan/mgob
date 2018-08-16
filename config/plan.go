@@ -16,6 +16,7 @@ type Plan struct {
 	Scheduler Scheduler `yaml:"scheduler"`
 	S3        *S3       `yaml:"s3"`
 	GCloud    *GCloud   `yaml:"gcloud"`
+	Azure     *Azure    `yaml:"azure"`
 	SFTP      *SFTP     `yaml:"sftp"`
 	SMTP      *SMTP     `yaml:"smtp"`
 	Slack     *Slack    `yaml:"slack"`
@@ -47,6 +48,11 @@ type S3 struct {
 type GCloud struct {
 	Bucket      string `yaml:"bucket"`
 	KeyFilePath string `yaml:"keyFilePath"`
+}
+
+type Azure struct {
+	ContainerName string `yaml:"containerName"`
+	ConnectionString string `yaml:"connectionString"`
 }
 
 type SFTP struct {

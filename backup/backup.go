@@ -85,6 +85,15 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		}
 	}
 
+	if plan.Azure != nil {
+		azureOutout, err := azureUpload(file, plan)
+		if err != nil {
+			return res, err
+		} else {
+			logrus.WithField("plan", plan.Name).Infof("Azure upload finished %v", azureOutout)
+		}
+	}
+
 	t2 := time.Now()
 	res.Status = 200
 	res.Duration = t2.Sub(t1)

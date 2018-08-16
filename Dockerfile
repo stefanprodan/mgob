@@ -6,6 +6,7 @@ ARG VERSION
 
 ENV MONGODB_TOOLS_VERSION 3.6.4-r0
 ENV GOOGLE_CLOUD_SDK_VERSION 181.0.0
+ENV AZURE_CLI_VERSION 2.0.44
 ENV PATH /root/google-cloud-sdk/bin:$PATH
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
@@ -42,6 +43,12 @@ RUN apk --no-cache add \
     gcloud config set component_manager/disable_update_check true && \
     gcloud config set metrics/environment github_docker_image && \
     gcloud --version
+
+# install azure-cli
+RUN apk add py-pip && \
+  apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python-dev make && \
+  pip install azure-cli==${AZURE_CLI_VERSION} && \
+  apk del --purge build
 
 COPY mgob    .
 
