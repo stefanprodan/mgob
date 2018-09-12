@@ -27,6 +27,7 @@ Supported tags:
 * `stefanprodan/mgob:edge` master branch latest successful [build](https://travis-ci.org/stefanprodan/mgob)
 * `stefanprodan/mgob:0.9` compatible with MongoDB 3.4
 * `stefanprodan/mgob:0.10` compatible with MongoDB 3.6
+* `stefanprodan/mgob:edge` compatible with MongoDB 4.0
 
 Docker:
 
