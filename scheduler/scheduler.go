@@ -110,6 +110,7 @@ func (b backupJob) Run() {
 
 	t2 := time.Now()
 	b.metrics.Total.WithLabelValues(b.plan.Name, status).Inc()
+	b.metrics.Size.WithLabelValues(b.plan.Name, status).Set(float64(res.Size))
 	b.metrics.Latency.WithLabelValues(b.plan.Name, status).Observe(t2.Sub(t1).Seconds())
 
 	s := &db.Status{

@@ -19,7 +19,7 @@ MGOB is a MongoDB backup automation tool built with golang.
 
 #### Install
 
-MGOB is available on Docker Hub at [stefanprodan/mgob](https://hub.docker.com/r/stefanprodan/mgob/). 
+MGOB is available on Docker Hub at [stefanprodan/mgob](https://hub.docker.com/r/stefanprodan/mgob/).
 
 Supported tags:
 
@@ -38,8 +38,8 @@ Docker:
 
 ```bash
 docker run -dp 8090:8090 --name mgob \
-    -v "/mogb/config:/config" \
-    -v "/mogb/storage:/storage" \
+    -v "/mgob/config:/config" \
+    -v "/mgob/storage:/storage" \
     -v "/mgob/tmp:/tmp" \
     -v "/mgob/data:/data" \
     stefanprodan/mgob \
@@ -52,8 +52,8 @@ A step by step guide on running MGOB as a StatefulSet with PersistentVolumeClaim
 
 #### Configure
 
-Define a backup plan (yaml format) for each database you want to backup inside the `config` dir. 
-The yaml file name is being used as the backup plan ID, no white spaces or special characters are allowed. 
+Define a backup plan (yaml format) for each database you want to backup inside the `config` dir.
+The yaml file name is being used as the backup plan ID, no white spaces or special characters are allowed.
 
 _Backup plan_
 
@@ -83,7 +83,7 @@ s3:
   bucket: "backup"
   accessKey: "Q3AM3UQ867SPQQA43P2F"
   secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-  # For Minio and AWS use S3v4 for GCP use S3v2 
+  # For Minio and AWS use S3v4 for GCP use S3v2
   api: "S3v4"
 # GCloud upload (optional)
 gcloud:
@@ -116,7 +116,7 @@ slack:
   url: https://hooks.slack.com/services/xxxx/xxx/xx
   channel: devops-alerts
   username: mgob
-  # 'true' to notify only on failures 
+  # 'true' to notify only on failures
   warnOnly: false
 ```
 
@@ -191,13 +191,13 @@ curl -X GET http://mgob-host:8090/status/mongo-debug
 View scheduler logs with `docker logs mgob`:
 
 ```bash
-time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:51:00 +0300 EEST" plan=mongo-dev 
-time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:52:00 +0300 EEST" plan=mongo-test 
-time="2017-05-05T16:51:00+03:00" level=info msg="Backup started" plan=mongo-dev 
-time="2017-05-05T16:51:02+03:00" level=info msg="Backup finished in 2.359901432s archive size 448 kB" plan=mongo-dev 
+time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:51:00 +0300 EEST" plan=mongo-dev
+time="2017-05-05T16:50:55+03:00" level=info msg="Next run at 2017-05-05 16:52:00 +0300 EEST" plan=mongo-test
+time="2017-05-05T16:51:00+03:00" level=info msg="Backup started" plan=mongo-dev
+time="2017-05-05T16:51:02+03:00" level=info msg="Backup finished in 2.359901432s archive size 448 kB" plan=mongo-dev
 time="2017-05-05T16:52:00+03:00" level=info msg="Backup started" plan=mongo-test
-time="2017-05-05T16:52:02+03:00" level=info msg="S3 upload finished `/storage/mongo-test/mongo-test-1493992320.gz` -> `bktest/mongo-test-1493992320.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 2.96 KB/s " plan=mongo-test 
-time="2017-05-05T16:52:02+03:00" level=info msg="Backup finished in 2.855078717s archive size 1.2 kB" plan=mongo-test 
+time="2017-05-05T16:52:02+03:00" level=info msg="S3 upload finished `/storage/mongo-test/mongo-test-1493992320.gz` -> `bktest/mongo-test-1493992320.gz` Total: 1.17 KB, Transferred: 1.17 KB, Speed: 2.96 KB/s " plan=mongo-test
+time="2017-05-05T16:52:02+03:00" level=info msg="Backup finished in 2.855078717s archive size 1.2 kB" plan=mongo-test
 ```
 
 The success/fail logs will be sent via SMTP and/or Slack if notifications are enabled.
@@ -245,7 +245,7 @@ mgob_scheduler_backup_latency_count{plan="mongo-test",status="500"} 4
 
 In order to restore from a local backup you have two options:
 
-Browse `mgob-host:8090/storage` to identify the backup you want to restore. 
+Browse `mgob-host:8090/storage` to identify the backup you want to restore.
 Login to your MongoDB server and download the archive using `curl` and restore the backup with `mongorestore` command line.
 
 ```bash
@@ -253,7 +253,7 @@ curl -o /tmp/mongo-test-1494056760.gz http://mgob-host:8090/storage/mongo-test/m
 mongorestore --gzip --archive=/tmp/mongo-test-1494056760.gz --drop
 ```
 
-You can also restore a backup from within mgob container. 
+You can also restore a backup from within mgob container.
 Exec into mgob, identify the backup you want to restore and use `mongorestore` to connect to your MongoDB server.
 
 ```bash

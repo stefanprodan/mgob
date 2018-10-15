@@ -4,7 +4,7 @@ ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 
-ENV MONGODB_TOOLS_VERSION 4.0.0-r0
+ENV MONGODB_TOOLS_VERSION 4.0.3-r0
 ENV GOOGLE_CLOUD_SDK_VERSION 181.0.0
 ENV AZURE_CLI_VERSION 2.0.44
 ENV PATH /root/google-cloud-sdk/bin:$PATH
@@ -47,6 +47,8 @@ RUN apk --no-cache add \
 # install azure-cli
 RUN apk add py-pip && \
   apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python-dev make && \
+  pip install --upgrade pip && \
+  pip install cffi && \
   pip install azure-cli==${AZURE_CLI_VERSION} && \
   apk del --purge build
 
