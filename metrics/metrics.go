@@ -4,6 +4,7 @@ import "github.com/prometheus/client_golang/prometheus"
 
 type BackupMetrics struct {
 	Total   *prometheus.CounterVec
+	Size    *prometheus.GaugeVec
 	Latency *prometheus.SummaryVec
 }
 
@@ -20,6 +21,16 @@ func New(namespace string, subsystem string) *BackupMetrics {
 		[]string{"plan", "status"},
 	)
 
+	prom.Size = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: subsystem,
+			Name:      "backup_size",
+			Help:      "The size of backup.",
+		},
+		[]string{"plan", "status"},
+	)
+
 	prom.Latency = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
 			Namespace: namespace,
@@ -31,6 +42,7 @@ func New(namespace string, subsystem string) *BackupMetrics {
 	)
 
 	prometheus.MustRegister(prom.Total)
+	prometheus.MustRegister(prom.Size)
 	prometheus.MustRegister(prom.Latency)
 
 	return prom
