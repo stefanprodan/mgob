@@ -32,7 +32,7 @@ Compatibility matrix:
 -----|--------
 `stefanprodan/mgob:0.9` | 3.4
 `stefanprodan/mgob:0.10` | 3.6
-`stefanprodan/mgob:edge` | 4.0
+`stefanprodan/mgob:1.0` | 4.0
 
 Docker:
 
