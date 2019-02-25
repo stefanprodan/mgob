@@ -47,7 +47,7 @@ func CheckGCloudClient() (string, error) {
 }
 
 func CheckAzureClient() (string, error) {
-	output, err := sh.Command("/bin/sh", "-c", "az --version").CombinedOutput()
+	output, err := sh.Command("/bin/sh", "-c", "az --version | grep 'azure-cli'").CombinedOutput()
 	if err != nil {
 		ex := ""
 		if len(output) > 0 {
