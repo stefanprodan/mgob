@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-APP_VERSION?=0.10
+APP_VERSION?=1.0
 
 # build vars
 BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
