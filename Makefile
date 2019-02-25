@@ -15,19 +15,13 @@ PACKAGES:=$(shell go list ./... | grep -v '/vendor/')
 VETARGS:=-asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -rangeloops -shift -structtags -unsafeptr
 
 travis:
-	@echo ">>> Building mgob:build image"
-	@docker build --build-arg APP_VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
-	    -t $(REPOSITORY)/mgob:build -f Dockerfile.build .
-	@docker create --name mgob_extract $(REPOSITORY)/mgob:build
-	@docker cp mgob_extract:/dist/mgob ./mgob
-	@docker rm -f mgob_extract
 	@echo ">>> Building mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) image"
 	@docker build \
 	    --build-arg BUILD_DATE=$(BUILD_DATE) \
 	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
 	    --build-arg VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
 	    -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) .
-	@rm ./mgob
+
 	@echo ">>> Starting mgob container"
 	@docker run -d --net=host --name mgob \
 	    --restart unless-stopped \
@@ -60,21 +54,6 @@ run: build
 		-StoragePath=/storage \
 		-TmpPath=/tmp \
 		-LogLevel=info
-
-build: clean
-	@echo ">>> Building mgob:build image"
-	@docker build --build-arg APP_VERSION=$(APP_VERSION) -t $(REPOSITORY)/mgob:build -f Dockerfile.build .
-	@docker create --name mgob_extract $(REPOSITORY)/mgob:build
-	@docker cp mgob_extract:/dist/mgob ./mgob
-	@docker rm -f mgob_extract
-	@echo ">>> Building mgob:$(APP_VERSION) image"
-	@docker build -t $(REPOSITORY)/mgob:$(APP_VERSION) .
-	@rm ./mgob
-
-clean:
-	@docker rm -f mgob-$(APP_VERSION) || true
-	@docker rmi $$(docker images | awk '$$1 ~ /mgob/ { print $$3 }') || true
-	@docker volume rm $$(docker volume ls -f dangling=true -q) || true
 
 backend:
 	@docker run -dp 20022:22 --name mgob-sftp \

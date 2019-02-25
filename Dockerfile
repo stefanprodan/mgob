@@ -1,12 +1,23 @@
+FROM golang:1.11
+
+ARG APP_VERSION=unkown
+
+ADD . /go/src/github.com/stefanprodan/mgob
+
+WORKDIR /go/src/github.com/stefanprodan/mgob
+
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$APP_VERSION" \
+    -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob
+
 FROM alpine:edge
 
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 
-ENV MONGODB_TOOLS_VERSION 4.0.3-r0
-ENV GOOGLE_CLOUD_SDK_VERSION 181.0.0
-ENV AZURE_CLI_VERSION 2.0.44
+ENV MONGODB_TOOLS_VERSION 4.0.5-r0
+ENV GOOGLE_CLOUD_SDK_VERSION 235.0.0
+ENV AZURE_CLI_VERSION 2.0.58
 ENV PATH /root/google-cloud-sdk/bin:$PATH
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
@@ -52,7 +63,7 @@ RUN apk add py-pip && \
   pip install azure-cli==${AZURE_CLI_VERSION} && \
   apk del --purge build
 
-COPY mgob    .
+COPY --from=0 /go/src/github.com/stefanprodan/mgob/mgob .
 
 VOLUME ["/config", "/storage", "/tmp", "/data"]
 
