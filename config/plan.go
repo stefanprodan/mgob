@@ -102,6 +102,9 @@ func LoadPlan(dir string, name string) (Plan, error) {
 		return plan, errors.Wrapf(err, "Reading %v failed", planPath)
 	}
 
+	// expand environment variables
+	data = []byte(os.ExpandEnv(string(data)))  
+
 	if err := yaml.Unmarshal(data, &plan); err != nil {
 		return plan, errors.Wrapf(err, "Parsing %v failed", planPath)
 	}
