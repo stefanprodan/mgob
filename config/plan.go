@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type Plan struct {
@@ -25,6 +25,7 @@ type Plan struct {
 type Target struct {
 	Database string `yaml:"database"`
 	Host     string `yaml:"host"`
+	Uri      string `yaml:"uri"`
 	Password string `yaml:"password"`
 	Port     int    `yaml:"port"`
 	Username string `yaml:"username"`
@@ -51,7 +52,7 @@ type GCloud struct {
 }
 
 type Azure struct {
-	ContainerName string `yaml:"containerName"`
+	ContainerName    string `yaml:"containerName"`
 	ConnectionString string `yaml:"connectionString"`
 }
 
