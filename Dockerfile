@@ -9,7 +9,7 @@ WORKDIR /go/src/github.com/stefanprodan/mgob
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$APP_VERSION" \
     -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob
 
-FROM alpine:edge
+FROM alpine:latest
 
 ARG BUILD_DATE
 ARG VCS_REF
