@@ -90,3 +90,16 @@ configMap:
         username: mgob
         # 'true' to notify only on failures
         warnOnly: false
+secret: {}
+## You can either insert your secret values as part of helm values, or refer externally created secrets.
+#- name: gcp-example-secret-name
+#- name: gcp-example-secret-name-with-values
+#  data:
+#    service-account.json: |
+#      {
+#        "type": "service_account",
+#        "project_id": "your-gcp-project-id",
+#        "private_key_id": "12345678901234567890",
+#        "private_key": "-----BEGIN PRIVATE KEY-----\n...........\n-----END PRIVATE KEY-----\n",
+#        ...
+#      }
