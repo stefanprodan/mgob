@@ -103,3 +103,6 @@ secret: {}
 #        "private_key": "-----BEGIN PRIVATE KEY-----\n...........\n-----END PRIVATE KEY-----\n",
 #        ...
 #      }
+env: {}
+#- name: HTTPS_PROXY
+#  value: "http://localhost:3128"

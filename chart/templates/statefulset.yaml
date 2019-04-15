@@ -17,6 +17,11 @@ spec:
       - name: {{ template "fullname" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+{{- range $envVar := .Values.env }}
+        - name: {{ $envVar.name }}
+          value: {{ $envVar.value }}
+{{- end }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
           protocol: TCP
