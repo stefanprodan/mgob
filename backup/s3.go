@@ -2,6 +2,7 @@ package backup
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -23,9 +24,11 @@ func s3Upload(file string, plan config.Plan) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "mc config host for plan %v failed %s", plan.Name, output)
 	}
+	
+	fileName := filepath.Base(file)
 
-	upload := fmt.Sprintf("mc --quiet cp %v %v/%v",
-		file, plan.Name, plan.S3.Bucket)
+	upload := fmt.Sprintf("mc --quiet cp %v %v/%v/%v",
+		file, plan.Name, plan.S3.Bucket, fileName)
 
 	result, err = sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	output = ""
