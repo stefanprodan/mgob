@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
@@ -16,7 +16,14 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 	t1 := time.Now()
 	planDir := fmt.Sprintf("%v/%v", storagePath, plan.Name)
 
-	archive, log, err := dump(plan, tmpPath, t1.UTC())
+	archive, mlog, err := dump(plan, tmpPath, t1.UTC())
+	log.WithFields(log.Fields{
+		"archive": archive,
+		"mlog":    mlog,
+		"planDir": planDir,
+		"err":     err,
+	}).Info("new dump")
+
 	res := Result{
 		Plan:      plan.Name,
 		Timestamp: t1.UTC(),
@@ -44,9 +51,14 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		return res, errors.Wrapf(err, "moving file from %v to %v failed", archive, planDir)
 	}
 
-	err = sh.Command("mv", log, planDir).Run()
-	if err != nil {
-		return res, errors.Wrapf(err, "moving file from %v to %v failed", log, planDir)
+	// check if log file exists, is not always created
+	if _, err := os.Stat(mlog); os.IsNotExist(err) {
+		log.Debug("appears no log file was generated")
+	} else {
+		err = sh.Command("mv", mlog, planDir).Run()
+		if err != nil {
+			return res, errors.Wrapf(err, "moving file from %v to %v failed", mlog, planDir)
+		}
 	}
 
 	if plan.Scheduler.Retention > 0 {
@@ -63,7 +75,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		if err != nil {
 			return res, err
 		} else {
-			logrus.WithField("plan", plan.Name).Info(sftpOutput)
+			log.WithField("plan", plan.Name).Info(sftpOutput)
 		}
 	}
 
@@ -72,7 +84,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		if err != nil {
 			return res, err
 		} else {
-			logrus.WithField("plan", plan.Name).Infof("S3 upload finished %v", s3Output)
+			log.WithField("plan", plan.Name).Infof("S3 upload finished %v", s3Output)
 		}
 	}
 
@@ -81,7 +93,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		if err != nil {
 			return res, err
 		} else {
-			logrus.WithField("plan", plan.Name).Infof("GCloud upload finished %v", gCloudOutput)
+			log.WithField("plan", plan.Name).Infof("GCloud upload finished %v", gCloudOutput)
 		}
 	}
 
@@ -90,7 +102,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 		if err != nil {
 			return res, err
 		} else {
-			logrus.WithField("plan", plan.Name).Infof("Azure upload finished %v", azureOutout)
+			log.WithField("plan", plan.Name).Infof("Azure upload finished %v", azureOutout)
 		}
 	}
 

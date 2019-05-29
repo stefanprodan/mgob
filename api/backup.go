@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -34,25 +34,25 @@ func postBackup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logrus.WithField("plan", planID).Info("On demand backup started")
+	log.WithField("plan", planID).Info("On demand backup started")
 
 	res, err := backup.Run(plan, cfg.TmpPath, cfg.StoragePath)
 	if err != nil {
-		logrus.WithField("plan", planID).Errorf("On demand backup failed %v", err)
+		log.WithField("plan", planID).Errorf("On demand backup failed %v", err)
 		if err := notifier.SendNotification(fmt.Sprintf("%v on demand backup failed", planID),
 			err.Error(), true, plan); err != nil {
-			logrus.WithField("plan", plan.Name).Errorf("Notifier failed for on demand backup %v", err)
+			log.WithField("plan", plan.Name).Errorf("Notifier failed for on demand backup %v", err)
 		}
 		render.Status(r, 500)
 		render.JSON(w, r, map[string]string{"error": err.Error()})
 	} else {
-		logrus.WithField("plan", plan.Name).Infof("On demand backup finished in %v archive %v size %v",
+		log.WithField("plan", plan.Name).Infof("On demand backup finished in %v archive %v size %v",
 			res.Duration, res.Name, humanize.Bytes(uint64(res.Size)))
 		if err := notifier.SendNotification(fmt.Sprintf("%v on demand backup finished", plan.Name),
 			fmt.Sprintf("%v backup finished in %v archive size %v",
 				res.Name, res.Duration, humanize.Bytes(uint64(res.Size))),
 			false, plan); err != nil {
-			logrus.WithField("plan", plan.Name).Errorf("Notifier failed for on demand backup %v", err)
+			log.WithField("plan", plan.Name).Errorf("Notifier failed for on demand backup %v", err)
 		}
 		render.JSON(w, r, toBackupResult(res))
 	}

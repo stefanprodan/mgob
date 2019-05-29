@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
 	"github.com/pkg/errors"
 )
@@ -84,14 +84,14 @@ func (db *StatusStore) Sync(stats []*Status) error {
 					if err != nil {
 						return errors.Wrapf(err, "Updating %v to store failed", oldS.Plan)
 					}
-					logrus.WithField("plan", oldS.Plan).Infof("Next run at %v", oldS.NextRun)
+					log.WithField("plan", oldS.Plan).Infof("Next run at %v", oldS.NextRun)
 					found = true
 				}
 			}
 
 			// insert new job
 			if !found {
-				logrus.WithField("plan", newS.Plan).Info("New job found, saving to store")
+				log.WithField("plan", newS.Plan).Info("New job found, saving to store")
 				buf, err := json.Marshal(newS)
 				if err != nil {
 					return errors.Wrapf(err, "Json marshal for %v failed", newS.Plan)
@@ -100,7 +100,7 @@ func (db *StatusStore) Sync(stats []*Status) error {
 				if err != nil {
 					return errors.Wrapf(err, "Saving %v to store failed", newS.Plan)
 				}
-				logrus.WithField("plan", newS.Plan).Infof("Next run at %v", newS.NextRun)
+				log.WithField("plan", newS.Plan).Infof("Next run at %v", newS.NextRun)
 			}
 		}
 
@@ -114,7 +114,7 @@ func (db *StatusStore) Sync(stats []*Status) error {
 			}
 
 			if !found {
-				logrus.WithField("plan", oldS.Plan).Info("Plan not found on disk, removing from store")
+				log.WithField("plan", oldS.Plan).Info("Plan not found on disk, removing from store")
 				err = b.Delete([]byte(oldS.Plan))
 				if err != nil {
 					return errors.Wrapf(err, "Removing %v from store failed", oldS.Plan)
