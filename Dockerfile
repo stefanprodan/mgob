@@ -1,13 +1,18 @@
 FROM golang:1.11
 
-ARG APP_VERSION=unkown
+# TODO: work out how to get this from version.go
+ARG APP_VERSION=v0.0.0-dev
 
-ADD . /go/src/github.com/stefanprodan/mgob
+COPY . /go/src/github.com/stefanprodan/mgob
 
 WORKDIR /go/src/github.com/stefanprodan/mgob
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$APP_VERSION" \
-    -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob
+RUN go get ./... && \
+    CGO_ENABLED=0 GOOS=linux \
+      go build \
+        -ldflags "-X main.version=$APP_VERSION" \
+        -a -installsuffix cgo \
+        -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
 FROM alpine:latest
 
