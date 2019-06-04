@@ -33,7 +33,7 @@ func beforeApp(c *cli.Context) error {
 func main() {
 	app := cli.NewApp()
 	app.Name = "mgob"
-	app.Version = mgob.VERSION
+	app.Version = mgob.Version
 	app.Usage = "mongodb dockerized backup agent"
 	app.Action = start
 	app.Before = beforeApp
@@ -77,7 +77,7 @@ func main() {
 }
 
 func start(c *cli.Context) error {
-	log.Infof("mgob %v", mgob.VERSION)
+	log.Infof("mgob %v", mgob.Version)
 
 	appConfig.LogLevel = c.String("LogLevel")
 	appConfig.JSONLog = c.Bool("JSONLog")

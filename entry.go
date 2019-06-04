@@ -64,7 +64,7 @@ func Start(appConfig *config.AppConfig) {
 		Stats:  statusStore,
 	}
 	log.Infof("starting http server on port %v", appConfig.Port)
-	go server.Start(VERSION)
+	go server.Start(Version)
 
 	// wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
 	sigChan := make(chan os.Signal, 1)
