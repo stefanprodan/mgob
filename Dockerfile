@@ -1,16 +1,15 @@
 FROM golang:1.11
 
 # TODO: work out how to get this from version.go
-ARG APP_VERSION=v0.0.0-dev
+ARG app_version=v0.0.0-dev
 
 COPY . /go/src/github.com/stefanprodan/mgob
 
 WORKDIR /go/src/github.com/stefanprodan/mgob
 
-RUN go get ./... && \
-    CGO_ENABLED=0 GOOS=linux \
+RUN CGO_ENABLED=0 GOOS=linux \
       go build \
-        -ldflags "-X main.version=$APP_VERSION" \
+        -ldflags "-X main.version=$app_version" \
         -a -installsuffix cgo \
         -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
