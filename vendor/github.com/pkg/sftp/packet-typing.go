@@ -12,8 +12,6 @@ type requestPacket interface {
 	id() uint32
 }
 
-type requestChan chan requestPacket
-
 type responsePacket interface {
 	encoding.BinaryMarshaler
 	id() uint32
@@ -28,11 +26,6 @@ type hasPath interface {
 type hasHandle interface {
 	requestPacket
 	getHandle() string
-}
-
-type isOpener interface {
-	hasPath
-	isOpener()
 }
 
 type notReadOnly interface {
@@ -52,12 +45,10 @@ func (p sshFxpStatvfsPacket) getPath() string  { return p.Path }
 func (p sshFxpRemovePacket) getPath() string   { return p.Filename }
 func (p sshFxpRenamePacket) getPath() string   { return p.Oldpath }
 func (p sshFxpSymlinkPacket) getPath() string  { return p.Targetpath }
+func (p sshFxpOpendirPacket) getPath() string  { return p.Path }
+func (p sshFxpOpenPacket) getPath() string     { return p.Path }
 
-// Openers implement hasPath and isOpener
-func (p sshFxpOpendirPacket) getPath() string { return p.Path }
-func (p sshFxpOpendirPacket) isOpener()       {}
-func (p sshFxpOpenPacket) getPath() string    { return p.Path }
-func (p sshFxpOpenPacket) isOpener()          {}
+func (p sshFxpExtendedPacketPosixRename) getPath() string { return p.Oldpath }
 
 // hasHandle
 func (p sshFxpFstatPacket) getHandle() string    { return p.Handle }
@@ -65,19 +56,18 @@ func (p sshFxpFsetstatPacket) getHandle() string { return p.Handle }
 func (p sshFxpReadPacket) getHandle() string     { return p.Handle }
 func (p sshFxpWritePacket) getHandle() string    { return p.Handle }
 func (p sshFxpReaddirPacket) getHandle() string  { return p.Handle }
+func (p sshFxpClosePacket) getHandle() string    { return p.Handle }
 
 // notReadOnly
-func (p sshFxpWritePacket) notReadOnly()    {}
-func (p sshFxpSetstatPacket) notReadOnly()  {}
-func (p sshFxpFsetstatPacket) notReadOnly() {}
-func (p sshFxpRemovePacket) notReadOnly()   {}
-func (p sshFxpMkdirPacket) notReadOnly()    {}
-func (p sshFxpRmdirPacket) notReadOnly()    {}
-func (p sshFxpRenamePacket) notReadOnly()   {}
-func (p sshFxpSymlinkPacket) notReadOnly()  {}
-
-// this has a handle, but is only used for close
-func (p sshFxpClosePacket) getHandle() string { return p.Handle }
+func (p sshFxpWritePacket) notReadOnly()               {}
+func (p sshFxpSetstatPacket) notReadOnly()             {}
+func (p sshFxpFsetstatPacket) notReadOnly()            {}
+func (p sshFxpRemovePacket) notReadOnly()              {}
+func (p sshFxpMkdirPacket) notReadOnly()               {}
+func (p sshFxpRmdirPacket) notReadOnly()               {}
+func (p sshFxpRenamePacket) notReadOnly()              {}
+func (p sshFxpSymlinkPacket) notReadOnly()             {}
+func (p sshFxpExtendedPacketPosixRename) notReadOnly() {}
 
 // some packets with ID are missing id()
 func (p sshFxpDataPacket) id() uint32   { return p.ID }
@@ -85,6 +75,7 @@ func (p sshFxpStatusPacket) id() uint32 { return p.ID }
 func (p sshFxpStatResponse) id() uint32 { return p.ID }
 func (p sshFxpNamePacket) id() uint32   { return p.ID }
 func (p sshFxpHandlePacket) id() uint32 { return p.ID }
+func (p StatVFS) id() uint32            { return p.ID }
 func (p sshFxVersionPacket) id() uint32 { return 0 }
 
 // take raw incoming packet data and build packet objects
@@ -135,7 +126,9 @@ func makePacket(p rxPacket) (requestPacket, error) {
 		return nil, errors.Errorf("unhandled packet type: %s", p.pktType)
 	}
 	if err := pkt.UnmarshalBinary(p.pktBytes); err != nil {
-		return nil, err
+		// Return partially unpacked packet to allow callers to return
+		// error messages appropriately with necessary id() method.
+		return pkt, err
 	}
 	return pkt, nil
 }

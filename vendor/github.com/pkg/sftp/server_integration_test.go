@@ -6,7 +6,12 @@ package sftp
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	crand "crypto/rand"
+	"crypto/x509"
 	"encoding/hex"
+	"encoding/pem"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -17,6 +22,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -26,7 +32,40 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var testSftpClientBin = flag.String("sftp_client", "/usr/bin/sftp", "location of the sftp client binary")
+func TestMain(m *testing.M) {
+	sftpClientLocation, _ := exec.LookPath("sftp")
+	testSftpClientBin = flag.String("sftp_client", sftpClientLocation, "location of the sftp client binary")
+	flag.Parse()
+
+	lookSFTPServer := []string{
+		"/usr/libexec/sftp-server",
+		"/usr/lib/openssh/sftp-server",
+	}
+	sftpServer, _ := exec.LookPath("sftp-server")
+	if len(sftpServer) == 0 {
+		for _, location := range lookSFTPServer {
+			if _, err := os.Stat(location); err == nil {
+				sftpServer = location
+				break
+			}
+		}
+	}
+	testSftp = flag.String("sftp", sftpServer, "location of the sftp server binary")
+
+	os.Exit(m.Run())
+}
+
+func skipIfWindows(t testing.TB) {
+	if runtime.GOOS == "windows" {
+		t.Skip("skipping test on windows")
+	}
+}
+
+var testServerImpl = flag.Bool("testserver", false, "perform integration tests against sftp package server instance")
+var testIntegration = flag.Bool("integration", false, "perform integration tests against sftp server process")
+var testSftp *string
+
+var testSftpClientBin *string
 var sshServerDebugStream = ioutil.Discard
 var sftpServerDebugStream = ioutil.Discard
 var sftpClientDebugStream = ioutil.Discard
@@ -316,7 +355,7 @@ func (chsvr *sshSessionChannelServer) handleSubsystem(req *ssh.Request) error {
 // starts an ssh server to test. returns: host string and port
 func testServer(t *testing.T, useSubsystem bool, readonly bool) (net.Listener, string, int) {
 	if !*testIntegration {
-		t.Skip("skipping intergration test")
+		t.Skip("skipping integration test")
 	}
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
@@ -357,29 +396,75 @@ func testServer(t *testing.T, useSubsystem bool, readonly bool) (net.Listener, s
 	return listener, host, port
 }
 
+func makeDummyKey() (string, error) {
+	priv, err := ecdsa.GenerateKey(elliptic.P256(), crand.Reader)
+	if err != nil {
+		return "", fmt.Errorf("cannot generate key: %v", err)
+	}
+	der, err := x509.MarshalECPrivateKey(priv)
+	if err != nil {
+		return "", fmt.Errorf("cannot marshal key: %v", err)
+	}
+	block := &pem.Block{Type: "EC PRIVATE KEY", Bytes: der}
+	f, err := ioutil.TempFile("", "sftp-test-key-")
+	if err != nil {
+		return "", fmt.Errorf("cannot create temp file: %v", err)
+	}
+	defer func() {
+		if f != nil {
+			_ = f.Close()
+			_ = os.Remove(f.Name())
+		}
+	}()
+	if err := pem.Encode(f, block); err != nil {
+		return "", fmt.Errorf("cannot write key: %v", err)
+	}
+	if err := f.Close(); err != nil {
+		return "", fmt.Errorf("error closing key file: %v", err)
+	}
+	path := f.Name()
+	f = nil
+	return path, nil
+}
+
 func runSftpClient(t *testing.T, script string, path string, host string, port int) (string, error) {
 	// if sftp client binary is unavailable, skip test
 	if _, err := os.Stat(*testSftpClientBin); err != nil {
 		t.Skip("sftp client binary unavailable")
 	}
+
+	// make a dummy key so we don't rely on ssh-agent
+	dummyKey, err := makeDummyKey()
+	if err != nil {
+		return "", err
+	}
+	defer os.Remove(dummyKey)
+
 	args := []string{
 		// "-vvvv",
 		"-b", "-",
 		"-o", "StrictHostKeyChecking=no",
 		"-o", "LogLevel=ERROR",
 		"-o", "UserKnownHostsFile /dev/null",
+		// do not trigger ssh-agent prompting
+		"-o", "IdentityFile=" + dummyKey,
+		"-o", "IdentitiesOnly=yes",
 		"-P", fmt.Sprintf("%d", port), fmt.Sprintf("%s:%s", host, path),
 	}
 	cmd := exec.Command(*testSftpClientBin, args...)
 	var stdout bytes.Buffer
+	var stderr bytes.Buffer
 	cmd.Stdin = bytes.NewBufferString(script)
 	cmd.Stdout = &stdout
-	cmd.Stderr = sftpClientDebugStream
+	cmd.Stderr = &stderr
 	if err := cmd.Start(); err != nil {
 		return "", err
 	}
-	err := cmd.Wait()
-	return string(stdout.Bytes()), err
+	err = cmd.Wait()
+	if err != nil {
+		err = fmt.Errorf("%v: %s", err, stderr.String())
+	}
+	return stdout.String(), err
 }
 
 func TestServerCompareSubsystems(t *testing.T) {
@@ -421,15 +506,17 @@ ls -l /usr/bin/
 		if goLine != opLine {
 			goWords := spaceRegex.Split(goLine, -1)
 			opWords := spaceRegex.Split(opLine, -1)
-			// allow words[2] and [3] to be different as these are users & groups
-			// also allow words[1] to differ as the link count for directories like
-			// proc is unstable during testing as processes are created/destroyed.
+			// some fields are allowed to be different..
+			// words[2] and [3] as these are users & groups
+			// words[1] as the link count for directories like proc is unstable
+			// during testing as processes are created/destroyed.
+			// words[7] as timestamp on dirs can very for things like /tmp
 			for j, goWord := range goWords {
 				if j > len(opWords) {
 					bad = true
 				}
 				opWord := opWords[j]
-				if goWord != opWord && j != 1 && j != 2 && j != 3 {
+				if goWord != opWord && j != 1 && j != 2 && j != 3 && j != 7 {
 					bad = true
 				}
 			}
@@ -483,6 +570,7 @@ func TestServerMkdirRmdir(t *testing.T) {
 }
 
 func TestServerSymlink(t *testing.T) {
+	skipIfWindows(t) // No symlinks on windows.
 	listenerGo, hostGo, portGo := testServer(t, GOLANG_SFTP, READONLY)
 	defer listenerGo.Close()
 
