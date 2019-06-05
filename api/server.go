@@ -3,13 +3,13 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/stefanprodan/mgob/config"
 	"github.com/stefanprodan/mgob/db"
-	"strings"
 )
 
 type HttpServer struct {
@@ -44,9 +44,9 @@ func (s *HttpServer) Start(version string) {
 		r.Post("/{planID}", postBackup)
 	})
 
-	FileServer(r,"/storage", http.Dir(s.Config.StoragePath))
+	FileServer(r, "/storage", http.Dir(s.Config.StoragePath))
 
-	logrus.Error(http.ListenAndServe(fmt.Sprintf(":%v", s.Config.Port), r))
+	log.Error(http.ListenAndServe(fmt.Sprintf(":%v", s.Config.Port), r))
 }
 
 func FileServer(r chi.Router, path string, root http.FileSystem) {

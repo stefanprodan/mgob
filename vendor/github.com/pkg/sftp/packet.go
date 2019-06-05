@@ -125,15 +125,14 @@ func sendPacket(w io.Writer, m encoding.BinaryMarshaler) error {
 	} else if debugDumpTxPacket {
 		debug("send packet: %s %d bytes", fxp(bb[0]), len(bb))
 	}
-	l := uint32(len(bb))
-	hdr := []byte{byte(l >> 24), byte(l >> 16), byte(l >> 8), byte(l)}
-	_, err = w.Write(hdr)
+	// Slide packet down 4 bytes to make room for length header.
+	packet := append(bb, make([]byte, 4)...) // optimistically assume bb has capacity
+	copy(packet[4:], bb)
+	binary.BigEndian.PutUint32(packet[:4], uint32(len(bb)))
+
+	_, err = w.Write(packet)
 	if err != nil {
-		return errors.Errorf("failed to send packet header: %v", err)
-	}
-	_, err = w.Write(bb)
-	if err != nil {
-		return errors.Errorf("failed to send packet body: %v", err)
+		return errors.Errorf("failed to send packet: %v", err)
 	}
 	return nil
 }
@@ -255,7 +254,7 @@ func unmarshalIDString(b []byte, id *uint32, str *string) error {
 	if err != nil {
 		return err
 	}
-	*str, b, err = unmarshalStringSafe(b)
+	*str, _, err = unmarshalStringSafe(b)
 	return err
 }
 
@@ -406,7 +405,7 @@ func (p *sshFxpSymlinkPacket) UnmarshalBinary(b []byte) error {
 		return err
 	} else if p.Targetpath, b, err = unmarshalStringSafe(b); err != nil {
 		return err
-	} else if p.Linkpath, b, err = unmarshalStringSafe(b); err != nil {
+	} else if p.Linkpath, _, err = unmarshalStringSafe(b); err != nil {
 		return err
 	}
 	return nil
@@ -510,7 +509,7 @@ func (p *sshFxpOpenPacket) UnmarshalBinary(b []byte) error {
 		return err
 	} else if p.Pflags, b, err = unmarshalUint32Safe(b); err != nil {
 		return err
-	} else if p.Flags, b, err = unmarshalUint32Safe(b); err != nil {
+	} else if p.Flags, _, err = unmarshalUint32Safe(b); err != nil {
 		return err
 	}
 	return nil
@@ -547,7 +546,7 @@ func (p *sshFxpReadPacket) UnmarshalBinary(b []byte) error {
 		return err
 	} else if p.Offset, b, err = unmarshalUint64Safe(b); err != nil {
 		return err
-	} else if p.Len, b, err = unmarshalUint32Safe(b); err != nil {
+	} else if p.Len, _, err = unmarshalUint32Safe(b); err != nil {
 		return err
 	}
 	return nil
@@ -580,10 +579,34 @@ func (p *sshFxpRenamePacket) UnmarshalBinary(b []byte) error {
 		return err
 	} else if p.Oldpath, b, err = unmarshalStringSafe(b); err != nil {
 		return err
-	} else if p.Newpath, b, err = unmarshalStringSafe(b); err != nil {
+	} else if p.Newpath, _, err = unmarshalStringSafe(b); err != nil {
 		return err
 	}
 	return nil
+}
+
+type sshFxpPosixRenamePacket struct {
+	ID      uint32
+	Oldpath string
+	Newpath string
+}
+
+func (p sshFxpPosixRenamePacket) id() uint32 { return p.ID }
+
+func (p sshFxpPosixRenamePacket) MarshalBinary() ([]byte, error) {
+	const ext = "posix-rename@openssh.com"
+	l := 1 + 4 + // type(byte) + uint32
+		4 + len(ext) +
+		4 + len(p.Oldpath) +
+		4 + len(p.Newpath)
+
+	b := make([]byte, 0, l)
+	b = append(b, ssh_FXP_EXTENDED)
+	b = marshalUint32(b, p.ID)
+	b = marshalString(b, ext)
+	b = marshalString(b, p.Oldpath)
+	b = marshalString(b, p.Newpath)
+	return b, nil
 }
 
 type sshFxpWritePacket struct {
@@ -657,7 +680,7 @@ func (p *sshFxpMkdirPacket) UnmarshalBinary(b []byte) error {
 		return err
 	} else if p.Path, b, err = unmarshalStringSafe(b); err != nil {
 		return err
-	} else if p.Flags, b, err = unmarshalUint32Safe(b); err != nil {
+	} else if p.Flags, _, err = unmarshalUint32Safe(b); err != nil {
 		return err
 	}
 	return nil
@@ -850,10 +873,18 @@ type sshFxpExtendedPacket struct {
 	}
 }
 
-func (p sshFxpExtendedPacket) id() uint32     { return p.ID }
-func (p sshFxpExtendedPacket) readonly() bool { return p.SpecificPacket.readonly() }
+func (p sshFxpExtendedPacket) id() uint32 { return p.ID }
+func (p sshFxpExtendedPacket) readonly() bool {
+	if p.SpecificPacket == nil {
+		return true
+	}
+	return p.SpecificPacket.readonly()
+}
 
-func (p sshFxpExtendedPacket) respond(svr *Server) error {
+func (p sshFxpExtendedPacket) respond(svr *Server) responsePacket {
+	if p.SpecificPacket == nil {
+		return statusFromError(p, nil)
+	}
 	return p.SpecificPacket.respond(svr)
 }
 
@@ -862,7 +893,7 @@ func (p *sshFxpExtendedPacket) UnmarshalBinary(b []byte) error {
 	bOrig := b
 	if p.ID, b, err = unmarshalUint32Safe(b); err != nil {
 		return err
-	} else if p.ExtendedRequest, b, err = unmarshalStringSafe(b); err != nil {
+	} else if p.ExtendedRequest, _, err = unmarshalStringSafe(b); err != nil {
 		return err
 	}
 
@@ -870,8 +901,10 @@ func (p *sshFxpExtendedPacket) UnmarshalBinary(b []byte) error {
 	switch p.ExtendedRequest {
 	case "statvfs@openssh.com":
 		p.SpecificPacket = &sshFxpExtendedPacketStatVFS{}
+	case "posix-rename@openssh.com":
+		p.SpecificPacket = &sshFxpExtendedPacketPosixRename{}
 	default:
-		return errUnknownExtendedPacket
+		return errors.Wrapf(errUnknownExtendedPacket, "packet type %v", p.SpecificPacket)
 	}
 
 	return p.SpecificPacket.UnmarshalBinary(bOrig)
@@ -891,8 +924,36 @@ func (p *sshFxpExtendedPacketStatVFS) UnmarshalBinary(b []byte) error {
 		return err
 	} else if p.ExtendedRequest, b, err = unmarshalStringSafe(b); err != nil {
 		return err
-	} else if p.Path, b, err = unmarshalStringSafe(b); err != nil {
+	} else if p.Path, _, err = unmarshalStringSafe(b); err != nil {
 		return err
 	}
 	return nil
+}
+
+type sshFxpExtendedPacketPosixRename struct {
+	ID              uint32
+	ExtendedRequest string
+	Oldpath         string
+	Newpath         string
+}
+
+func (p sshFxpExtendedPacketPosixRename) id() uint32     { return p.ID }
+func (p sshFxpExtendedPacketPosixRename) readonly() bool { return false }
+func (p *sshFxpExtendedPacketPosixRename) UnmarshalBinary(b []byte) error {
+	var err error
+	if p.ID, b, err = unmarshalUint32Safe(b); err != nil {
+		return err
+	} else if p.ExtendedRequest, b, err = unmarshalStringSafe(b); err != nil {
+		return err
+	} else if p.Oldpath, b, err = unmarshalStringSafe(b); err != nil {
+		return err
+	} else if p.Newpath, _, err = unmarshalStringSafe(b); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p sshFxpExtendedPacketPosixRename) respond(s *Server) responsePacket {
+	err := os.Rename(p.Oldpath, p.Newpath)
+	return statusFromError(p, err)
 }

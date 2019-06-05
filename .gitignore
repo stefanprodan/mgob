@@ -30,3 +30,7 @@ _testmain.go
 /test/data/
 
 /k8s/service-account.json
+
+# working with relative dirs from project for testing
+/data/
+/config/*.yml

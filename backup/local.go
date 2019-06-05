@@ -6,16 +6,15 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
 	"github.com/stefanprodan/mgob/config"
 )
 
 func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error) {
-
 	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
-	log := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
-
+	mlog := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
 	dump := fmt.Sprintf("mongodump --archive=%v --gzip ", archive)
 
 	if plan.Target.Uri != "" {
@@ -40,6 +39,8 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		dump += fmt.Sprintf("%v", plan.Target.Params)
 	}
 
+	// TODO: mask password
+	log.Debugf("dump cmd: %v", dump)
 	output, err := sh.Command("/bin/sh", "-c", dump).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if err != nil {
 		ex := ""
@@ -48,9 +49,9 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		}
 		return "", "", errors.Wrapf(err, "mongodump log %v", ex)
 	}
-	logToFile(log, output)
+	logToFile(mlog, output)
 
-	return archive, log, nil
+	return archive, mlog, nil
 }
 
 func logToFile(file string, data []byte) error {
@@ -71,6 +72,7 @@ func applyRetention(path string, retention int) error {
 		return errors.Wrapf(err, "removing old gz files from %v failed", path)
 	}
 
+	log.Debug("apply retention")
 	log := fmt.Sprintf("cd %v && rm -f $(ls -1t *.log | tail -n +%v)", path, retention+1)
 	err = sh.Command("/bin/sh", "-c", log).Run()
 	if err != nil {

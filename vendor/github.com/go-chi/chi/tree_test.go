@@ -129,7 +129,7 @@ func TestTree(t *testing.T) {
 	for i, tt := range tests {
 		rctx := NewRouteContext()
 
-		handlers := tr.FindRoute(rctx, mGET, tt.r)
+		_, handlers, _ := tr.FindRoute(rctx, mGET, tt.r)
 
 		var handler http.Handler
 		if methodHandler, ok := handlers[mGET]; ok {
@@ -245,7 +245,7 @@ func TestTreeMoar(t *testing.T) {
 	for i, tt := range tests {
 		rctx := NewRouteContext()
 
-		handlers := tr.FindRoute(rctx, tt.m, tt.r)
+		_, handlers, _ := tr.FindRoute(rctx, tt.m, tt.r)
 
 		var handler http.Handler
 		if methodHandler, ok := handlers[tt.m]; ok {
@@ -274,8 +274,10 @@ func TestTreeRegexp(t *testing.T) {
 	hStub4 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	hStub5 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	hStub6 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub7 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 
 	tr := &node{}
+	tr.InsertRoute(mGET, "/articles/{rid:^[0-9]{5,6}}", hStub7)
 	tr.InsertRoute(mGET, "/articles/{zid:^0[0-9]+}", hStub3)
 	tr.InsertRoute(mGET, "/articles/{name:^@[a-z]+}/posts", hStub4)
 	tr.InsertRoute(mGET, "/articles/{op:^[0-9]+}/run", hStub5)
@@ -296,6 +298,7 @@ func TestTreeRegexp(t *testing.T) {
 		v []string     // output param values
 	}{
 		{r: "/articles", h: nil, k: []string{}, v: []string{}},
+		{r: "/articles/12345", h: hStub7, k: []string{"rid"}, v: []string{"12345"}},
 		{r: "/articles/123", h: hStub1, k: []string{"id"}, v: []string{"123"}},
 		{r: "/articles/how-to-build-a-router", h: hStub2, k: []string{"slug"}, v: []string{"how-to-build-a-router"}},
 		{r: "/articles/0456", h: hStub3, k: []string{"zid"}, v: []string{"0456"}},
@@ -308,7 +311,7 @@ func TestTreeRegexp(t *testing.T) {
 	for i, tt := range tests {
 		rctx := NewRouteContext()
 
-		handlers := tr.FindRoute(rctx, mGET, tt.r)
+		_, handlers, _ := tr.FindRoute(rctx, mGET, tt.r)
 
 		var handler http.Handler
 		if methodHandler, ok := handlers[mGET]; ok {
@@ -330,7 +333,32 @@ func TestTreeRegexp(t *testing.T) {
 	}
 }
 
-func TestTreeMatchPattern(t *testing.T) {
+func TestTreeRegexMatchWholeParam(t *testing.T) {
+	hStub1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+
+	rctx := NewRouteContext()
+	tr := &node{}
+	tr.InsertRoute(mGET, "/{id:[0-9]+}", hStub1)
+
+	tests := []struct {
+		url             string
+		expectedHandler http.Handler
+	}{
+		{url: "/13", expectedHandler: hStub1},
+		{url: "/a13", expectedHandler: nil},
+		{url: "/13.jpg", expectedHandler: nil},
+		{url: "/a13.jpg", expectedHandler: nil},
+	}
+
+	for _, tc := range tests {
+		_, _, handler := tr.FindRoute(rctx, mGET, tc.url)
+		if fmt.Sprintf("%v", tc.expectedHandler) != fmt.Sprintf("%v", handler) {
+			t.Errorf("expecting handler:%v , got:%v", tc.expectedHandler, handler)
+		}
+	}
+}
+
+func TestTreeFindPattern(t *testing.T) {
 	hStub1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	hStub2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	hStub3 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
@@ -340,22 +368,22 @@ func TestTreeMatchPattern(t *testing.T) {
 	tr.InsertRoute(mGET, "/articles/{id}/*", hStub2)
 	tr.InsertRoute(mGET, "/articles/{slug}/{uid}/*", hStub3)
 
-	if tr.matchPattern("/pages") != false {
+	if tr.findPattern("/pages") != false {
 		t.Errorf("find /pages failed")
 	}
-	if tr.matchPattern("/pages*") != false {
+	if tr.findPattern("/pages*") != false {
 		t.Errorf("find /pages* failed - should be nil")
 	}
-	if tr.matchPattern("/pages/*") == false {
+	if tr.findPattern("/pages/*") == false {
 		t.Errorf("find /pages/* failed")
 	}
-	if tr.matchPattern("/articles/{id}/*") == false {
+	if tr.findPattern("/articles/{id}/*") == false {
 		t.Errorf("find /articles/{id}/* failed")
 	}
-	if tr.matchPattern("/articles/{something}/*") == false {
+	if tr.findPattern("/articles/{something}/*") == false {
 		t.Errorf("find /articles/{something}/* failed")
 	}
-	if tr.matchPattern("/articles/{slug}/{uid}/*") == false {
+	if tr.findPattern("/articles/{slug}/{uid}/*") == false {
 		t.Errorf("find /articles/{slug}/{uid}/* failed")
 	}
 }
@@ -392,7 +420,7 @@ func stringSliceEqual(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
 	}
-	for i, _ := range a {
+	for i := range a {
 		if b[i] != a[i] {
 			return false
 		}
@@ -420,7 +448,7 @@ func BenchmarkTreeGet(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		mctx.reset()
+		mctx.Reset()
 		tr.FindRoute(mctx, mGET, "/ping/123/456")
 	}
 }

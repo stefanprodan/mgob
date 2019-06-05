@@ -3,9 +3,7 @@ package sftp
 import (
 	"encoding"
 	"fmt"
-	"sync"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +21,14 @@ func (s _testSender) sendPacket(p encoding.BinaryMarshaler) error {
 	return nil
 }
 
-type fakepacket uint32
+type fakepacket struct {
+	reqid uint32
+	oid   uint32
+}
+
+func fake(rid, order uint32) fakepacket {
+	return fakepacket{reqid: rid, oid: order}
+}
 
 func (fakepacket) MarshalBinary() ([]byte, error) {
 	return []byte{}, nil
@@ -34,40 +39,51 @@ func (fakepacket) UnmarshalBinary([]byte) error {
 }
 
 func (f fakepacket) id() uint32 {
-	return uint32(f)
+	return f.reqid
 }
 
 type pair struct {
-	in  fakepacket
-	out fakepacket
+	in, out fakepacket
+}
+
+type ordered_pair struct {
+	in  orderedRequest
+	out orderedResponse
 }
 
 // basic test
 var ttable1 = []pair{
-	pair{fakepacket(0), fakepacket(0)},
-	pair{fakepacket(1), fakepacket(1)},
-	pair{fakepacket(2), fakepacket(2)},
-	pair{fakepacket(3), fakepacket(3)},
+	pair{fake(0, 0), fake(0, 0)},
+	pair{fake(1, 1), fake(1, 1)},
+	pair{fake(2, 2), fake(2, 2)},
+	pair{fake(3, 3), fake(3, 3)},
 }
 
 // outgoing packets out of order
 var ttable2 = []pair{
-	pair{fakepacket(0), fakepacket(0)},
-	pair{fakepacket(1), fakepacket(4)},
-	pair{fakepacket(2), fakepacket(1)},
-	pair{fakepacket(3), fakepacket(3)},
-	pair{fakepacket(4), fakepacket(2)},
+	pair{fake(10, 0), fake(12, 2)},
+	pair{fake(11, 1), fake(11, 1)},
+	pair{fake(12, 2), fake(13, 3)},
+	pair{fake(13, 3), fake(10, 0)},
 }
 
-// incoming packets out of order
+// request ids are not incremental
 var ttable3 = []pair{
-	pair{fakepacket(2), fakepacket(0)},
-	pair{fakepacket(1), fakepacket(1)},
-	pair{fakepacket(3), fakepacket(2)},
-	pair{fakepacket(0), fakepacket(3)},
+	pair{fake(7, 0), fake(7, 0)},
+	pair{fake(1, 1), fake(1, 1)},
+	pair{fake(9, 2), fake(3, 3)},
+	pair{fake(3, 3), fake(9, 2)},
 }
 
-var tables = [][]pair{ttable1, ttable2, ttable3}
+// request ids are all the same
+var ttable4 = []pair{
+	pair{fake(1, 0), fake(1, 0)},
+	pair{fake(1, 1), fake(1, 1)},
+	pair{fake(1, 2), fake(1, 3)},
+	pair{fake(1, 3), fake(1, 2)},
+}
+
+var tables = [][]pair{ttable1, ttable2, ttable3, ttable4}
 
 func TestPacketManager(t *testing.T) {
 	sender := newTestSender()
@@ -75,80 +91,37 @@ func TestPacketManager(t *testing.T) {
 
 	for i := range tables {
 		table := tables[i]
+		ordered_pairs := make([]ordered_pair, 0, len(table))
 		for _, p := range table {
+			ordered_pairs = append(ordered_pairs, ordered_pair{
+				in:  orderedRequest{p.in, p.in.oid},
+				out: orderedResponse{p.out, p.out.oid},
+			})
+		}
+		for _, p := range ordered_pairs {
 			s.incomingPacket(p.in)
 		}
-		for _, p := range table {
+		for _, p := range ordered_pairs {
 			s.readyPacket(p.out)
 		}
-		for i := 0; i < len(table); i++ {
+		for _, p := range table {
 			pkt := <-sender.sent
-			id := pkt.(fakepacket).id()
-			assert.Equal(t, id, uint32(i))
+			id := pkt.(orderedResponse).id()
+			assert.Equal(t, id, p.in.id())
 		}
 	}
 	s.close()
 }
 
 func (p sshFxpRemovePacket) String() string {
-	return fmt.Sprintf("RmPct:%d", p.ID)
+	return fmt.Sprintf("RmPkt:%d", p.ID)
 }
 func (p sshFxpOpenPacket) String() string {
-	return fmt.Sprintf("OpPct:%d", p.ID)
+	return fmt.Sprintf("OpPkt:%d", p.ID)
 }
 func (p sshFxpWritePacket) String() string {
-	return fmt.Sprintf("WrPct:%d", p.ID)
+	return fmt.Sprintf("WrPkt:%d", p.ID)
 }
 func (p sshFxpClosePacket) String() string {
-	return fmt.Sprintf("ClPct:%d", p.ID)
-}
-
-// Test what happens when the pool processes a close packet on a file that it
-// is still reading from.
-func TestCloseOutOfOrder(t *testing.T) {
-	packets := []requestPacket{
-		&sshFxpRemovePacket{ID: 0, Filename: "foo"},
-		&sshFxpOpenPacket{ID: 1},
-		&sshFxpWritePacket{ID: 2, Handle: "foo"},
-		&sshFxpWritePacket{ID: 3, Handle: "foo"},
-		&sshFxpWritePacket{ID: 4, Handle: "foo"},
-		&sshFxpWritePacket{ID: 5, Handle: "foo"},
-		&sshFxpClosePacket{ID: 6, Handle: "foo"},
-		&sshFxpRemovePacket{ID: 7, Filename: "foo"},
-	}
-
-	recvChan := make(chan requestPacket, len(packets)+1)
-	sender := newTestSender()
-	pktMgr := newPktMgr(sender)
-	wg := sync.WaitGroup{}
-	wg.Add(len(packets))
-	runWorker := func(ch requestChan) {
-		go func() {
-			for pkt := range ch {
-				if _, ok := pkt.(*sshFxpWritePacket); ok {
-					// sleep to cause writes to come after close/remove
-					time.Sleep(time.Millisecond)
-				}
-				pktMgr.working.Done()
-				recvChan <- pkt
-				wg.Done()
-			}
-		}()
-	}
-	pktChan := pktMgr.workerChan(runWorker)
-	for _, p := range packets {
-		pktChan <- p
-	}
-	wg.Wait()
-	close(recvChan)
-	received := []requestPacket{}
-	for p := range recvChan {
-		received = append(received, p)
-	}
-	if received[len(received)-2].id() != packets[len(packets)-2].id() {
-		t.Fatal("Packets processed out of order1:", received, packets)
-	}
-	if received[len(received)-1].id() != packets[len(packets)-1].id() {
-		t.Fatal("Packets processed out of order2:", received, packets)
-	}
+	return fmt.Sprintf("ClPkt:%d", p.ID)
 }

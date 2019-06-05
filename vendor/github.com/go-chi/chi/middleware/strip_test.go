@@ -65,6 +65,9 @@ func TestStripSlashesInRoute(t *testing.T) {
 
 	r.Route("/accounts/{accountID}", func(r chi.Router) {
 		r.Use(StripSlashes)
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("accounts index"))
+		})
 		r.Get("/query", func(w http.ResponseWriter, r *http.Request) {
 			accountID := chi.URLParam(r, "accountID")
 			w.Write([]byte(accountID))
@@ -78,6 +81,12 @@ func TestStripSlashesInRoute(t *testing.T) {
 		t.Fatalf(resp)
 	}
 	if _, resp := testRequest(t, ts, "GET", "/hi/", nil); resp != "nothing here" {
+		t.Fatalf(resp)
+	}
+	if _, resp := testRequest(t, ts, "GET", "/accounts/admin", nil); resp != "accounts index" {
+		t.Fatalf(resp)
+	}
+	if _, resp := testRequest(t, ts, "GET", "/accounts/admin/", nil); resp != "accounts index" {
 		t.Fatalf(resp)
 	}
 	if _, resp := testRequest(t, ts, "GET", "/accounts/admin/query", nil); resp != "admin" {
@@ -114,25 +123,25 @@ func TestRedirectSlashes(t *testing.T) {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	if status, resp := testRequest(t, ts, "GET", "/", nil); resp != "root" && status != 200 {
+	if req, resp := testRequest(t, ts, "GET", "/", nil); resp != "root" && req.StatusCode != 200 {
 		t.Fatalf(resp)
 	}
 
 	// NOTE: the testRequest client will follow the redirection..
-	if status, resp := testRequest(t, ts, "GET", "//", nil); resp != "root" && status != 200 {
+	if req, resp := testRequest(t, ts, "GET", "//", nil); resp != "root" && req.StatusCode != 200 {
 		t.Fatalf(resp)
 	}
 
-	if status, resp := testRequest(t, ts, "GET", "/accounts/admin", nil); resp != "admin" && status != 200 {
+	if req, resp := testRequest(t, ts, "GET", "/accounts/admin", nil); resp != "admin" && req.StatusCode != 200 {
 		t.Fatalf(resp)
 	}
 
 	// NOTE: the testRequest client will follow the redirection..
-	if status, resp := testRequest(t, ts, "GET", "/accounts/admin/", nil); resp != "admin" && status != 200 {
+	if req, resp := testRequest(t, ts, "GET", "/accounts/admin/", nil); resp != "admin" && req.StatusCode != 200 {
 		t.Fatalf(resp)
 	}
 
-	if status, resp := testRequest(t, ts, "GET", "/nothing-here", nil); resp != "nothing here" && status != 200 {
+	if req, resp := testRequest(t, ts, "GET", "/nothing-here", nil); resp != "nothing here" && req.StatusCode != 200 {
 		t.Fatalf(resp)
 	}
 }

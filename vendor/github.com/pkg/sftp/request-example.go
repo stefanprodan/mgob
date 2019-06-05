@@ -11,12 +11,12 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"sync"
+	"syscall"
 	"time"
 )
 
-// InMemHandler returns a Hanlders object with the test handlers
+// InMemHandler returns a Hanlders object with the test handlers.
 func InMemHandler() Handlers {
 	root := &root{
 		files: make(map[string]*memFile),
@@ -25,8 +25,12 @@ func InMemHandler() Handlers {
 	return Handlers{root, root, root, root}
 }
 
-// Handlers
-func (fs *root) Fileread(r Request) (io.ReaderAt, error) {
+// Example Handlers
+func (fs *root) Fileread(r *Request) (io.ReaderAt, error) {
+	if fs.mockErr != nil {
+		return nil, fs.mockErr
+	}
+	_ = r.WithContext(r.Context()) // initialize context for deadlock testing
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 	file, err := fs.fetch(r.Filepath)
@@ -42,7 +46,11 @@ func (fs *root) Fileread(r Request) (io.ReaderAt, error) {
 	return file.ReaderAt()
 }
 
-func (fs *root) Filewrite(r Request) (io.WriterAt, error) {
+func (fs *root) Filewrite(r *Request) (io.WriterAt, error) {
+	if fs.mockErr != nil {
+		return nil, fs.mockErr
+	}
+	_ = r.WithContext(r.Context()) // initialize context for deadlock testing
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 	file, err := fs.fetch(r.Filepath)
@@ -60,7 +68,11 @@ func (fs *root) Filewrite(r Request) (io.WriterAt, error) {
 	return file.WriterAt()
 }
 
-func (fs *root) Filecmd(r Request) error {
+func (fs *root) Filecmd(r *Request) error {
+	if fs.mockErr != nil {
+		return fs.mockErr
+	}
+	_ = r.WithContext(r.Context()) // initialize context for deadlock testing
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
 	switch r.Method {
@@ -75,6 +87,7 @@ func (fs *root) Filecmd(r Request) error {
 			return &os.LinkError{Op: "rename", Old: r.Filepath, New: r.Target,
 				Err: fmt.Errorf("dest file exists")}
 		}
+		file.name = r.Target
 		fs.files[r.Target] = file
 		delete(fs.files, r.Filepath)
 	case "Rmdir", "Remove":
@@ -101,19 +114,38 @@ func (fs *root) Filecmd(r Request) error {
 	return nil
 }
 
-func (fs *root) Fileinfo(r Request) ([]os.FileInfo, error) {
+type listerat []os.FileInfo
+
+// Modeled after strings.Reader's ReadAt() implementation
+func (f listerat) ListAt(ls []os.FileInfo, offset int64) (int, error) {
+	var n int
+	if offset >= int64(len(f)) {
+		return 0, io.EOF
+	}
+	n = copy(ls, f[offset:])
+	if n < len(ls) {
+		return n, io.EOF
+	}
+	return n, nil
+}
+
+func (fs *root) Filelist(r *Request) (ListerAt, error) {
+	if fs.mockErr != nil {
+		return nil, fs.mockErr
+	}
+	_ = r.WithContext(r.Context()) // initialize context for deadlock testing
 	fs.filesLock.Lock()
 	defer fs.filesLock.Unlock()
+
+	file, err := fs.fetch(r.Filepath)
+	if err != nil {
+		return nil, err
+	}
+
 	switch r.Method {
 	case "List":
-		var err error
-		batch_size := 10
-		current_offset := 0
-		if token := r.LsNext(); token != "" {
-			current_offset, err = strconv.Atoi(token)
-			if err != nil {
-				return nil, os.ErrInvalid
-			}
+		if !file.IsDir() {
+			return nil, syscall.ENOTDIR
 		}
 		ordered_names := []string{}
 		for fn, _ := range fs.files {
@@ -121,38 +153,22 @@ func (fs *root) Fileinfo(r Request) ([]os.FileInfo, error) {
 				ordered_names = append(ordered_names, fn)
 			}
 		}
-		sort.Sort(sort.StringSlice(ordered_names))
+		sort.Strings(ordered_names)
 		list := make([]os.FileInfo, len(ordered_names))
 		for i, fn := range ordered_names {
 			list[i] = fs.files[fn]
 		}
-		if len(list) < current_offset {
-			return nil, io.EOF
-		}
-		new_offset := current_offset + batch_size
-		if new_offset > len(list) {
-			new_offset = len(list)
-		}
-		r.LsSave(strconv.Itoa(new_offset))
-		return list[current_offset:new_offset], nil
+		return listerat(list), nil
 	case "Stat":
-		file, err := fs.fetch(r.Filepath)
-		if err != nil {
-			return nil, err
-		}
-		return []os.FileInfo{file}, nil
+		return listerat([]os.FileInfo{file}), nil
 	case "Readlink":
-		file, err := fs.fetch(r.Filepath)
-		if err != nil {
-			return nil, err
-		}
 		if file.symlink != "" {
 			file, err = fs.fetch(file.symlink)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return []os.FileInfo{file}, nil
+		return listerat([]os.FileInfo{file}), nil
 	}
 	return nil, nil
 }
@@ -162,6 +178,13 @@ type root struct {
 	*memFile
 	files     map[string]*memFile
 	filesLock sync.Mutex
+	mockErr   error
+}
+
+// Set a mocked error that the next handler call will return.
+// Set to nil to reset for no error.
+func (fs *root) returnErr(err error) {
+	fs.mockErr = err
 }
 
 func (fs *root) fetch(path string) (*memFile, error) {

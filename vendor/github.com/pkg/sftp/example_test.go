@@ -1,7 +1,9 @@
 package sftp_test
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -104,14 +106,26 @@ func ExampleClient_Mkdir_parents() {
 	}
 	defer client.Close()
 
-	ssh_fx_failure := uint32(4)
+	sshFxFailure := uint32(4)
 	mkdirParents := func(client *sftp.Client, dir string) (err error) {
 		var parents string
+
+		if path.IsAbs(dir) {
+			// Otherwise, an absolute path given below would be turned in to a relative one
+			// by splitting on "/"
+			parents = "/"
+		}
+
 		for _, name := range strings.Split(dir, "/") {
+			if name == "" {
+				// Paths with double-/ in them should just move along
+				// this will also catch the case of the first character being a "/", i.e. an absolute path
+				continue
+			}
 			parents = path.Join(parents, name)
 			err = client.Mkdir(parents)
 			if status, ok := err.(*sftp.StatusError); ok {
-				if status.Code == ssh_fx_failure {
+				if status.Code == sshFxFailure {
 					var fi os.FileInfo
 					fi, err = client.Stat(parents)
 					if err == nil {
@@ -132,4 +146,19 @@ func ExampleClient_Mkdir_parents() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func ExampleFile_ReadFrom_bufio() {
+	// Using Bufio to buffer writes going to an sftp.File won't buffer as it
+	// skips buffering if the underlying writer support ReadFrom. The
+	// workaround is to wrap your writer in a struct that only implements
+	// io.Writer.
+	//
+	// For background see github.com/pkg/sftp/issues/125
+
+	var data_source io.Reader
+	var f *sftp.File
+	type writerOnly struct{ io.Writer }
+	bw := bufio.NewWriter(writerOnly{f}) // no ReadFrom()
+	bw.ReadFrom(data_source)
 }
