@@ -54,7 +54,7 @@ configMap:
         retention: 7
         timeout: 60
       s3:
-        url: "https://s3.amazonaws.com"
+        url: "https://s3.dualstack.us-east-1.amazonaws.com"
         bucket: "my-db-backups"
         accessKey: "ABCDEFGHIJKLMNOPQRST"
         secretKey: "be0da49b599b24115c7f53c92c729cbb2c8a17e5"
@@ -79,7 +79,7 @@ configMap:
         retention: 7
         timeout: 60
       s3:
-        url: "https://s3.amazonaws.com"
+        url: "https://s3.dualstack.us-east-1.amazonaws.com"
         bucket: "my-db-backups"
         accessKey: "ABCDEFGHIJKLMNOPQRST"
         secretKey: "be0da49b599b24115c7f53c92c729cbb2c8a17e5"
