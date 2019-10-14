@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux \
         -a -installsuffix cgo \
         -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-FROM alpine:latest
+FROM alpine:3.9
 
 ARG BUILD_DATE
 ARG VCS_REF
