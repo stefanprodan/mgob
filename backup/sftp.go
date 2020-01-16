@@ -3,6 +3,7 @@ package backup
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
@@ -16,9 +17,23 @@ import (
 
 func sftpUpload(file string, plan config.Plan) (string, error) {
 	t1 := time.Now()
+	var am ssh.AuthMethod
+	am = ssh.Password(plan.SFTP.Password)
+	if plan.SFTP.Password == "" && plan.SFTP.PrivateKey != "" {
+		key, err := ioutil.ReadFile(plan.SFTP.PrivateKey)
+		if err != nil {
+			return "", errors.Wrapf(err, "Reading private_key from file %s", plan.SFTP.PrivateKey)
+		}
+
+		signer, err := ssh.ParsePrivateKey(key)
+		if err != nil {
+			return "", errors.Wrapf(err, "Parsing private key from file %s", plan.SFTP.PrivateKey)
+		}
+		am = ssh.PublicKeys(signer)
+	}
 	sshConf := &ssh.ClientConfig{
 		User: plan.SFTP.Username,
-		Auth: []ssh.AuthMethod{ssh.Password(plan.SFTP.Password)},
+		Auth: []ssh.AuthMethod{am},
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 			return nil
 		},

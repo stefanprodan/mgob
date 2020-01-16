@@ -57,11 +57,12 @@ type Azure struct {
 }
 
 type SFTP struct {
-	Dir      string `yaml:"dir"`
-	Host     string `yaml:"host"`
-	Password string `yaml:"password"`
-	Port     int    `yaml:"port"`
-	Username string `yaml:"username"`
+	Dir        string `yaml:"dir"`
+	Host       string `yaml:"host"`
+	Password   string `yaml:"password"`
+	PrivateKey string `yaml:"private_key"`
+	Port       int    `yaml:"port"`
+	Username   string `yaml:"username"`
 }
 
 type SMTP struct {
