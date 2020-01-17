@@ -1,4 +1,4 @@
-FROM golang:1.11
+FROM golang:1.13
 
 # TODO: work out how to get this from version.go
 ARG app_version=v0.0.0-dev
