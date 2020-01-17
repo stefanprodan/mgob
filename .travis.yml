@@ -23,7 +23,7 @@ before_script:
 
 script:
   - make travis
-  - sleep 60
+  - sleep 90
   - docker logs mgob
   - curl http://localhost:8090/version
   - echo 'SFTP integration test'
