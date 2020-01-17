@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         role: {{ .Values.selector.role }}
+      annotations:
+        checksum/configMap: {{ toYaml .Values.configMap | sha256sum }}
     spec:
       containers:
       - name: {{ template "fullname" . }}
