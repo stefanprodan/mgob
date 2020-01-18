@@ -3,7 +3,6 @@ package backup
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
@@ -17,23 +16,41 @@ import (
 
 func sftpUpload(file string, plan config.Plan) (string, error) {
 	t1 := time.Now()
-	var am ssh.AuthMethod
-	am = ssh.Password(plan.SFTP.Password)
-	if plan.SFTP.Password == "" && plan.SFTP.PrivateKey != "" {
-		key, err := ioutil.ReadFile(plan.SFTP.PrivateKey)
+	var ams []ssh.AuthMethod
+	if plan.SFTP.Password != "" {
+		ams = append(ams, ssh.Password(plan.SFTP.Password))
+	}
+
+	var key []byte
+	if plan.SFTP.PrivateKey != "" {
+		f, err := os.Open(plan.SFTP.PrivateKey)
+		if err != nil {
+			return "", errors.Wrapf(err, "Opening private_key file %s", plan.SFTP.PrivateKey)
+		}
+		_, err = io.ReadFull(f, key)
 		if err != nil {
 			return "", errors.Wrapf(err, "Reading private_key from file %s", plan.SFTP.PrivateKey)
 		}
 
-		signer, err := ssh.ParsePrivateKey(key)
-		if err != nil {
-			return "", errors.Wrapf(err, "Parsing private key from file %s", plan.SFTP.PrivateKey)
+		var signer ssh.Signer
+		switch {
+		case plan.SFTP.PrivateKey != "" && plan.SFTP.Passphrase != "":
+			signer, err = ssh.ParsePrivateKeyWithPassphrase(key, []byte(plan.SFTP.Passphrase))
+			if err != nil {
+				return "", errors.Wrapf(err, "Parsing private key from file %s", plan.SFTP.PrivateKey)
+			}
+		case plan.SFTP.PrivateKey != "":
+			signer, err = ssh.ParsePrivateKey(key)
+			if err != nil {
+				return "", errors.Wrapf(err, "Parsing private key from file %s", plan.SFTP.PrivateKey)
+			}
 		}
-		am = ssh.PublicKeys(signer)
+		ams = append(ams, ssh.PublicKeys(signer))
 	}
+
 	sshConf := &ssh.ClientConfig{
 		User: plan.SFTP.Username,
-		Auth: []ssh.AuthMethod{am},
+		Auth: ams,
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 			return nil
 		},

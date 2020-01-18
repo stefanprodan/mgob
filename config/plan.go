@@ -61,6 +61,7 @@ type SFTP struct {
 	Host       string `yaml:"host"`
 	Password   string `yaml:"password"`
 	PrivateKey string `yaml:"private_key"`
+	Passphrase string `yaml:"passphrase"`
 	Port       int    `yaml:"port"`
 	Username   string `yaml:"username"`
 }
