@@ -99,6 +99,9 @@ sftp:
   port: 2022
   username: user
   password: secret
+  # you can also specify path to a private key and a passphrase
+  private_key: /etc/ssh/ssh_host_rsa_key
+  passphrase: secretpassphrase
   # dir must exist on the SFTP server
   dir: backup
 # Email notifications (optional)
