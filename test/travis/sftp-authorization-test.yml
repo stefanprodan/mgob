@@ -1,0 +1,14 @@
+scheduler:
+  cron: "* * * * *"
+  retention: 5
+  timeout: 60
+target:
+  host: "127.0.0.1"
+  port: 27017
+  database: test
+sftp:
+  host: "127.0.0.1"
+  port: 20023
+  username: test
+  private_key: /etc/ssh/ssh_host_rsa_key
+  dir: backup

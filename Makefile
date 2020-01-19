@@ -26,6 +26,8 @@ travis:
 	@docker run -d --net=host --name mgob \
 	    --restart unless-stopped \
 	    -v "$(TRAVIS):/config" \
+	    -v "/tmp/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key:ro" \
+	    -v "/tmp/ssh_host_rsa_key.pub:/etc/ssh/ssh_host_rsa_key.pub:ro" \
         $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
 		-ConfigPath=/config \
 		-StoragePath=/storage \

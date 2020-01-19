@@ -13,6 +13,12 @@ before_install:
   - sudo curl -s -o /usr/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/mc
   - sudo chmod u+x /usr/bin/mc
   - docker run -dp 20022:22 atmoz/sftp:alpine test:test:::backup
+  - ssh-keygen -b 4096 -t rsa -N "" -f /tmp/ssh_host_rsa_key -q
+  - >-
+    docker run -dp 20023:22
+    -v /tmp/ssh_host_rsa_key.pub:/home/test/.ssh/keys/ssh_host_rsa_key.pub:ro
+    -v /tmp/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key
+    --name test-sftp atmoz/sftp:alpine test::1001::backup
 
 before_script:
   - sleep 10
@@ -32,6 +38,8 @@ script:
   - docker logs mgob 2>&1 | grep 'S3 upload finished'
   - echo 'Local backup integration test'
   - docker logs mgob 2>&1 | grep 'Backup finished'
+  - echo 'SFTP private key authorization integration test'
+  - docker logs mgob 2>&1 | grep "Backup finished .* sftp-authorization-test"
 
 after_success:
   - if [ -z "$DOCKER_USER" ]; then
