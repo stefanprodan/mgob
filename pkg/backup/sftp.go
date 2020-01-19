@@ -11,8 +11,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/pkg/sftp"
-	"github.com/stefanprodan/mgob/config"
 	"golang.org/x/crypto/ssh"
+
+	"github.com/stefanprodan/mgob/pkg/config"
 )
 
 func sftpUpload(file string, plan config.Plan) (string, error) {

@@ -1,9 +1,9 @@
 # mgob
 
 [![Build Status](https://travis-ci.org/stefanprodan/mgob.svg?branch=master)](https://travis-ci.org/stefanprodan/mgob)
-[![Docker Image](https://images.microbadger.com/badges/image/stefanprodan/mgob:edge.svg)](https://hub.docker.com/r/stefanprodan/mgob/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/stefanprodan/mgob)](https://hub.docker.com/r/stefanprodan/mgob/)
 
-MGOB is a MongoDB backup automation tool built with golang.
+MGOB is a MongoDB backup automation tool built with Go.
 
 #### Features
 
@@ -33,6 +33,7 @@ Compatibility matrix:
 `stefanprodan/mgob:0.9` | 3.4
 `stefanprodan/mgob:0.10` | 3.6
 `stefanprodan/mgob:1.0` | 4.0
+`stefanprodan/mgob:1.1` | 4.2
 
 Docker:
 

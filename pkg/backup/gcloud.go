@@ -7,7 +7,8 @@ import (
 
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
-	"github.com/stefanprodan/mgob/config"
+
+	"github.com/stefanprodan/mgob/pkg/config"
 )
 
 func gCloudUpload(file string, plan config.Plan) (string, error) {

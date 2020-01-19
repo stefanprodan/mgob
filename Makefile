@@ -93,4 +93,4 @@ vet:
 		echo "go vet failed"; \
 	fi
 
-.PHONY: run
+.PHONY: build

@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
-	"github.com/stefanprodan/mgob/config"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/stefanprodan/mgob/pkg/config"
 )
 
 func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {

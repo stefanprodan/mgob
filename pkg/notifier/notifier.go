@@ -1,6 +1,6 @@
 package notifier
 
-import "github.com/stefanprodan/mgob/config"
+import "github.com/stefanprodan/mgob/pkg/config"
 
 func SendNotification(subject string, body string, warn bool, plan config.Plan) error {
 

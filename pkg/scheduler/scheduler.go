@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
-	"github.com/stefanprodan/mgob/backup"
-	"github.com/stefanprodan/mgob/config"
-	"github.com/stefanprodan/mgob/db"
-	"github.com/stefanprodan/mgob/metrics"
-	"github.com/stefanprodan/mgob/notifier"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/stefanprodan/mgob/pkg/backup"
+	"github.com/stefanprodan/mgob/pkg/config"
+	"github.com/stefanprodan/mgob/pkg/db"
+	"github.com/stefanprodan/mgob/pkg/metrics"
+	"github.com/stefanprodan/mgob/pkg/notifier"
 )
 
 type Scheduler struct {

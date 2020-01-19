@@ -8,7 +8,8 @@ import (
 
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
-	"github.com/stefanprodan/mgob/config"
+
+	"github.com/stefanprodan/mgob/pkg/config"
 )
 
 func s3Upload(file string, plan config.Plan) (string, error) {
@@ -24,7 +25,7 @@ func s3Upload(file string, plan config.Plan) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "mc config host for plan %v failed %s", plan.Name, output)
 	}
-	
+
 	fileName := filepath.Base(file)
 
 	upload := fmt.Sprintf("mc --quiet cp %v %v/%v/%v",

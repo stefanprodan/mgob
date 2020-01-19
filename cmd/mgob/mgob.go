@@ -6,19 +6,19 @@ import (
 	"path"
 	"syscall"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/stefanprodan/mgob/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
-	"github.com/stefanprodan/mgob/api"
-	"github.com/stefanprodan/mgob/backup"
-	"github.com/stefanprodan/mgob/db"
-	"github.com/stefanprodan/mgob/scheduler"
+	"github.com/stefanprodan/mgob/pkg/api"
+	"github.com/stefanprodan/mgob/pkg/backup"
+	"github.com/stefanprodan/mgob/pkg/config"
+	"github.com/stefanprodan/mgob/pkg/db"
+	"github.com/stefanprodan/mgob/pkg/scheduler"
 )
 
 var (
 	appConfig = &config.AppConfig{}
-	version   = "v1.0.0-dev"
+	version   = "v1.1.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {

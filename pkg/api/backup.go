@@ -6,13 +6,14 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
-	"github.com/stefanprodan/mgob/backup"
-	"github.com/stefanprodan/mgob/config"
-	"github.com/stefanprodan/mgob/notifier"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/stefanprodan/mgob/pkg/backup"
+	"github.com/stefanprodan/mgob/pkg/config"
+	"github.com/stefanprodan/mgob/pkg/notifier"
 )
 
 func configCtx(data config.AppConfig) func(next http.Handler) http.Handler {

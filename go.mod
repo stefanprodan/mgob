@@ -3,7 +3,6 @@ module github.com/stefanprodan/mgob
 go 1.13
 
 require (
-	github.com/Sirupsen/logrus v0.11.5
 	github.com/boltdb/bolt v1.3.1
 	github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0 // indirect
 	github.com/codeskyblue/go-sh v0.0.0-20170112005953-b097669b1569
@@ -15,9 +14,9 @@ require (
 	github.com/pkg/sftp v1.10.1-0.20190523025818-e98a7bef6829
 	github.com/prometheus/client_golang v0.9.3
 	github.com/robfig/cron v1.0.1-0.20170309132418-df38d32658d8
+	github.com/sirupsen/logrus v1.4.2
 	github.com/urfave/cli v1.20.0
 	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793
-	golang.org/x/sys v0.0.0-20190124100055-b90733256f2e // indirect
 	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/yaml.v2 v2.2.1
 )

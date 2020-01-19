@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type Status struct {
