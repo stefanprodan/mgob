@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-APP_VERSION?=1.0
+APP_VERSION?=1.1
 
 # build vars
 BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -13,6 +13,14 @@ TRAVIS:=$$(pwd)/test/travis
 # go tools
 PACKAGES:=$(shell go list ./... | grep -v '/vendor/')
 VETARGS:=-asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -rangeloops -shift -structtags -unsafeptr
+
+build:
+	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@docker build \
+	    --build-arg BUILD_DATE=$(BUILD_DATE) \
+	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VERSION=$(APP_VERSION) \
+	    -t $(REPOSITORY)/mgob:$(APP_VERSION) .
 
 travis:
 	@echo ">>> Building mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) image"
@@ -46,7 +54,7 @@ release:
 	@docker push $(REPOSITORY)/mgob:$(APP_VERSION)
 	@docker push $(REPOSITORY)/mgob:latest
 
-run: build
+run:
 	@echo ">>> Starting mgob container"
 	@docker run -dp 8090:8090 --name mgob-$(APP_VERSION) \
 	    --restart unless-stopped \
@@ -85,4 +93,4 @@ vet:
 		echo "go vet failed"; \
 	fi
 
-.PHONY: build
+.PHONY: run

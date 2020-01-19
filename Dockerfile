@@ -1,7 +1,6 @@
 FROM golang:1.13
 
-# TODO: work out how to get this from version.go
-ARG app_version=v0.0.0-dev
+ARG VERSION
 
 COPY . /go/src/github.com/stefanprodan/mgob
 
@@ -9,19 +8,19 @@ WORKDIR /go/src/github.com/stefanprodan/mgob
 
 RUN CGO_ENABLED=0 GOOS=linux \
       go build \
-        -ldflags "-X main.version=$app_version" \
+        -ldflags "-X main.version=$VERSION" \
         -a -installsuffix cgo \
         -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-FROM alpine:3.9
+FROM alpine:3.11
 
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 
-ENV MONGODB_TOOLS_VERSION 4.0.5-r0
-ENV GOOGLE_CLOUD_SDK_VERSION 235.0.0
-ENV AZURE_CLI_VERSION 2.0.58
+ENV MONGODB_TOOLS_VERSION 4.2.1-r0
+ENV GOOGLE_CLOUD_SDK_VERSION 276.0.0
+ENV AZURE_CLI_VERSION 2.0.80
 ENV PATH /root/google-cloud-sdk/bin:$PATH
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
