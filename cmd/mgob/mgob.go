@@ -2,15 +2,23 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"path"
+	"syscall"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/stefanprodan/mgob"
-	"github.com/stefanprodan/mgob/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+
+	"github.com/stefanprodan/mgob/pkg/api"
+	"github.com/stefanprodan/mgob/pkg/backup"
+	"github.com/stefanprodan/mgob/pkg/config"
+	"github.com/stefanprodan/mgob/pkg/db"
+	"github.com/stefanprodan/mgob/pkg/scheduler"
 )
 
 var (
 	appConfig = &config.AppConfig{}
+	version   = "v1.1.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {
@@ -33,7 +41,7 @@ func beforeApp(c *cli.Context) error {
 func main() {
 	app := cli.NewApp()
 	app.Name = "mgob"
-	app.Version = mgob.Version
+	app.Version = version
 	app.Usage = "mongodb dockerized backup agent"
 	app.Action = start
 	app.Before = beforeApp
@@ -77,7 +85,7 @@ func main() {
 }
 
 func start(c *cli.Context) error {
-	log.Infof("mgob %v", mgob.Version)
+	log.Infof("mgob %v", version)
 
 	appConfig.LogLevel = c.String("LogLevel")
 	appConfig.JSONLog = c.Bool("JSONLog")
@@ -86,8 +94,63 @@ func start(c *cli.Context) error {
 	appConfig.StoragePath = c.String("StoragePath")
 	appConfig.TmpPath = c.String("TmpPath")
 	appConfig.DataPath = c.String("DataPath")
+	appConfig.Version = version
 
-	mgob.Start(appConfig)
+	log.Infof("starting with config: %+v", appConfig)
+
+	info, err := backup.CheckMongodump()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Info(info)
+
+	info, err = backup.CheckMinioClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Info(info)
+
+	info, err = backup.CheckGCloudClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Info(info)
+
+	info, err = backup.CheckAzureClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Info(info)
+
+	plans, err := config.LoadPlans(appConfig.ConfigPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	store, err := db.Open(path.Join(appConfig.DataPath, "mgob.db"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	statusStore, err := db.NewStatusStore(store)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sch := scheduler.New(plans, appConfig, statusStore)
+	sch.Start()
+
+	server := &api.HttpServer{
+		Config: appConfig,
+		Stats:  statusStore,
+	}
+	log.Infof("starting http server on port %v", appConfig.Port)
+	go server.Start(appConfig.Version)
+
+	// wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-sigChan
+
+	log.Infof("shutting down %v signal received", sig)
 
 	return nil
 }

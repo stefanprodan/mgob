@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/stefanprodan/mgob/config"
-	"github.com/stefanprodan/mgob/db"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/stefanprodan/mgob/pkg/config"
+	"github.com/stefanprodan/mgob/pkg/db"
 )
 
 type HttpServer struct {

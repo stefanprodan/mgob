@@ -8,4 +8,5 @@ type AppConfig struct {
 	StoragePath string `json:"storage_path"`
 	TmpPath     string `json:"tmp_path"`
 	DataPath    string `json:"data_path"`
+	Version     string `json:"version"`
 }
