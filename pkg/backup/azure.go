@@ -12,8 +12,9 @@ import (
 )
 
 func azureUpload(file string, plan config.Plan) (string, error) {
+	azurefile := strings.TrimLeft(file, "!/")
 	upload := fmt.Sprintf("az storage blob upload -c '%v' --file '%v' --name '%v' --connection-string '%v'",
-		plan.Azure.ContainerName, file, file, plan.Azure.ConnectionString)
+		plan.Azure.ContainerName, file, azurefile, plan.Azure.ConnectionString)
 
 	result, err := sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	output := ""
