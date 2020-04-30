@@ -24,7 +24,7 @@ before_script:
   - sleep 10
   - >-
     mongo test --eval 'db.test.insert({item: "item", val: "test" });'
-  - sudo mc config host add local http://127.0.0.1:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY S3v4
+  - sudo mc config host add local http://127.0.0.1:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY --api S3v4
   - sudo mc mb local/backup
 
 script:
