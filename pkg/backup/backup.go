@@ -99,11 +99,20 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 	}
 
 	if plan.Azure != nil {
-		azureOutout, err := azureUpload(file, plan)
+		azureOutput, err := azureUpload(file, plan)
 		if err != nil {
 			return res, err
 		} else {
-			log.WithField("plan", plan.Name).Infof("Azure upload finished %v", azureOutout)
+			log.WithField("plan", plan.Name).Infof("Azure upload finished %v", azureOutput)
+		}
+	}
+
+	if plan.Rclone != nil {
+		rcloneOutput, err := rcloneUpload(file, plan)
+		if err != nil {
+			return res, err
+		} else {
+			log.WithField("plan", plan.Name).Infof("Rclone upload finished %v", rcloneOutput)
 		}
 	}
 
