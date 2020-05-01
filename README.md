@@ -12,6 +12,7 @@ MGOB is a MongoDB backup automation tool built with Go.
 * upload to S3 Object Storage (Minio, AWS, Google Cloud, Azure)
 * upload to gcloud storage
 * upload to SFTP
+* upload to any [Rclone](https://rclone.org/) supported storage
 * notifications (Email, Slack)
 * instrumentation with Prometheus
 * http file server for local backups and logs
@@ -94,6 +95,11 @@ gcloud:
 azure:
   containerName: "backup"
   connectionString: "DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net"
+# Rclone upload (optional)
+rclone:
+  bucket: "my-backup-bucket"
+  # See https://rclone.org/docs/ for details on how to configure rclone
+  configFilePath: /etc/rclone.conf
 # SFTP upload (optional)
 sftp:
   host: sftp.company.com

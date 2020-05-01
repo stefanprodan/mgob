@@ -37,6 +37,12 @@ RUN apk add --no-cache ca-certificates tzdata mongodb-tools=${MONGODB_TOOLS_VERS
 ADD https://dl.minio.io/client/mc/release/linux-amd64/mc /usr/bin
 RUN chmod u+x /usr/bin/mc
 
+ADD https://downloads.rclone.org/rclone-current-linux-amd64.zip /tmp
+RUN cd /tmp \
+  && unzip rclone-current-linux-amd64.zip \
+  && cp rclone-*-linux-amd64/rclone /usr/bin/ \
+  && chmod u+x /usr/bin/rclone
+
 WORKDIR /root/
 
 #install gcloud

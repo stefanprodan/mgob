@@ -16,6 +16,7 @@ type Plan struct {
 	Scheduler Scheduler `yaml:"scheduler"`
 	S3        *S3       `yaml:"s3"`
 	GCloud    *GCloud   `yaml:"gcloud"`
+	Rclone    *Rclone   `yaml:"rclone"`
 	Azure     *Azure    `yaml:"azure"`
 	SFTP      *SFTP     `yaml:"sftp"`
 	SMTP      *SMTP     `yaml:"smtp"`
@@ -49,6 +50,11 @@ type S3 struct {
 type GCloud struct {
 	Bucket      string `yaml:"bucket"`
 	KeyFilePath string `yaml:"keyFilePath"`
+}
+
+type Rclone struct {
+	Bucket         string `yaml:"bucket"`
+	ConfigFilePath string `yaml:"configFilePath"`
 }
 
 type Azure struct {
