@@ -16,8 +16,13 @@ func rcloneUpload(file string, plan config.Plan) (string, error) {
 
 	fileName := filepath.Base(file)
 
+	configSection := plan.Rclone.ConfigSection
+	if "" == configSection {
+		configSection = plan.Name
+	}
+
 	upload := fmt.Sprintf("rclone --config=\"%v\" copy %v %v:%v/%v",
-		plan.Rclone.ConfigFilePath, plan.Name, plan.Rclone.Bucket, fileName)
+		plan.Rclone.ConfigFilePath, file, configSection, plan.Rclone.Bucket, fileName)
 
 	result, err := sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	output := ""

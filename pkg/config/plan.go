@@ -55,6 +55,7 @@ type GCloud struct {
 type Rclone struct {
 	Bucket         string `yaml:"bucket"`
 	ConfigFilePath string `yaml:"configFilePath"`
+	ConfigSection  string `yaml:"configSection"`
 }
 
 type Azure struct {

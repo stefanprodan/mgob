@@ -100,6 +100,7 @@ rclone:
   bucket: "my-backup-bucket"
   # See https://rclone.org/docs/ for details on how to configure rclone
   configFilePath: /etc/rclone.conf
+  configSection: "myrclonesection"
 # SFTP upload (optional)
 sftp:
   host: sftp.company.com
