@@ -22,7 +22,7 @@ func rcloneUpload(file string, plan config.Plan) (string, error) {
 	}
 
 	upload := fmt.Sprintf("rclone --config=\"%v\" copy %v %v:%v/%v",
-		plan.Rclone.ConfigFilePath, file, plan.Rclone.ConfigSection, plan.Rclone.Bucket, fileName)
+		plan.Rclone.ConfigFilePath, file, sectionName, plan.Rclone.Bucket, fileName)
 
 	result, err := sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	output := ""
