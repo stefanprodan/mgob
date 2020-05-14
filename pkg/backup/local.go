@@ -22,7 +22,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		// using uri (New in version 3.4.6)
 		// host/port/username/password are incompatible with uri
 		// https://docs.mongodb.com/manual/reference/program/mongodump/#cmdoption-mongodump-uri
-		dump += fmt.Sprintf("--uri %v ", plan.Target.Uri)
+		dump += fmt.Sprintf(`--uri "%v" `, plan.Target.Uri)
 	} else {
 		// use older host/port
 		dump += fmt.Sprintf("--host %v --port %v ", plan.Target.Host, plan.Target.Port)
