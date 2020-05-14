@@ -28,7 +28,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		dump += fmt.Sprintf("--host %v --port %v ", plan.Target.Host, plan.Target.Port)
 
 		if plan.Target.Username != "" && plan.Target.Password != "" {
-			dump += fmt.Sprintf("-u %v -p %v ", plan.Target.Username, plan.Target.Password)
+			dump += fmt.Sprintf(`-u "%v" -p "%v" `, plan.Target.Username, plan.Target.Password)
 		}
 	}
 
