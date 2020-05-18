@@ -49,13 +49,16 @@ WORKDIR /root/
 # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/69b7b0031d877600a9146c1111e43bc66b536de7/alpine/Dockerfile
 RUN apk --no-cache add \
         curl \
-        python \
-        py-crcmod \
+        python3 \
+        py3-pip \
         bash \
         libc6-compat \
         openssh-client \
         git \
-    && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    && pip3 install --upgrade pip && \
+    pip install wheel && \
+    pip install crcmod && \
+    curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar xzf google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     rm google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     ln -s /lib /lib64 && \
@@ -65,9 +68,7 @@ RUN apk --no-cache add \
     gcloud --version
 
 # install azure-cli
-RUN apk add py-pip && \
-  apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python-dev make && \
-  pip install --upgrade pip && \
+RUN apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make && \
   pip install cffi && \
   pip install azure-cli==${AZURE_CLI_VERSION} && \
   apk del --purge build
