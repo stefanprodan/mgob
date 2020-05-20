@@ -7,10 +7,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
+      app: {{ template "fullname" . }}
       role: {{ .Values.selector.role }}
   template:
     metadata:
       labels:
+        app: {{ template "fullname" . }}
         role: {{ .Values.selector.role }}
       annotations:
         checksum/configMap: {{ toYaml .Values.configMap | sha256sum }}
