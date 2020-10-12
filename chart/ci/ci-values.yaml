@@ -1,0 +1,123 @@
+# Default values for mgob.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# Note that two backup plans are provided as templates - they contain dummy values and should be changed before
+# attempting to apply the chart to your cluster.
+replicaCount: 1
+image:
+  repository: stefanprodan/mgob
+  pullPolicy: IfNotPresent
+  tag: 1.1
+service:
+  name: mgob
+  externalPort: 8090
+  internalPort: 8090
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: iamArn
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+storage:
+  longTerm:
+    accessMode: "ReadWriteOnce"
+    # storageClass: "gp2"  # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    name: "mgob-storage"
+    size: 10Mi
+  tmp:
+    accessMode: "ReadWriteOnce"
+    # storageClass: "gp2"  # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    name: "mgob-tmp"
+    size: 10Mi
+config:
+  # Add each plan as per below.
+  the-first-database.yml:
+    # run every day at 6:00 and 18:00 UTC
+    schedule: "0 6,18 */1 * *"
+    # number of backups to keep locally
+    retention: 14
+    # backup operation timeout in minutes
+    timeout: 60
+    target:
+      # mongod IP or host name
+      host: "172.18.7.21"
+      # mongodb port
+      port: 27017
+      # mongodb database name, leave blank to backup all databases
+      database: "test"
+      # leave blank if auth is not enabled
+      username: "admin"
+      password: "secret"
+      # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
+      params: "--ssl --authenticationDatabase admin"
+    # S3 upload (optional)
+    s3:
+      url: "https://play.minio.io:9000"
+      bucket: "backup"
+      accessKey: "Q3AM3UQ867SPQQA43P2F"
+      secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+      # For Minio and AWS use S3v4 for GCP use S3v2
+      api: "S3v4"
+    # GCloud upload (optional)
+    gcloud:
+      bucket: "backup"
+      keyFilePath: /path/to/service-account.json
+    # Azure blob storage upload (optional)
+    azure:
+      containerName: "backup"
+      connectionString: "DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net"
+    # Rclone upload (optional)
+    rclone:
+      bucket: "my-backup-bucket"
+      # See https://rclone.org/docs/ for details on how to configure rclone
+      configFilePath: /etc/rclone.conf
+      configSection: "myrclonesection"
+    # SFTP upload (optional)
+    sftp:
+      host: sftp.company.com
+      port: 2022
+      username: user
+      password: secret
+      # you can also specify path to a private key and a passphrase
+      private_key: /etc/ssh/ssh_host_rsa_key
+      passphrase: secretpassphrase
+      # dir must exist on the SFTP server
+      dir: backup
+    # Email notifications (optional)
+    smtp:
+      server: smtp.company.com
+      port: 465
+      username: user
+      password: secret
+      from: mgob@company.com
+      to:
+        - devops@company.com
+        - alerts@company.com
+    # Slack notifications (optional)
+    slack:
+      url: https://hooks.slack.com/services/xxxx/xxx/xx
+      channel: devops-alerts
+      username: mgob
+      # 'true' to notify only on failures
+      warnOnly: false
+secret: {}
+## You can either insert your secret values as part of helm values, or refer externally created secrets.
+#  - name: gcp-example-secret-name
+#  - name: gcp-example-secret-name-with-values
+#    data:
+#      service-account.json: |
+#        {
+#          "type": "service_account",
+#          "project_id": "your-gcp-project-id",
+#          "private_key_id": "12345678901234567890",
+#          "private_key": "-----BEGIN PRIVATE KEY-----\n...........\n-----END PRIVATE KEY-----\n",
+#          ...
+#        }
+env: {}
+#  - name: HTTPS_PROXY
+#    value: "http://localhost:3128"

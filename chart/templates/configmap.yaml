@@ -1,8 +1,46 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
+  name: {{ template "mgob.fullname" . }}-config
   labels:
-    role: backup
-  name: "mgob-config"
+    {{- include "mgob.labels" . | nindent 4 }}
 data:
-{{ toYaml .Values.configMap.data | indent 2 }}
+  {{- range $name,$value := .Values.config }}
+  {{ $name | quote }}: |-
+    scheduler:
+      cron: {{ $value.schedule | quote }}
+      retention: {{ $value.retention }}
+      timeout: {{ $value.timeout }}
+    {{- with $value.target }}
+    target:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.s3 }}
+    s3:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.gcloud }}
+    gcloud:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.azure }}
+    azure:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.rclone }}
+    rclone:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.sftp }}
+    sftp:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.smtp }}
+    smtp:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.slack }}
+    slack:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+  {{- end }}
