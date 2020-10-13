@@ -1,31 +1,32 @@
-apiVersion: apps/v1 # Change to "apps/v1beta1" for Kubernetes < 1.10.
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "mgob.fullname" . }}
+  labels:
+    {{- include "mgob.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ template "fullname" . }}
+  serviceName: {{ template "mgob.fullname" . }}
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "fullname" . }}
-      role: {{ .Values.selector.role }}
+      app.kubernetes.io/name: {{ include "mgob.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
-        role: {{ .Values.selector.role }}
+        {{- include "mgob.labels" . | nindent 8 }}
       annotations:
-        checksum/configMap: {{ toYaml .Values.configMap | sha256sum }}
+        checksum/configMap: {{ toYaml .Values.config | sha256sum }}
     spec:
       containers:
-      - name: {{ template "fullname" . }}
+      - name: {{ template "mgob.fullname" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-{{- range $envVar := .Values.env }}
+        {{- range $envVar := .Values.env }}
         - name: {{ $envVar.name }}
           value: {{ $envVar.value }}
-{{- end }}
+        {{- end }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
           protocol: TCP
@@ -36,35 +37,35 @@ spec:
           mountPath: "/tmp"
         - name: "mgob-tmp"
           mountPath: "/data"
-{{- range $name, $value := .Values.configMap.data }}
+        {{- range $name, $value := .Values.config }}
         - mountPath: "/config/{{ $name }}"
-          name: {{ $.Values.configMap.name }}
+          name: config
           subPath: {{ $name | quote }}
-{{ end }}
-{{- range $secret := .Values.secret }}
+        {{- end }}
+        {{- range $secret := .Values.secret }}
         - mountPath: "/secret/{{ $secret.name }}"
           name: {{ $secret.name }}
-{{ end }}
+        {{- end }}
+      serviceAccountName: {{ template "mgob.serviceAccountName" . }}
       volumes:
-      - name: {{ .Values.configMap.name }}
+      - name: config
         configMap:
-          name: {{ .Values.configMap.name }}
+          name: {{ template "mgob.fullname" . }}-config
           items:
-{{- range $name, $value := .Values.configMap.data }}
+          {{- range $name, $value := .Values.config }}
           - key: {{ $name }}
             path: {{ $name }}
-{{ end }}
-{{- range $secret := .Values.secret }}
+          {{- end }}
+      {{- range $secret := .Values.secret }}
       - name: {{ $secret.name }}
         secret:
           secretName: {{ $secret.name }}
-{{ end }}
+      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: {{ .Values.storage.longTerm.name }}
-      annotations:
-        volume.beta.kubernetes.io/storage-class: {{ .Values.storage.longTerm.storageClass }}
     spec:
+      storageClassName: {{ .Values.storage.longTerm.storageClass }}
       accessModes:
       - {{ .Values.storage.longTerm.accessMode }}
       resources:
@@ -72,9 +73,8 @@ spec:
           storage: {{ .Values.storage.longTerm.size }}
   - metadata:
       name: {{ .Values.storage.tmp.name }}
-      annotations:
-        volume.beta.kubernetes.io/storage-class: {{ .Values.storage.tmp.storageClass }}
     spec:
+      storageClassName: {{ .Values.storage.tmp.storageClass }}
       accessModes:
       - {{ .Values.storage.tmp.accessMode }}
       resources:

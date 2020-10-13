@@ -3,22 +3,141 @@
 # Declare variables to be passed into your templates.
 # Note that two backup plans are provided as templates - they contain dummy values and should be changed before
 # attempting to apply the chart to your cluster.
+
+# -- Number of replicas
 replicaCount: 1
 image:
+  # -- Image repo
   repository: stefanprodan/mgob
+  # -- Image pull policy
   pullPolicy: IfNotPresent
-
-  # We need edge to be able to use the "configMap.data[name].target.params", required to set the auth db.
-  # When this is official, update to the proper stable release.
-  #
-  # @see https://github.com/stefanprodan/mgob/commit/b70e86b3acba8c82447a568cfcdd31fbd5ee3f7c
-  tag: edge
+  # -- Image tag
+  tag: 1.1
 service:
+  # -- Service name
   name: mgob
+  # -- Port to access the service
   externalPort: 8090
+  # -- Port to connect to in pod
   internalPort: 8090
-selector:
-  role: mongo-backup
+serviceAccount:
+  # -- If false, default service account will be used
+  create: true
+  # -- Annotations to add on service account
+  annotations: {}
+  # For example, to attach an AWS IAM role:
+  #  eks.amazonaws.com/role-arn: iamArn
+storage:
+  # -- Persistent volume for backups, see `config.retention`
+  longTerm:
+    accessMode: "ReadWriteOnce"
+    storageClass: "gp2"  # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    name: "mgob-storage"
+    size: 10Gi
+  # -- Persistent volume for temporary files
+  tmp:
+    accessMode: "ReadWriteOnce"
+    storageClass: "gp2"  # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    name: "mgob-tmp"
+    size: 3Gi
+
+# -- Backup plans.
+# For details, see [values.yaml](values.yaml)
+config: {}
+#    # Add each plan as per below.
+#    the-first-database.yml:
+#      # run every day at 6:00 and 18:00 UTC
+#      schedule: "0 6,18 */1 * *"
+#      # number of backups to keep locally
+#      retention: 14
+#      # backup operation timeout in minutes
+#      timeout: 60
+#      target:
+#        # mongod IP or host name
+#        host: "172.18.7.21"
+#        # mongodb port
+#        port: 27017
+#        # mongodb database name, leave blank to backup all databases
+#        database: "test"
+#        # leave blank if auth is not enabled
+#        username: "admin"
+#        password: "secret"
+#        # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
+#        params: "--ssl --authenticationDatabase admin"
+#      # S3 upload (optional)
+#      s3:
+#        url: "https://play.minio.io:9000"
+#        bucket: "backup"
+#        accessKey: "Q3AM3UQ867SPQQA43P2F"
+#        secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+#        # For Minio and AWS use S3v4 for GCP use S3v2
+#        api: "S3v4"
+#      # GCloud upload (optional)
+#      gcloud:
+#        bucket: "backup"
+#        keyFilePath: /path/to/service-account.json
+#      # Azure blob storage upload (optional)
+#      azure:
+#        containerName: "backup"
+#        connectionString: "DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net"
+#      # Rclone upload (optional)
+#      rclone:
+#        bucket: "my-backup-bucket"
+#        # See https://rclone.org/docs/ for details on how to configure rclone
+#        configFilePath: /etc/rclone.conf
+#        configSection: "myrclonesection"
+#      # SFTP upload (optional)
+#      sftp:
+#        host: sftp.company.com
+#        port: 2022
+#        username: user
+#        password: secret
+#        # you can also specify path to a private key and a passphrase
+#        private_key: /etc/ssh/ssh_host_rsa_key
+#        passphrase: secretpassphrase
+#        # dir must exist on the SFTP server
+#        dir: backup
+#      # Email notifications (optional)
+#      smtp:
+#        server: smtp.company.com
+#        port: 465
+#        username: user
+#        password: secret
+#        from: mgob@company.com
+#        to:
+#          - devops@company.com
+#          - alerts@company.com
+#      # Slack notifications (optional)
+#      slack:
+#        url: https://hooks.slack.com/services/xxxx/xxx/xx
+#        channel: devops-alerts
+#        username: mgob
+#        # 'true' to notify only on failures
+#        warnOnly: false
+
+# -- Secret(s) to mount.
+# For details, see [values.yaml](values.yaml)
+secret: {}
+## You can either insert your secret values as part of helm values, or refer externally created secrets.
+#  - name: gcp-example-secret-name
+#  - name: gcp-example-secret-name-with-values
+#    data:
+#      service-account.json: |
+#        {
+#          "type": "service_account",
+#          "project_id": "your-gcp-project-id",
+#          "private_key_id": "12345678901234567890",
+#          "private_key": "-----BEGIN PRIVATE KEY-----\n...........\n-----END PRIVATE KEY-----\n",
+#          ...
+#        }
+
+# Environment variables
+env: {}
+#  - name: HTTPS_PROXY
+#    value: "http://localhost:3128"
+
+# -- Resource requests and limits
+# ref: http://kubernetes.io/docs/user-guide/compute-resources/
 resources:
   limits:
     cpu: 100m
@@ -26,83 +145,3 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
-storage:
-  longTerm:
-    accessMode: "ReadWriteOnce"
-    storageClass: "gp2" # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
-    name: "mgob-storage"
-    size: 10Gi
-  tmp:
-    accessMode: "ReadWriteOnce"
-    storageClass: "gp2" # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
-    name: "mgob-tmp"
-    size: 3Gi
-configMap:
-  name: "mgob-config"
-  data:
-    # Add each plan as per below.
-    the-first-database.yml: |
-      target:
-        host: "mongodb-replicaset"
-        port: 27017
-        database: "my-database"
-        username: "mongodb-backup"
-        password: "backup-user-pwd"
-        params: "--authenticationDatabase admin"
-      scheduler:
-        cron: "0 5 * * *"
-        retention: 7
-        timeout: 60
-      s3:
-        url: "https://s3.dualstack.us-east-1.amazonaws.com"
-        bucket: "my-db-backups"
-        accessKey: "ABCDEFGHIJKLMNOPQRST"
-        secretKey: "be0da49b599b24115c7f53c92c729cbb2c8a17e5"
-        api: "S3v4"
-      slack:
-        url: "https://hooks.slack.com/services/..."
-        channel: mongochan
-        username: mgob
-        # 'true' to notify only on failures
-        warnOnly: false
-
-    the-second-database.yml: |
-      target:
-        host: "mongodb-replicaset"
-        port: 27017
-        database: "my-database"
-        username: "mongodb-backup"
-        password: "backup-user-pwd"
-        params: "--authenticationDatabase admin"
-      scheduler:
-        cron: "0 5 * * *"
-        retention: 7
-        timeout: 60
-      s3:
-        url: "https://s3.dualstack.us-east-1.amazonaws.com"
-        bucket: "my-db-backups"
-        accessKey: "ABCDEFGHIJKLMNOPQRST"
-        secretKey: "be0da49b599b24115c7f53c92c729cbb2c8a17e5"
-        api: "S3v4"
-      slack:
-        url: "https://hooks.slack.com/services/..."
-        channel: mongochan
-        username: mgob
-        # 'true' to notify only on failures
-        warnOnly: false
-secret: {}
-## You can either insert your secret values as part of helm values, or refer externally created secrets.
-#- name: gcp-example-secret-name
-#- name: gcp-example-secret-name-with-values
-#  data:
-#    service-account.json: |
-#      {
-#        "type": "service_account",
-#        "project_id": "your-gcp-project-id",
-#        "private_key_id": "12345678901234567890",
-#        "private_key": "-----BEGIN PRIVATE KEY-----\n...........\n-----END PRIVATE KEY-----\n",
-#        ...
-#      }
-env: {}
-#- name: HTTPS_PROXY
-#  value: "http://localhost:3128"
