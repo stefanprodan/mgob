@@ -33,6 +33,19 @@ func CheckMinioClient() (string, error) {
 	return strings.Replace(string(output), "\n", " ", -1), nil
 }
 
+func CheckAWSClient() (string, error) {
+	output, err := sh.Command("/bin/sh", "-c", "aws --version").CombinedOutput()
+	if err != nil {
+		ex := ""
+		if len(output) > 0 {
+			ex = strings.Replace(string(output), "\n", " ", -1)
+		}
+		return "", errors.Wrapf(err, "aws failed %v", ex)
+	}
+
+	return strings.Replace(string(output), "\n", " ", -1), nil
+}
+
 func CheckGCloudClient() (string, error) {
 	output, err := sh.Command("/bin/sh", "-c", "gcloud --version").CombinedOutput()
 	if err != nil {

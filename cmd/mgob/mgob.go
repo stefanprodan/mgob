@@ -18,7 +18,7 @@ import (
 
 var (
 	appConfig = &config.AppConfig{}
-	version   = "v1.1.0-dev"
+	version   = "v1.2.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {
@@ -95,6 +95,7 @@ func start(c *cli.Context) error {
 	appConfig.TmpPath = c.String("TmpPath")
 	appConfig.DataPath = c.String("DataPath")
 	appConfig.Version = version
+	appConfig.UseAwsCli = true
 
 	log.Infof("starting with config: %+v", appConfig)
 
@@ -107,6 +108,13 @@ func start(c *cli.Context) error {
 	info, err = backup.CheckMinioClient()
 	if err != nil {
 		log.Fatal(err)
+	}
+	log.Info(info)
+
+	info, err = backup.CheckAWSClient()
+	if err != nil {
+		log.Warn(err)
+		appConfig.UseAwsCli = false
 	}
 	log.Info(info)
 
