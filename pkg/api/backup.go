@@ -37,7 +37,7 @@ func postBackup(w http.ResponseWriter, r *http.Request) {
 
 	log.WithField("plan", planID).Info("On demand backup started")
 
-	res, err := backup.Run(plan, cfg.TmpPath, cfg.StoragePath)
+	res, err := backup.Run(plan, cfg)
 	if err != nil {
 		log.WithField("plan", planID).Errorf("On demand backup failed %v", err)
 		if err := notifier.SendNotification(fmt.Sprintf("%v on demand backup failed", planID),
