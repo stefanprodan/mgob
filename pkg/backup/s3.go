@@ -47,8 +47,18 @@ func awsUpload(file string, plan config.Plan) (string, error) {
 
 	fileName := filepath.Base(file)
 
-	upload := fmt.Sprintf("aws --quiet s3 cp %v s3://%v/%v",
-		file, plan.S3.Bucket, fileName)
+	encrypt := ""
+	if len(plan.S3.KmsKeyId) > 0 {
+		encrypt = fmt.Sprintf(" --sse aws:kms --sse-kms-key-id %v", plan.S3.KmsKeyId)
+	}
+
+	storage := ""
+	if len(plan.S3.StorageClass) > 0 {
+		storage = fmt.Sprintf(" --storage-class %v", plan.S3.StorageClass)
+	}
+
+	upload := fmt.Sprintf("aws --quiet s3 cp %v s3://%v/%v%v%v",
+		file, plan.S3.Bucket, fileName, encrypt, storage)
 
 	result, err := sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if len(result) > 0 {
