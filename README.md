@@ -83,8 +83,18 @@ target:
 s3:
   url: "https://play.minio.io:9000"
   bucket: "backup"
+  # accessKey and secretKey are optional for AWS, if your Docker image has awscli
   accessKey: "Q3AM3UQ867SPQQA43P2F"
   secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+  # Optional, only used for AWS (when awscli is present)
+  # The customer-managed AWS Key Management  Service (KMS) key ID that should be used to 
+  # server-side encrypt the backup in S3
+  #kmsKeyId:
+  # Optional, only used for AWS (when awscli is present)
+  # Valid choices are: STANDARD | REDUCED_REDUNDANCY | STANDARD_IA  |  ONE-
+  #     ZONE_IA  |  INTELLIGENT_TIERING  |  GLACIER | DEEP_ARCHIVE. 
+  # Defaults to 'STANDARD'
+  #storageClass: STANDARD
   # For Minio and AWS use S3v4 for GCP use S3v2
   api: "S3v4"
 # GCloud upload (optional)

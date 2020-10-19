@@ -13,7 +13,9 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
-func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
+func Run(plan config.Plan, conf *config.AppConfig) (Result, error) {
+	tmpPath := conf.TmpPath
+	storagePath := conf.StoragePath
 	t1 := time.Now()
 	planDir := fmt.Sprintf("%v/%v", storagePath, plan.Name)
 
@@ -81,7 +83,7 @@ func Run(plan config.Plan, tmpPath string, storagePath string) (Result, error) {
 	}
 
 	if plan.S3 != nil {
-		s3Output, err := s3Upload(file, plan)
+		s3Output, err := s3Upload(file, plan, conf.UseAwsCli)
 		if err != nil {
 			return res, err
 		} else {

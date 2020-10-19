@@ -9,4 +9,5 @@ type AppConfig struct {
 	TmpPath     string `json:"tmp_path"`
 	DataPath    string `json:"data_path"`
 	Version     string `json:"version"`
+	UseAwsCli   bool   `json:"use_aws_cli"`
 }

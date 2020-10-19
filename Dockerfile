@@ -20,7 +20,8 @@ ARG VERSION
 
 ENV MONGODB_TOOLS_VERSION 4.2.1-r1
 ENV GOOGLE_CLOUD_SDK_VERSION 276.0.0
-ENV AZURE_CLI_VERSION 2.5.1
+ENV AZURE_CLI_VERSION 2.13.0
+ENV AWS_CLI_VERSION 1.18.159
 ENV PATH /root/google-cloud-sdk/bin:$PATH
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
@@ -55,9 +56,9 @@ RUN apk --no-cache add \
         libc6-compat \
         openssh-client \
         git \
-    && pip3 install --upgrade pip && \
-    pip install wheel && \
-    pip install crcmod && \
+    && pip3 --no-cache-dir install --upgrade pip && \
+    pip --no-cache-dir install wheel && \
+    pip --no-cache-dir install crcmod && \
     curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar xzf google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     rm google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
@@ -67,10 +68,11 @@ RUN apk --no-cache add \
     gcloud config set metrics/environment github_docker_image && \
     gcloud --version
 
-# install azure-cli
-RUN apk add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make && \
-  pip install cffi && \
-  pip install azure-cli==${AZURE_CLI_VERSION} && \
+# install azure-cli and aws-cli
+RUN apk --no-cache add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make && \
+  pip --no-cache-dir install cffi && \
+  pip --no-cache-dir install azure-cli==${AZURE_CLI_VERSION} && \
+  pip --no-cache-dir install awscli==${AWS_CLI_VERSION} && \
   apk del --purge build
 
 COPY --from=0 /go/src/github.com/stefanprodan/mgob/mgob .

@@ -86,7 +86,7 @@ func (b backupJob) Run() {
 	var backupLog string
 	t1 := time.Now()
 
-	res, err := backup.Run(b.plan, b.conf.TmpPath, b.conf.StoragePath)
+	res, err := backup.Run(b.plan, b.conf)
 	if err != nil {
 		status = "500"
 		backupLog = fmt.Sprintf("Backup failed %v", err)
