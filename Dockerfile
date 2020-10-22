@@ -19,7 +19,8 @@ ARG VCS_REF
 ARG VERSION
 
 ENV MONGODB_TOOLS_VERSION 4.2.1-r1
-ENV GOOGLE_CLOUD_SDK_VERSION 276.0.0
+ENV GNUPG_VERSION 2.2.19-r0
+ENV GOOGLE_CLOUD_SDK_VERSION 315.0.0
 ENV AZURE_CLI_VERSION 2.13.0
 ENV AWS_CLI_VERSION 1.18.159
 ENV PATH /root/google-cloud-sdk/bin:$PATH
@@ -34,7 +35,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
 
-RUN apk add --no-cache ca-certificates tzdata mongodb-tools=${MONGODB_TOOLS_VERSION}
+RUN apk add --no-cache ca-certificates tzdata mongodb-tools=${MONGODB_TOOLS_VERSION} gnupg=${GNUPG_VERSION}
 ADD https://dl.minio.io/client/mc/release/linux-amd64/mc /usr/bin
 RUN chmod u+x /usr/bin/mc
 
@@ -71,7 +72,7 @@ RUN apk --no-cache add \
 # install azure-cli and aws-cli
 RUN apk --no-cache add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make && \
   pip --no-cache-dir install cffi && \
-  pip --no-cache-dir install azure-cli==${AZURE_CLI_VERSION} && \
+  pip --no-cache-dir --use-feature=2020-resolver install azure-cli==${AZURE_CLI_VERSION} && \
   pip --no-cache-dir install awscli==${AWS_CLI_VERSION} && \
   apk del --purge build
 

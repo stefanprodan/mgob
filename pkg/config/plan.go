@@ -11,16 +11,17 @@ import (
 )
 
 type Plan struct {
-	Name      string    `yaml:"name"`
-	Target    Target    `yaml:"target"`
-	Scheduler Scheduler `yaml:"scheduler"`
-	S3        *S3       `yaml:"s3"`
-	GCloud    *GCloud   `yaml:"gcloud"`
-	Rclone    *Rclone   `yaml:"rclone"`
-	Azure     *Azure    `yaml:"azure"`
-	SFTP      *SFTP     `yaml:"sftp"`
-	SMTP      *SMTP     `yaml:"smtp"`
-	Slack     *Slack    `yaml:"slack"`
+	Name       string      `yaml:"name"`
+	Target     Target      `yaml:"target"`
+	Scheduler  Scheduler   `yaml:"scheduler"`
+	Encryption *Encryption `yaml:"encryption"`
+	S3         *S3         `yaml:"s3"`
+	GCloud     *GCloud     `yaml:"gcloud"`
+	Rclone     *Rclone     `yaml:"rclone"`
+	Azure      *Azure      `yaml:"azure"`
+	SFTP       *SFTP       `yaml:"sftp"`
+	SMTP       *SMTP       `yaml:"smtp"`
+	Slack      *Slack      `yaml:"slack"`
 }
 
 type Target struct {
@@ -37,6 +38,16 @@ type Scheduler struct {
 	Cron      string `yaml:"cron"`
 	Retention int    `yaml:"retention"`
 	Timeout   int    `yaml:"timeout"`
+}
+
+type Encryption struct {
+	Gpg *Gpg `yaml:"gpg"`
+}
+
+type Gpg struct {
+	KeyServer  string   `yaml:"keyServer"`
+	Recipients []string `yaml:"recipients"`
+	KeyFile    string   `yaml:"keyFile"`
 }
 
 type S3 struct {
