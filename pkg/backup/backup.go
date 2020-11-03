@@ -73,6 +73,18 @@ func Run(plan config.Plan, conf *config.AppConfig) (Result, error) {
 
 	file := filepath.Join(planDir, res.Name)
 
+	if plan.Encryption != nil {
+		encryptedFile := fmt.Sprintf("%v.encrypted", file)
+		output, err := encrypt(file, encryptedFile, plan, conf)
+		if err != nil {
+			return res, err
+		} else {
+			removeUnencrypted(file, encryptedFile)
+			file = encryptedFile
+			log.WithField("plan", plan.Name).Infof("Encryption finished %v", output)
+		}
+	}
+
 	if plan.SFTP != nil {
 		sftpOutput, err := sftpUpload(file, plan)
 		if err != nil {

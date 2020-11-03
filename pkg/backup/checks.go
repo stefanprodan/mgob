@@ -46,6 +46,19 @@ func CheckAWSClient() (string, error) {
 	return strings.Replace(string(output), "\n", " ", -1), nil
 }
 
+func CheckGpg() (string, error) {
+	output, err := sh.Command("/bin/sh", "-c", "gpg --version").CombinedOutput()
+	if err != nil {
+		ex := ""
+		if len(output) > 0 {
+			ex = strings.Replace(string(output), "\n", " ", -1)
+		}
+		return "", errors.Wrapf(err, "gpg failed %v", ex)
+	}
+
+	return strings.Replace(string(output), "\n", " ", -1), nil
+}
+
 func CheckGCloudClient() (string, error) {
 	output, err := sh.Command("/bin/sh", "-c", "gcloud --version").CombinedOutput()
 	if err != nil {

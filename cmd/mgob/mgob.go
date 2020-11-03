@@ -18,7 +18,7 @@ import (
 
 var (
 	appConfig = &config.AppConfig{}
-	version   = "v1.2.0-dev"
+	version   = "v1.3.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {
@@ -95,9 +95,11 @@ func start(c *cli.Context) error {
 	appConfig.TmpPath = c.String("TmpPath")
 	appConfig.DataPath = c.String("DataPath")
 	appConfig.Version = version
-	appConfig.UseAwsCli = true
 
 	log.Infof("starting with config: %+v", appConfig)
+
+	appConfig.UseAwsCli = true
+	appConfig.HasGpg = true
 
 	info, err := backup.CheckMongodump()
 	if err != nil {
@@ -115,6 +117,13 @@ func start(c *cli.Context) error {
 	if err != nil {
 		log.Warn(err)
 		appConfig.UseAwsCli = false
+	}
+	log.Info(info)
+
+	info, err = backup.CheckGpg()
+	if err != nil {
+		log.Warn(err)
+		appConfig.HasGpg = false
 	}
 	log.Info(info)
 

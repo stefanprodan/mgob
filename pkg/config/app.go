@@ -10,4 +10,5 @@ type AppConfig struct {
 	DataPath    string `json:"data_path"`
 	Version     string `json:"version"`
 	UseAwsCli   bool   `json:"use_aws_cli"`
+	HasGpg      bool   `json:"has_gpg"`
 }

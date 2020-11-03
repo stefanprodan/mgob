@@ -67,7 +67,7 @@ func logToFile(file string, data []byte) error {
 }
 
 func applyRetention(path string, retention int) error {
-	gz := fmt.Sprintf("cd %v && rm -f $(ls -1t *.gz | tail -n +%v)", path, retention+1)
+	gz := fmt.Sprintf("cd %v && rm -f $(ls -1t *.gz *.gz.encrypted | tail -n +%v)", path, retention+1)
 	err := sh.Command("/bin/sh", "-c", gz).Run()
 	if err != nil {
 		return errors.Wrapf(err, "removing old gz files from %v failed", path)
