@@ -34,3 +34,7 @@ _testmain.go
 # working with relative dirs from project for testing
 /data/
 /config/*.yml
+
+
+# intelij
+.idea
