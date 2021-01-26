@@ -6,13 +6,19 @@
 
 # -- Number of replicas
 replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
 image:
   # -- Image repo
   repository: stefanprodan/mgob
   # -- Image pull policy
   pullPolicy: IfNotPresent
   # -- Image tag
-  tag: 1.1
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
 service:
   # -- Service name
   name: mgob
@@ -23,10 +29,14 @@ service:
 serviceAccount:
   # -- If false, default service account will be used
   create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
   # -- Annotations to add on service account
   annotations: {}
   # For example, to attach an AWS IAM role:
   #  eks.amazonaws.com/role-arn: iamArn
+
 storage:
   # -- Persistent volume for backups, see `config.retention`
   longTerm:

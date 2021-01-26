@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: stefanprodan/mgob
   pullPolicy: IfNotPresent
-  tag: 1.1
+  tag: 1.3
 service:
   name: mgob
   externalPort: 8090
