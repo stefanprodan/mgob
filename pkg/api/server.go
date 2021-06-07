@@ -47,7 +47,7 @@ func (s *HttpServer) Start(version string) {
 
 	FileServer(r, "/storage", http.Dir(s.Config.StoragePath))
 
-	log.Error(http.ListenAndServe(fmt.Sprintf(":%v", s.Config.Port), r))
+	log.Error(http.ListenAndServe(fmt.Sprintf("%s:%v", s.Config.Host, s.Config.Port), r))
 }
 
 func FileServer(r chi.Router, path string, root http.FileSystem) {
