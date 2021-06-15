@@ -20,8 +20,10 @@ spec:
     spec:
       containers:
       - name: {{ template "mgob.fullname" . }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        - "-LogLevel=debug"
         env:
         {{- range $envVar := .Values.env }}
         - name: {{ $envVar.name }}

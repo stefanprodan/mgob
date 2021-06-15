@@ -8,9 +8,9 @@ data:
   {{- range $name,$value := .Values.config }}
   {{ $name | quote }}: |-
     scheduler:
-      cron: {{ $value.schedule | quote }}
-      retention: {{ $value.retention }}
-      timeout: {{ $value.timeout }}
+      cron: {{ $value.scheduler.cron | quote }}
+      retention: {{ $value.scheduler.retention }}
+      timeout: {{ $value.scheduler.timeout }}
     {{- with $value.target }}
     target:
       {{ toYaml . | nindent 6 | trim }}
