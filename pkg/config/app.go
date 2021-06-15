@@ -3,6 +3,7 @@ package config
 type AppConfig struct {
 	LogLevel    string `json:"log_level"`
 	JSONLog     bool   `json:"json_log"`
+	Host        string `json:"host"`
 	Port        int    `json:"port"`
 	ConfigPath  string `json:"config_path"`
 	StoragePath string `json:"storage_path"`

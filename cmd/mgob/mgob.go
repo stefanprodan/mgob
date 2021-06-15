@@ -71,6 +71,11 @@ func main() {
 			Usage: "HTTP port to listen on",
 			Value: 8090,
 		},
+		cli.StringFlag{
+			Name:  "Host,h",
+			Usage: "HTTP host to listen on",
+			Value: "",
+		},
 		cli.BoolFlag{
 			Name:  "JSONLog,j",
 			Usage: "logs in JSON format",
