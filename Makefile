@@ -21,6 +21,13 @@ build:
 	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
 	    --build-arg VERSION=$(APP_VERSION) \
 	    -t $(REPOSITORY)/mgob:$(APP_VERSION) .
+	@docker build \
+	    --build-arg BUILD_DATE=$(BUILD_DATE) \
+	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VERSION=$(APP_VERSION) \
+	    -f Dockerfile.ubuntu \
+	    -t $(REPOSITORY)/mgob:$(APP_VERSION)-ubuntu .
+
 
 travis:
 	@echo ">>> Building mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) image"
@@ -29,6 +36,12 @@ travis:
 	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
 	    --build-arg VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
 	    -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) .
+	@docker build \
+	    --build-arg BUILD_DATE=$(BUILD_DATE) \
+	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
+	    -f Dockerfile.ubuntu \
+	    -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER)-ubuntu .
 
 	@echo ">>> Starting mgob container"
 	@docker run -d --net=host --name mgob \
@@ -46,6 +59,8 @@ publish:
 	@echo $(DOCKER_PASS) | docker login -u "$(DOCKER_USER)" --password-stdin
 	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:edge
 	@docker push $(REPOSITORY)/mgob:edge
+#	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER)-ubuntu $(REPOSITORY)/mgob:edge-ubuntu
+#	@docker push $(REPOSITORY)/mgob:edge-ubuntu
 
 release:
 	@echo $(DOCKER_PASS) | docker login -u "$(DOCKER_USER)" --password-stdin
@@ -53,6 +68,8 @@ release:
 	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:latest
 	@docker push $(REPOSITORY)/mgob:$(APP_VERSION)
 	@docker push $(REPOSITORY)/mgob:latest
+#	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER)-ubuntu $(REPOSITORY)/mgob:$(APP_VERSION)-ubuntu
+#	@docker push $(REPOSITORY)/mgob:$(APP_VERSION)-ubuntu
 
 run:
 	@echo ">>> Starting mgob container"
