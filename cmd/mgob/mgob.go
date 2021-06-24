@@ -68,12 +68,12 @@ func main() {
 		},
 		cli.IntFlag{
 			Name:  "Port,p",
-			Usage: "HTTP port to listen on",
+			Usage: "Port to bind the HTTP server on",
 			Value: 8090,
 		},
 		cli.StringFlag{
-			Name:  "Host,h",
-			Usage: "HTTP host to listen on",
+			Name:  "Bind,b",
+			Usage: "Host to bind the HTTP server on",
 			Value: "",
 		},
 		cli.BoolFlag{
@@ -95,6 +95,7 @@ func start(c *cli.Context) error {
 	appConfig.LogLevel = c.String("LogLevel")
 	appConfig.JSONLog = c.Bool("JSONLog")
 	appConfig.Port = c.Int("Port")
+	appConfig.Host = c.String("Bind")
 	appConfig.ConfigPath = c.String("ConfigPath")
 	appConfig.StoragePath = c.String("StoragePath")
 	appConfig.TmpPath = c.String("TmpPath")
