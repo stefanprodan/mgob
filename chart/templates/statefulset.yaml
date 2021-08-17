@@ -17,6 +17,9 @@ spec:
         {{- include "mgob.labels" . | nindent 8 }}
       annotations:
         checksum/configMap: {{ toYaml .Values.config | sha256sum }}
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
     spec:
       containers:
       - name: {{ template "mgob.fullname" . }}

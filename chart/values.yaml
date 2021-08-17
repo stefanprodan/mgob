@@ -20,6 +20,9 @@ service:
   externalPort: 8090
   # -- Port to connect to in pod
   internalPort: 8090
+
+ # -- Annotations to add on pod
+podAnnotations: {}
 serviceAccount:
   # -- If false, default service account will be used
   create: true
