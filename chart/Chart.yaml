@@ -3,7 +3,7 @@ description: |
   MongoDB dockerized backup agent.
   Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrumentation with Prometheus and more.
 name: mgob
-version: 1.0.0
+version: 1.1.0
 sources:
 - https://github.com/stefanprodan/mgob
 maintainers:
