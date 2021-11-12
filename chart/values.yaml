@@ -10,6 +10,10 @@ replicaCount: 1
 nameOverride: ""
 fullnameOverride: ""
 
+# -- log level (debug|info|warn|error|fatal|panic)
+# WARNING! debug logs might include passwords!
+logLevel: info
+
 image:
   # -- Image repo
   repository: stefanprodan/mgob
@@ -26,6 +30,14 @@ service:
   externalPort: 8090
   # -- Port to connect to in pod
   internalPort: 8090
+
+# TODO: add example values
+ingress:
+  enabled: false
+  annotations: {}
+  tls: {}
+  hosts: {}
+
 serviceAccount:
   # -- If false, default service account will be used
   create: true
@@ -57,11 +69,12 @@ config: {}
 #    # Add each plan as per below.
 #    the-first-database.yml:
 #      # run every day at 6:00 and 18:00 UTC
-#      schedule: "0 6,18 */1 * *"
-#      # number of backups to keep locally
-#      retention: 14
-#      # backup operation timeout in minutes
-#      timeout: 60
+#      scheduler:
+#        cron: "0 6,18 */1 * *"
+#        # number of backups to keep locally
+#        retention: 14
+#        # backup operation timeout in minutes
+#        timeout: 60
 #      target:
 #        # mongod IP or host name
 #        host: "172.18.7.21"
@@ -145,6 +158,24 @@ secret: {}
 env: {}
 #  - name: HTTPS_PROXY
 #    value: "http://localhost:3128"
+
+# -- Pod Security Context
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext:
+  fsGroup: 65534
+
+# -- Container Security Context
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  ### The current image writes the root filesystem, and needs root. :(
+  #readOnlyRootFilesystem: false
+  #runAsNonRoot: false
+  #runAsUser: 0
 
 # -- Resource requests and limits
 # ref: http://kubernetes.io/docs/user-guide/compute-resources/
