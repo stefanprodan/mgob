@@ -2,6 +2,7 @@ package backup
 
 import (
 	"fmt"
+	"os"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -48,6 +49,8 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		if len(output) > 0 {
 			ex = strings.Replace(string(output), "\n", " ", -1)
 		}
+		// Try and clean up tmp file after an error
+		os.Remove(archive)
 		return "", "", errors.Wrapf(err, "mongodump log %v", ex)
 	}
 	logToFile(mlog, output)
