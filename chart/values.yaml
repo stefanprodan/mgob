@@ -87,6 +87,18 @@ config: {}
 #        password: "secret"
 #        # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
 #        params: "--ssl --authenticationDatabase admin"
+#      # Encryption (optional)
+#      encryption:
+#        # At the time being, only gpg asymmetric encryption is supported
+#        # Public key file or at least one recipient is mandatory
+#        gpg:
+#          # optional path to a public key file, only the first key is used.
+#          keyFile: /secret/mgob-key/key.pub
+#          # optional key server, defaults to hkps://keys.openpgp.org
+#          keyServer: hkps://keys.openpgp.org
+#          # optional list of recipients, they will be looked up on key server
+#          recipients:
+#            - example@example.com
 #      # S3 upload (optional)
 #      s3:
 #        url: "https://play.minio.io:9000"

@@ -15,6 +15,10 @@ data:
     target:
       {{ toYaml . | nindent 6 | trim }}
     {{- end }}
+    {{- with $value.encryption }}
+    encryption:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
     {{- with $value.s3 }}
     s3:
       {{ toYaml . | nindent 6 | trim }}
