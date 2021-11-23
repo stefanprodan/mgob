@@ -5,7 +5,7 @@ description: |
 name: mgob
 version: 1.0.0
 sources:
-- https://github.com/stefanprodan/mgob
+  - https://github.com/stefanprodan/mgob
 maintainers:
-- name: endrec
-  email: endre.czirbesz@rungway.com
+  - name: endrec
+    email: endre.czirbesz@rungway.com
