@@ -31,13 +31,13 @@ storage:
   # -- Persistent volume for backups, see `config.retention`
   longTerm:
     accessMode: "ReadWriteOnce"
-    storageClass: "gp2"  # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    storageClass: "gp2" # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
     name: "mgob-storage"
     size: 10Gi
   # -- Persistent volume for temporary files
   tmp:
     accessMode: "ReadWriteOnce"
-    storageClass: "gp2"  # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
+    storageClass: "gp2" # Note: "gp2" is for AWS. Use the storage class for your cloud provider.
     name: "mgob-tmp"
     size: 3Gi
 

@@ -8,8 +8,8 @@ metadata:
     name: mgob
 spec:
   ports:
-  - port: 8090
-    targetPort: 8090
+    - port: 8090
+      targetPort: 8090
   clusterIP: None
   selector:
     role: mongo-backup
@@ -31,25 +31,25 @@ spec:
         role: mongo-backup
     spec:
       containers:
-      - name: mgobd
-        image: stefanprodan/mgob:edge
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8090
-          protocol: TCP
-        volumeMounts:
-        - name: mgob-storage
-          mountPath: /storage
-        - name: mgob-tmp
-          mountPath: /tmp
-        - name: mgob-tmp
-          mountPath: /data
-        - mountPath: /config/test1.yml
-          name: mgob-config
-          subPath: test1.yml
-        - mountPath: /config/test2.yml
-          name: mgob-config
-          subPath: test2.yml
+        - name: mgobd
+          image: stefanprodan/mgob:edge
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8090
+              protocol: TCP
+          volumeMounts:
+            - name: mgob-storage
+              mountPath: /storage
+            - name: mgob-tmp
+              mountPath: /tmp
+            - name: mgob-tmp
+              mountPath: /data
+            - mountPath: /config/test1.yml
+              name: mgob-config
+              subPath: test1.yml
+            - mountPath: /config/test2.yml
+              name: mgob-config
+              subPath: test2.yml
       volumes:
         - name: mgob-config
           configMap:
@@ -60,21 +60,21 @@ spec:
               - key: test2.yml
                 path: test2.yml
   volumeClaimTemplates:
-  - metadata:
-      name: mgob-storage
-      annotations:
-        volume.beta.kubernetes.io/storage-class: "hdd"
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 3Gi
-  - metadata:
-      name: mgob-tmp
-      annotations:
-        volume.beta.kubernetes.io/storage-class: "hdd"
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi
+    - metadata:
+        name: mgob-storage
+        annotations:
+          volume.beta.kubernetes.io/storage-class: "hdd"
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 3Gi
+    - metadata:
+        name: mgob-tmp
+        annotations:
+          volume.beta.kubernetes.io/storage-class: "hdd"
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

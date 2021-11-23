@@ -1,12 +1,12 @@
 # Kubernetes MongoDB Backup Operator
 
-This is a step by step guide on setting up 
+This is a step by step guide on setting up
 MGOB to automate MongoDB backups on Google Kubernetes Engine.
 
 Requirements:
 
-* GKE cluster minimum version v1.8
-* kubctl admin config
+- GKE cluster minimum version v1.8
+- kubctl admin config
 
 Clone the mgob repository:
 
@@ -28,14 +28,14 @@ kubectl create clusterrolebinding "cluster-admin-$(whoami)" \
 Create the `db` namespace:
 
 ```bash
-$ kubectl apply -f ./namespace.yaml 
+$ kubectl apply -f ./namespace.yaml
 namespace "db" created
 ```
 
 Create the `ssd` and `hdd` storage classes:
 
 ```bash
-$ kubectl apply -f ./storage.yaml 
+$ kubectl apply -f ./storage.yaml
 storageclass "ssd" created
 storageclass "hdd" created
 ```
@@ -43,14 +43,14 @@ storageclass "hdd" created
 Create the `startup-script` _Daemon Set_ to disable hugepage on all hosts:
 
 ```bash
-$ kubectl apply -f ./mongo-ds.yaml 
+$ kubectl apply -f ./mongo-ds.yaml
 daemonset "startup-script" created
 ```
 
 Create a 3 nodes _Replica Set_, each replica provisioned with a 1Gi SSD disk:
 
 ```bash
-$ kubectl apply -f ./mongo-rs.yaml 
+$ kubectl apply -f ./mongo-rs.yaml
 service "mongo" created
 statefulset "mongo" created
 clusterrole "default" configured
@@ -109,8 +109,8 @@ rs0:PRIMARY> db.getCollectionNames()
 [ "inventory" ]
 ```
 
-The [mongo-k8s-sidecar](https://github.com/cvallance/mongo-k8s-sidecar) deals with ReplicaSet provisioning only. 
-if you want to run a sharded cluster on GKE, take a look at [pkdone/gke-mongodb-shards-demo](https://github.com/pkdone/gke-mongodb-shards-demo). 
+The [mongo-k8s-sidecar](https://github.com/cvallance/mongo-k8s-sidecar) deals with ReplicaSet provisioning only.
+if you want to run a sharded cluster on GKE, take a look at [pkdone/gke-mongodb-shards-demo](https://github.com/pkdone/gke-mongodb-shards-demo).
 
 ### Create a MongoDB Backup agent with Stateful Sets
 
@@ -163,7 +163,7 @@ Apply the config:
 kubectl apply -f ./mgob-cfg.yaml
 ```
 
-Deploy mgob _Headless Service_ and _Stateful Set_ with two disks, 3Gi for the long term backup storage 
+Deploy mgob _Headless Service_ and _Stateful Set_ with two disks, 3Gi for the long term backup storage
 and 1Gi for the temporary storage of the running backups:
 
 ```bash
@@ -173,13 +173,13 @@ kubectl apply -f ./mgob-dep.yaml
 To monitor the backups you can stream the mgob logs:
 
 ```bash
-$ kubectl -n db logs -f mgob-0 
-msg="Backup started" plan=test1 
-msg="Backup finished in 261.76829ms archive test1-1514491560.gz size 307 B" plan=test1 
-msg="Next run at 2017-12-28 20:07:00 +0000 UTC" plan=test1 
+$ kubectl -n db logs -f mgob-0
+msg="Backup started" plan=test1
+msg="Backup finished in 261.76829ms archive test1-1514491560.gz size 307 B" plan=test1
+msg="Next run at 2017-12-28 20:07:00 +0000 UTC" plan=test1
 msg="Backup started" plan=test2
-msg="Backup finished in 266.635088ms archive test2-1514491560.gz size 313 B" plan=test2 
-msg="Next run at 2017-12-28 20:08:00 +0000 UTC" plan=test2 
+msg="Backup finished in 266.635088ms archive test2-1514491560.gz size 313 B" plan=test2
+msg="Next run at 2017-12-28 20:08:00 +0000 UTC" plan=test2
 ```
 
 Or you can `curl` the mgob API:
@@ -195,7 +195,7 @@ kubectl -n db exec -it mgob-0 -- curl -XPOST mgob-0.mgob.db:8090/backup/test2
 {"plan":"test2","file":"test2-1514492080.gz","duration":"61.109042ms","size":"313 B","timestamp":"2017-12-28T20:14:40.604057546Z"}
 ```
 
-You can restore a backup from within mgob container. 
+You can restore a backup from within mgob container.
 Exec into mgob and identify the backup you want to restore, the backups are in `/storage/<plan-name>`.
 
 ```bash
@@ -234,11 +234,11 @@ slack:
   url: https://hooks.slack.com/services/xxxx/xxx/xx
   channel: devops-alerts
   username: mgob
-  # 'true' to notify only on failures 
+  # 'true' to notify only on failures
   warnOnly: false
 ```
 
-Mgob exposes Prometheus metrics on the `/metrics` endpoint. 
+Mgob exposes Prometheus metrics on the `/metrics` endpoint.
 
 Successful/failed backups counter:
 
@@ -257,11 +257,11 @@ mgob_scheduler_backup_latency{plan="test1",status="200",quantile="0.99"} 2.39848
 
 ### Backup to GCP Storage Bucket
 
-For long term backup storage you could use a GCP Bucket since is a cheaper option than keeping all 
+For long term backup storage you could use a GCP Bucket since is a cheaper option than keeping all
 backups on disk.
 
-First you need to create an GCP service account key from the `API & Services` page. Download the JSON file 
-and rename it to `service-account.json`. 
+First you need to create an GCP service account key from the `API & Services` page. Download the JSON file
+and rename it to `service-account.json`.
 
 Store the JSON file as a secret in the `db` namespace:
 
@@ -269,7 +269,7 @@ Store the JSON file as a secret in the `db` namespace:
 kubectl -n db create secret generic gcp-key --from-file=service-account.json=service-account.json
 ```
 
-From the GCP web UI, navigate to _Storage_ and create a regional bucket named `mgob`. 
+From the GCP web UI, navigate to _Storage_ and create a regional bucket named `mgob`.
 If the bucket name is taken you'll need to change it in the `mgob-gstore-cfg.yaml` file:
 
 ```yaml
@@ -310,9 +310,8 @@ kubectl apply -f ./mgob-gstore-dep.yaml
 After one minute the backup will be uploaded to the GCP bucket:
 
 ```bash
-$ kubectl -n db logs -f mgob-0 
+$ kubectl -n db logs -f mgob-0
 msg="Google Cloud SDK 181.0.0 bq 2.0.27 core 2017.11.28 gsutil 4.28"
 msg="Backup started" plan=test
 msg="GCloud upload finished Copying file:///storage/test/test-1514544660.gz"
 ```
-
