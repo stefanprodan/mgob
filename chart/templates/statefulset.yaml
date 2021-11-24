@@ -50,6 +50,10 @@ spec:
         - mountPath: "/secret/{{ $secret.name }}"
           name: {{ $secret.name }}
         {{- end }}
+      initContainers:
+        - name: init-cleanup
+          image: busybox:1.34
+          command: ['sh', '-c', 'find /tmp -not -name "mgob.db" -type f -delete']
       securityContext:
         {{ toYaml .Values.podSecurityContext | nindent 8 | trim }}
       serviceAccountName: {{ template "mgob.serviceAccountName" . }}
