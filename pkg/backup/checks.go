@@ -84,3 +84,16 @@ func CheckAzureClient() (string, error) {
 
 	return strings.Replace(string(output), "\n", " ", -1), nil
 }
+
+func CheckRCloneClient() (string, error) {
+	output, err := sh.Command("/bin/sh", "-c", "rclone version | grep 'rclone'").CombinedOutput()
+	if err != nil {
+		ex := ""
+		if len(output) > 0 {
+			ex = strings.Replace(string(output), "\n", " ", -1)
+		}
+		return "", errors.Wrapf(err, "rclone failed %v", ex)
+	}
+
+	return strings.Replace(string(output), "\n", " ", -1), nil
+}

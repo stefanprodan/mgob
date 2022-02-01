@@ -6,13 +6,23 @@
 
 # -- Number of replicas
 replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+# -- log level (debug|info|warn|error|fatal|panic)
+# WARNING! debug logs might include passwords!
+logLevel: info
+
 image:
   # -- Image repo
   repository: stefanprodan/mgob
   # -- Image pull policy
   pullPolicy: IfNotPresent
   # -- Image tag
-  tag: 1.1
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
 service:
   # -- Service name
   name: mgob
@@ -20,13 +30,25 @@ service:
   externalPort: 8090
   # -- Port to connect to in pod
   internalPort: 8090
+
+# TODO: add example values
+ingress:
+  enabled: false
+  annotations: {}
+  tls: {}
+  hosts: {}
+
 serviceAccount:
   # -- If false, default service account will be used
   create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
   # -- Annotations to add on service account
   annotations: {}
   # For example, to attach an AWS IAM role:
   #  eks.amazonaws.com/role-arn: iamArn
+
 storage:
   # -- Persistent volume for backups, see `config.retention`
   longTerm:
@@ -47,11 +69,12 @@ config: {}
 #    # Add each plan as per below.
 #    the-first-database.yml:
 #      # run every day at 6:00 and 18:00 UTC
-#      schedule: "0 6,18 */1 * *"
-#      # number of backups to keep locally
-#      retention: 14
-#      # backup operation timeout in minutes
-#      timeout: 60
+#      scheduler:
+#        cron: "0 6,18 */1 * *"
+#        # number of backups to keep locally
+#        retention: 14
+#        # backup operation timeout in minutes
+#        timeout: 60
 #      target:
 #        # mongod IP or host name
 #        host: "172.18.7.21"
@@ -64,6 +87,18 @@ config: {}
 #        password: "secret"
 #        # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
 #        params: "--ssl --authenticationDatabase admin"
+#      # Encryption (optional)
+#      encryption:
+#        # At the time being, only gpg asymmetric encryption is supported
+#        # Public key file or at least one recipient is mandatory
+#        gpg:
+#          # optional path to a public key file, only the first key is used.
+#          keyFile: /secret/mgob-key/key.pub
+#          # optional key server, defaults to hkps://keys.openpgp.org
+#          keyServer: hkps://keys.openpgp.org
+#          # optional list of recipients, they will be looked up on key server
+#          recipients:
+#            - example@example.com
 #      # S3 upload (optional)
 #      s3:
 #        url: "https://play.minio.io:9000"
@@ -135,6 +170,24 @@ secret: {}
 env: {}
 #  - name: HTTPS_PROXY
 #    value: "http://localhost:3128"
+
+# -- Pod Security Context
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext:
+  fsGroup: 65534
+
+# -- Container Security Context
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  privileged: false
+  ### The current image writes the root filesystem, and needs root. :(
+  #readOnlyRootFilesystem: false
+  #runAsNonRoot: false
+  #runAsUser: 0
 
 # -- Resource requests and limits
 # ref: http://kubernetes.io/docs/user-guide/compute-resources/

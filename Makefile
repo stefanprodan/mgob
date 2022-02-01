@@ -1,10 +1,10 @@
 SHELL:=/bin/bash
 
-APP_VERSION?=1.3
+APP_VERSION?=1.5
 
 # build vars
 BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-REPOSITORY:=stefanprodan
+REPOSITORY?=stefanprodan
 
 #run vars
 CONFIG:=$$(pwd)/test/config
@@ -21,6 +21,48 @@ build:
 	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
 	    --build-arg VERSION=$(APP_VERSION) \
 	    -t $(REPOSITORY)/mgob:$(APP_VERSION) .
+
+aws:
+	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@docker build \
+	    --build-arg BUILD_DATE=$(BUILD_DATE) \
+	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VERSION=$(APP_VERSION) \
+	    --build-arg EN_AWS_CLI=true \
+	    --build-arg EN_AZURE=false \
+	    --build-arg EN_GCLOUD=false \
+	    --build-arg EN_MINIO=false \
+	    --build-arg EN_RCLONE=false \
+	    --build-arg EN_GPG=true \
+	    -t $(REPOSITORY)/mgob:$(APP_VERSION)-aws .
+
+azure:
+	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@docker build \
+	    --build-arg BUILD_DATE=$(BUILD_DATE) \
+	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VERSION=$(APP_VERSION) \
+	    --build-arg EN_AWS_CLI=false \
+	    --build-arg EN_AZURE=true \
+	    --build-arg EN_GCLOUD=false \
+	    --build-arg EN_MINIO=false \
+	    --build-arg EN_RCLONE=false \
+	    --build-arg EN_GPG=true \
+	    -t $(REPOSITORY)/mgob:$(APP_VERSION)-azure .
+
+gcloud:
+	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@docker build \
+	    --build-arg BUILD_DATE=$(BUILD_DATE) \
+	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VERSION=$(APP_VERSION) \
+	    --build-arg EN_AWS_CLI=false \
+	    --build-arg EN_AZURE=false \
+	    --build-arg EN_GCLOUD=true \
+	    --build-arg EN_MINIO=false \
+	    --build-arg EN_RCLONE=false \
+	    --build-arg EN_GPG=true \
+	    -t $(REPOSITORY)/mgob:$(APP_VERSION)-gcloud .
 
 travis:
 	@echo ">>> Building mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) image"

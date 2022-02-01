@@ -14,8 +14,9 @@ import (
 )
 
 type HttpServer struct {
-	Config *config.AppConfig
-	Stats  *db.StatusStore
+	Config  *config.AppConfig
+	Modules *config.ModuleConfig
+	Stats   *db.StatusStore
 }
 
 func (s *HttpServer) Start(version string) {
@@ -41,7 +42,7 @@ func (s *HttpServer) Start(version string) {
 	})
 
 	r.Route("/backup", func(r chi.Router) {
-		r.Use(configCtx(*s.Config))
+		r.Use(configCtx(*s.Config, *s.Modules))
 		r.Post("/{planID}", postBackup)
 	})
 

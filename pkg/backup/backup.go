@@ -13,7 +13,7 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
-func Run(plan config.Plan, conf *config.AppConfig) (Result, error) {
+func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig) (Result, error) {
 	tmpPath := conf.TmpPath
 	storagePath := conf.StoragePath
 	t1 := time.Now()

@@ -20,15 +20,17 @@ type Scheduler struct {
 	Cron    *cron.Cron
 	Plans   []config.Plan
 	Config  *config.AppConfig
+	Modules *config.ModuleConfig
 	Stats   *db.StatusStore
 	metrics *metrics.BackupMetrics
 }
 
-func New(plans []config.Plan, conf *config.AppConfig, stats *db.StatusStore) *Scheduler {
+func New(plans []config.Plan, conf *config.AppConfig, modules *config.ModuleConfig, stats *db.StatusStore) *Scheduler {
 	s := &Scheduler{
 		Cron:    cron.New(),
 		Plans:   plans,
 		Config:  conf,
+		Modules: modules,
 		Stats:   stats,
 		metrics: metrics.New("mgob", "scheduler"),
 	}
@@ -42,7 +44,7 @@ func (s *Scheduler) Start() error {
 		if err != nil {
 			return errors.Wrapf(err, "Invalid cron %v for plan %v", plan.Scheduler.Cron, plan.Name)
 		}
-		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config, s.Stats, s.metrics, s.Cron})
+		s.Cron.Schedule(schedule, backupJob{plan.Name, plan, s.Config, s.Modules, s.Stats, s.metrics, s.Cron})
 	}
 
 	s.Cron.AddFunc("0 0 */1 * *", func() {
@@ -75,6 +77,7 @@ type backupJob struct {
 	name    string
 	plan    config.Plan
 	conf    *config.AppConfig
+	modules *config.ModuleConfig
 	stats   *db.StatusStore
 	metrics *metrics.BackupMetrics
 	cron    *cron.Cron
@@ -86,7 +89,7 @@ func (b backupJob) Run() {
 	var backupLog string
 	t1 := time.Now()
 
-	res, err := backup.Run(b.plan, b.conf)
+	res, err := backup.Run(b.plan, b.conf, b.modules)
 	if err != nil {
 		status = "500"
 		backupLog = fmt.Sprintf("Backup failed %v", err)
