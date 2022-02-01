@@ -10,7 +10,7 @@ ARG GNUPG_VERSION="2.2.31-r0"
 ARG EN_MINIO=true
 ARG EN_RCLONE=true
 
-FROM golang:1.15 as mgob-builder
+FROM golang:1.17 as mgob-builder
 
 ARG VERSION
 
@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=linux \
     -a -installsuffix cgo \
     -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-FROM golang:1.15-alpine3.14 as tools-builder
+FROM golang:1.17-alpine3.15 as tools-builder
 
 ARG MONGODB_TOOLS_VERSION
 
@@ -34,7 +34,7 @@ RUN apk add --no-cache git build-base krb5-dev \
 WORKDIR mongo-tools
 RUN ./make build
 
-FROM alpine:3.14
+FROM alpine:3.15
 
 ARG BUILD_DATE
 ARG VCS_REF
