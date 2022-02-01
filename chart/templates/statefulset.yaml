@@ -23,7 +23,7 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
-        - "-LogLevel=debug"
+        - "-LogLevel={{ .Values.logLevel }}"
         env:
         {{- range $envVar := .Values.env }}
         - name: {{ $envVar.name }}
@@ -32,6 +32,8 @@ spec:
         ports:
         - containerPort: {{ .Values.service.internalPort }}
           protocol: TCP
+        securityContext:
+          {{ toYaml .Values.securityContext | nindent 10 | trim }}
         volumeMounts:
         - name: "mgob-storage"
           mountPath: "/storage"
@@ -48,6 +50,12 @@ spec:
         - mountPath: "/secret/{{ $secret.name }}"
           name: {{ $secret.name }}
         {{- end }}
+      initContainers:
+        - name: init-cleanup
+          image: busybox:1.34
+          command: ['sh', '-c', 'find /tmp -not -name "mgob.db" -type f -delete']
+      securityContext:
+        {{ toYaml .Values.podSecurityContext | nindent 8 | trim }}
       serviceAccountName: {{ template "mgob.serviceAccountName" . }}
       volumes:
       - name: config

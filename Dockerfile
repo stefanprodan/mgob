@@ -1,4 +1,4 @@
-FROM golang:1.16-buster
+FROM golang:1.15
 
 ARG VERSION
 
@@ -12,18 +12,17 @@ RUN CGO_ENABLED=0 GOOS=linux \
         -a -installsuffix cgo \
         -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-FROM ubuntu:focal
+FROM alpine:3.14
 
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 
-ENV MONGODB_TOOLS_VERSION 100.5.1
-ENV MONGODB_VERSION 4.4
-ENV GNUPG_VERSION 2.2.27
-ENV GOOGLE_CLOUD_SDK_VERSION 316.0.0
-ENV AZURE_CLI_VERSION 2.13.0
-ENV AWS_CLI_VERSION 2.0.30
+ENV MONGODB_TOOLS_VERSION 4.2.14-r2
+ENV GNUPG_VERSION 2.2.31-r0
+ENV GOOGLE_CLOUD_SDK_VERSION 364.0.0
+ENV AZURE_CLI_VERSION 2.30.0
+ENV AWS_CLI_VERSION 1.22.3
 ENV PATH /root/google-cloud-sdk/bin:$PATH
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
@@ -36,22 +35,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
 
-RUN apt-get update && apt install apt-transport-https ca-certificates gnupg tzdata wget unzip curl -y
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | apt-key add -
-RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/${MONGODB_VERSION} multiverse" | tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-
-RUN apt update && apt install -y google-cloud-sdk
-RUN gcloud config set core/disable_usage_reporting true && \
-    gcloud config set component_manager/disable_update_check true && \
-    gcloud config set metrics/environment github_docker_image && \
-    gcloud --version
-
-RUN wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x86_64-100.5.1.tgz
-RUN tar -zxvf mongodb-database-tools-*-100.5.1.tgz
-RUN cp /mongodb-database-tools-*-100.5.1/bin/* /usr/bin/
-
+RUN apk add --no-cache ca-certificates tzdata mongodb-tools=${MONGODB_TOOLS_VERSION} gnupg=${GNUPG_VERSION}
 ADD https://dl.minio.io/client/mc/release/linux-amd64/mc /usr/bin
 RUN chmod u+x /usr/bin/mc
 
@@ -63,11 +47,35 @@ RUN cd /tmp \
 
 WORKDIR /root/
 
-# install azure-cli and aws-cli
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install
+#install gcloud
+# https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/69b7b0031d877600a9146c1111e43bc66b536de7/alpine/Dockerfile
+RUN apk --no-cache add \
+        curl \
+        python3 \
+        py3-pip \
+        bash \
+        libc6-compat \
+        openssh-client \
+        git \
+    && pip3 --no-cache-dir install --upgrade pip && \
+    pip --no-cache-dir install wheel && \
+    pip --no-cache-dir install crcmod && \
+    curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    tar xzf google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    rm google-cloud-sdk-${GOOGLE_CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+    ln -s /lib /lib64 && \
+    gcloud config set core/disable_usage_reporting true && \
+    gcloud config set component_manager/disable_update_check true && \
+    gcloud config set metrics/environment github_docker_image && \
+    gcloud --version
 
-RUN apt autoremove -y
+# install azure-cli and aws-cli
+RUN apk --no-cache add --virtual=build gcc libffi-dev musl-dev openssl-dev python3-dev make && \
+  pip --no-cache-dir install cffi && \
+  pip --no-cache-dir --use-feature=2020-resolver install azure-cli==${AZURE_CLI_VERSION} && \
+  pip --no-cache-dir install awscli==${AWS_CLI_VERSION} && \
+  apk del --purge build
+
 COPY --from=0 /go/src/github.com/stefanprodan/mgob/mgob .
 
 VOLUME ["/config", "/storage", "/tmp", "/data"]

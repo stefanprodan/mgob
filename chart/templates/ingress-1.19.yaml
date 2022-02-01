@@ -1,11 +1,7 @@
-{{- if and .Values.ingress.enabled (semverCompare "<1.19-0" .Capabilities.KubeVersion.GitVersion) -}}
+{{- if and .Values.ingress.enabled (semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion) -}}
 {{- $fullName := include "mgob.fullname" . -}}
 {{- $svcPort := .Values.service.externalPort -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -33,9 +29,12 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}
-              servicePort: {{ $svcPort }}
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
           {{- end }}
     {{- end }}
-  {{- end }}
+{{- end }}
