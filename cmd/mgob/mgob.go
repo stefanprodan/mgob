@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kelseyhightower/envconfig"
 	"os"
 	"os/signal"
 	"path"
@@ -18,7 +19,9 @@ import (
 
 var (
 	appConfig = &config.AppConfig{}
-	version   = "v1.3.0-dev"
+	modules   = &config.ModuleConfig{}
+	name      = "mgob"
+	version   = "v1.5.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {
@@ -40,7 +43,7 @@ func beforeApp(c *cli.Context) error {
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "mgob"
+	app.Name = name
 	app.Version = version
 	app.Usage = "mongodb dockerized backup agent"
 	app.Action = start
@@ -104,6 +107,11 @@ func start(c *cli.Context) error {
 
 	log.Infof("starting with config: %+v", appConfig)
 
+	err := envconfig.Process(name, modules)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	appConfig.UseAwsCli = true
 	appConfig.HasGpg = true
 
@@ -113,37 +121,7 @@ func start(c *cli.Context) error {
 	}
 	log.Info(info)
 
-	info, err = backup.CheckMinioClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Info(info)
-
-	info, err = backup.CheckAWSClient()
-	if err != nil {
-		log.Warn(err)
-		appConfig.UseAwsCli = false
-	}
-	log.Info(info)
-
-	info, err = backup.CheckGpg()
-	if err != nil {
-		log.Warn(err)
-		appConfig.HasGpg = false
-	}
-	log.Info(info)
-
-	info, err = backup.CheckGCloudClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Info(info)
-
-	info, err = backup.CheckAzureClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Info(info)
+	checkClients()
 
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
 	if err != nil {
@@ -158,12 +136,13 @@ func start(c *cli.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sch := scheduler.New(plans, appConfig, statusStore)
+	sch := scheduler.New(plans, appConfig, modules, statusStore)
 	sch.Start()
 
 	server := &api.HttpServer{
-		Config: appConfig,
-		Stats:  statusStore,
+		Config:  appConfig,
+		Modules: modules,
+		Stats:   statusStore,
 	}
 	log.Infof("starting http server on port %v", appConfig.Port)
 	go server.Start(appConfig.Version)
@@ -176,4 +155,68 @@ func start(c *cli.Context) error {
 	log.Infof("shutting down %v signal received", sig)
 
 	return nil
+}
+
+func checkClients() {
+	if modules.MinioClient {
+		info, err := backup.CheckMinioClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Info(info)
+	} else {
+		log.Info("Minio Client is disabled.")
+	}
+
+	if modules.AWSClient {
+		info, err := backup.CheckAWSClient()
+		if err != nil {
+			log.Warn(err)
+			appConfig.UseAwsCli = false
+		}
+		log.Info(info)
+	} else {
+		log.Info("AWS CLI is disabled.")
+	}
+
+	if modules.GnuPG {
+		info, err := backup.CheckGpg()
+		if err != nil {
+			log.Warn(err)
+			appConfig.HasGpg = false
+		}
+		log.Info(info)
+	} else {
+		log.Info("GPG is disabled.")
+	}
+
+	if modules.GCloudClient {
+		info, err := backup.CheckGCloudClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Info(info)
+	} else {
+		log.Info("Google Storage is disabled.")
+	}
+
+	if modules.AzureClient {
+		info, err := backup.CheckAzureClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Info(info)
+	} else {
+		log.Info("Azure Storage is disabled.")
+	}
+
+	if modules.RCloneClient {
+		info, err := backup.CheckRCloneClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Info(info)
+	} else {
+		log.Info("RClone is disabled.")
+	}
 }

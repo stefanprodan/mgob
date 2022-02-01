@@ -16,10 +16,11 @@ import (
 	"github.com/stefanprodan/mgob/pkg/notifier"
 )
 
-func configCtx(data config.AppConfig) func(next http.Handler) http.Handler {
+func configCtx(data config.AppConfig, modules config.ModuleConfig) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			r = r.WithContext(context.WithValue(r.Context(), "app.config", data))
+			r = r.WithContext(context.WithValue(r.Context(), "app.modules", modules))
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -27,6 +28,7 @@ func configCtx(data config.AppConfig) func(next http.Handler) http.Handler {
 
 func postBackup(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value("app.config").(config.AppConfig)
+	modules := r.Context().Value("app.modules").(config.ModuleConfig)
 	planID := chi.URLParam(r, "planID")
 	plan, err := config.LoadPlan(cfg.ConfigPath, planID)
 	if err != nil {
@@ -37,7 +39,7 @@ func postBackup(w http.ResponseWriter, r *http.Request) {
 
 	log.WithField("plan", planID).Info("On demand backup started")
 
-	res, err := backup.Run(plan, &cfg)
+	res, err := backup.Run(plan, &cfg, &modules)
 	if err != nil {
 		log.WithField("plan", planID).Errorf("On demand backup failed %v", err)
 		if err := notifier.SendNotification(fmt.Sprintf("%v on demand backup failed", planID),
