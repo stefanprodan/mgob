@@ -61,3 +61,15 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Add node selectors for mgob if present in the given scope
+*/}}
+{{- define "mgob.nodeSelector" }}
+{{- if .nodeSelector }}
+nodeSelector:
+  {{- range $key, $val := .nodeSelector }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
