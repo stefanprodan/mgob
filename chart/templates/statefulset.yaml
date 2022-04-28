@@ -57,6 +57,7 @@ spec:
       securityContext:
         {{ toYaml .Values.podSecurityContext | nindent 8 | trim }}
       serviceAccountName: {{ template "mgob.serviceAccountName" . }}
+      {{- include "mgob.nodeSelector" .Values  | indent 6 }}
       volumes:
       - name: config
         configMap:

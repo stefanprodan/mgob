@@ -198,3 +198,7 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
+# -- Node labels for pod assignment
+# ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+nodeSelector: {}
