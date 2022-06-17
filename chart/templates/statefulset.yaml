@@ -54,6 +54,9 @@ spec:
         - name: init-cleanup
           image: busybox:1.34
           command: ['sh', '-c', 'find /tmp -not -name "mgob.db" -type f -delete']
+          volumeMounts:
+          - mountPath: /tmp
+            name: mgob-tmp
       securityContext:
         {{ toYaml .Values.podSecurityContext | nindent 8 | trim }}
       serviceAccountName: {{ template "mgob.serviceAccountName" . }}

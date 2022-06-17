@@ -5,7 +5,7 @@ description: |
   Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrumentation with Prometheus and more.
 
 
-version: 1.2.2
+version: 1.2.3
 appVersion: "1.5"
 
 sources:
