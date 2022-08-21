@@ -52,5 +52,5 @@ jobs:
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ env.BUILD_NUMBER }}
+        tags: maxisam/mgob:${{ env.BUILD_NUMBER }}
         
