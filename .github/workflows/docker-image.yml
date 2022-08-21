@@ -24,7 +24,7 @@ jobs:
         if [ ! -z "${{ github.event.inputs.version }}" ]; then
             VER="${{ github.event.inputs.version }}" 
         fi            
-         echo "BUILD_NUMBER=$(VER)" >> $GITHUB_ENV
+         echo "BUILD_NUMBER=${VER}" >> $GITHUB_ENV
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
