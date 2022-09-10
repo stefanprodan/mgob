@@ -12,9 +12,3 @@ s3:
   accessKey: "AKIAIOSFODNN7EXAMPLE"
   secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
   api: "S3v4"
-sftp:
-  host: "127.0.0.1"
-  port: 20022
-  username: test
-  password: test
-  dir: backup

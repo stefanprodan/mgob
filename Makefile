@@ -4,7 +4,7 @@ APP_VERSION?=1.5
 
 # build vars
 BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-REPOSITORY?=stefanprodan
+
 
 #run vars
 CONFIG:=$$(pwd)/test/config
@@ -15,18 +15,18 @@ PACKAGES:=$(shell go list ./... | grep -v '/vendor/')
 VETARGS:=-asmdecl -atomic -bool -buildtags -copylocks -methods -nilfunc -rangeloops -shift -structtags -unsafeptr
 
 build:
-	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@echo ">>> Building $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)"
 	@docker build \
 	    --build-arg BUILD_DATE=$(BUILD_DATE) \
-	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VCS_REF=$(GITHUB_SHA) \
 	    --build-arg VERSION=$(APP_VERSION) \
-	    -t $(REPOSITORY)/mgob:$(APP_VERSION) .
+	    -t $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION) .
 
 aws:
-	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@echo ">>> Building $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)"
 	@docker build \
 	    --build-arg BUILD_DATE=$(BUILD_DATE) \
-	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VCS_REF=$(GITHUB_SHA) \
 	    --build-arg VERSION=$(APP_VERSION) \
 	    --build-arg EN_AWS_CLI=true \
 	    --build-arg EN_AZURE=false \
@@ -34,13 +34,13 @@ aws:
 	    --build-arg EN_MINIO=false \
 	    --build-arg EN_RCLONE=false \
 	    --build-arg EN_GPG=true \
-	    -t $(REPOSITORY)/mgob:$(APP_VERSION)-aws .
+	    -t $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)-aws .
 
 azure:
-	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@echo ">>> Building $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)"
 	@docker build \
 	    --build-arg BUILD_DATE=$(BUILD_DATE) \
-	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VCS_REF=$(GITHUB_SHA) \
 	    --build-arg VERSION=$(APP_VERSION) \
 	    --build-arg EN_AWS_CLI=false \
 	    --build-arg EN_AZURE=true \
@@ -48,13 +48,13 @@ azure:
 	    --build-arg EN_MINIO=false \
 	    --build-arg EN_RCLONE=false \
 	    --build-arg EN_GPG=true \
-	    -t $(REPOSITORY)/mgob:$(APP_VERSION)-azure .
+	    -t $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)-azure .
 
 gcloud:
-	@echo ">>> Building $(REPOSITORY)/mgob:$(APP_VERSION)"
+	@echo ">>> Building $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)"
 	@docker build \
 	    --build-arg BUILD_DATE=$(BUILD_DATE) \
-	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
+	    --build-arg VCS_REF=$(GITHUB_SHA) \
 	    --build-arg VERSION=$(APP_VERSION) \
 	    --build-arg EN_AWS_CLI=false \
 	    --build-arg EN_AZURE=false \
@@ -62,15 +62,15 @@ gcloud:
 	    --build-arg EN_MINIO=false \
 	    --build-arg EN_RCLONE=false \
 	    --build-arg EN_GPG=true \
-	    -t $(REPOSITORY)/mgob:$(APP_VERSION)-gcloud .
+	    -t $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)-gcloud .
 
-travis:
-	@echo ">>> Building mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) image"
+ci:
+	@echo ">>> Building mgob:$(APP_VERSION).$(GITHUB_RUN_NUMBER) image"
 	@docker build \
 	    --build-arg BUILD_DATE=$(BUILD_DATE) \
-	    --build-arg VCS_REF=$(TRAVIS_COMMIT) \
-	    --build-arg VERSION=$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
-	    -t $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) .
+	    --build-arg VCS_REF=$(GITHUB_SHA) \
+	    --build-arg VERSION=$(APP_VERSION).$(GITHUB_RUN_NUMBER) \
+	    -t $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION).$(GITHUB_RUN_NUMBER) .
 
 	@echo ">>> Starting mgob container"
 	@docker run -d --net=host --name mgob \
@@ -78,7 +78,7 @@ travis:
 	    -v "$(TRAVIS):/config" \
 	    -v "/tmp/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key:ro" \
 	    -v "/tmp/ssh_host_rsa_key.pub:/etc/ssh/ssh_host_rsa_key.pub:ro" \
-        $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) \
+        $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION).$(GITHUB_RUN_NUMBER) \
 		-ConfigPath=/config \
 		-StoragePath=/storage \
 		-TmpPath=/tmp \
@@ -86,22 +86,22 @@ travis:
 
 publish:
 	@echo $(DOCKER_PASS) | docker login -u "$(DOCKER_USER)" --password-stdin
-	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:edge
-	@docker push $(REPOSITORY)/mgob:edge
+	@docker tag $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION).$(GITHUB_RUN_NUMBER) $(GITHUB_REPOSITORY_OWNER)/mgob:edge
+	@docker push $(GITHUB_REPOSITORY_OWNER)/mgob:edge
 
 release:
 	@echo $(DOCKER_PASS) | docker login -u "$(DOCKER_USER)" --password-stdin
-	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:$(APP_VERSION)
-	@docker tag $(REPOSITORY)/mgob:$(APP_VERSION).$(TRAVIS_BUILD_NUMBER) $(REPOSITORY)/mgob:latest
-	@docker push $(REPOSITORY)/mgob:$(APP_VERSION)
-	@docker push $(REPOSITORY)/mgob:latest
+	@docker tag $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION).$(GITHUB_RUN_NUMBER) $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)
+	@docker tag $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION).$(GITHUB_RUN_NUMBER) $(GITHUB_REPOSITORY_OWNER)/mgob:latest
+	@docker push $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION)
+	@docker push $(GITHUB_REPOSITORY_OWNER)/mgob:latest
 
 run:
 	@echo ">>> Starting mgob container"
 	@docker run -dp 8090:8090 --name mgob-$(APP_VERSION) \
 	    --restart unless-stopped \
 	    -v "$(CONFIG):/config" \
-        $(REPOSITORY)/mgob:$(APP_VERSION) \
+        $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION) \
 		-ConfigPath=/config \
 		-StoragePath=/storage \
 		-TmpPath=/tmp \
