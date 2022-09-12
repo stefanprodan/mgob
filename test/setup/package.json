@@ -1,0 +1,6 @@
+{
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^4.9.1"
+  }
+}

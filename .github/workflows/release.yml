@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Version
+        default: 1.5
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Version
+        run: |
+          VER="${{ github.event.inputs.version }}.${{ github.run_number }}" 
+          echo "BUILD_NUMBER=${VER}" >> $GITHUB_ENV
+
+      - name: Set current date as env variable
+        run: echo "NOW=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          labels: ${{ env.BUILD_NUMBER }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ github.repository }}:${{ env.BUILD_NUMBER }}
+            ${{ github.repository }}:latest
+          build-args: |
+            BUILD_DATE=${{ env.NOW }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ env.BUILD_NUMBER }}
+            EN_AWS_CLI=false
+            EN_AZURE=false
+            EN_GCLOUD=false
+            EN_MINIO=true
+            EN_RCLONE=false
+            EN_GPG=false
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
