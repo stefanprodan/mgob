@@ -221,6 +221,8 @@ For each backup plan you can configure alerting via email or Slack:
 ```yaml
 # Email notifications (optional)
 smtp:
+  tlsEnabled: true
+  insecureSkipVerify: true
   server: smtp.company.com
   port: 465
   username: user
@@ -236,6 +238,11 @@ slack:
   username: mgob
   # 'true' to notify only on failures
   warnOnly: false
+team:
+  webhookUrl: https://hooks.slack.com/services/xxxx/xxx/xx
+  title: "mgob backup failed"
+  warnOnly: false
+  themeColor: "#FF0000"
 ```
 
 Mgob exposes Prometheus metrics on the `/metrics` endpoint.
