@@ -10,8 +10,11 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
-func sendEmailNotification(subject string, body string, config *config.SMTP) error {
-
+func sendEmailNotification(subject string, body string, warn bool, config *config.SMTP) error {
+	if !warn && config.WarnOnly {
+		return nil
+	}
+	
 	msg := "From: \"MGOB\" <" + config.From + ">\r\n" +
 		"To: " + strings.Join(config.To, ", ") + "\r\n" +
 		"Subject: " + subject + "\r\n\r\n" +
