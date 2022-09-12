@@ -41,7 +41,7 @@ func sendEmail(config *config.SMTP, e *email.Email) error {
 	addr := fmt.Sprintf("%v:%v", config.Server, config.Port)
 	if config.TlsEnabled {
 		config := &tls.Config{InsecureSkipVerify: config.InsecureSkipVerify, ServerName: config.Server}
-		return e.SendWithTLS(addr, auth, config)
+		return e.SendWithStartTLS(addr, auth, config)
 	} else {
 		return e.Send(addr, auth)
 	}
