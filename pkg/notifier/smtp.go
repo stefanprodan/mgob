@@ -1,12 +1,12 @@
 package notifier
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/smtp"
-	"strings"
 
+	"github.com/jordan-wright/email"
 	"github.com/pkg/errors"
-
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
@@ -14,14 +14,22 @@ func sendEmailNotification(subject string, body string, warn bool, config *confi
 	if !warn && config.WarnOnly {
 		return nil
 	}
-	
-	msg := "From: \"MGOB\" <" + config.From + ">\r\n" +
-		"To: " + strings.Join(config.To, ", ") + "\r\n" +
-		"Subject: " + subject + "\r\n\r\n" +
-		body + "\r\n"
 
-	addr := fmt.Sprintf("%v:%v", config.Server, config.Port)
+	mail := &email.Email{
+		To:      config.To,
+		From:    config.From,
+		Subject: subject,
+		Text:    []byte(body),
+	}
 
+	if err := sendEmail(config, mail); err != nil {
+		return errors.Wrapf(err, "sending email notification failed")
+	}
+
+	return nil
+}
+
+func sendEmail(config *config.SMTP, e *email.Email) error {
 	// auth is set to nil by default
 	// workaround for error given if auth is disabled on the smtp server
 	// notifier error: "smtp: server doesn't support AUTH"
@@ -30,8 +38,11 @@ func sendEmailNotification(subject string, body string, warn bool, config *confi
 		auth = smtp.PlainAuth("", config.Username, config.Password, config.Server)
 	}
 
-	if err := smtp.SendMail(addr, auth, config.From, config.To, []byte(msg)); err != nil {
-		return errors.Wrapf(err, "sending email notification failed")
+	addr := fmt.Sprintf("%v:%v", config.Server, config.Port)
+	if config.TlsEnabled {
+		config := &tls.Config{InsecureSkipVerify: config.InsecureSkipVerify, ServerName: config.Server}
+		return e.SendWithTLS(addr, auth, config)
+	} else {
+		return e.Send(addr, auth)
 	}
-	return nil
 }

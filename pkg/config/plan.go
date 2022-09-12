@@ -87,13 +87,15 @@ type SFTP struct {
 }
 
 type SMTP struct {
-	WarnOnly bool     `yaml:"warnOnly"`
-	Server   string   `yaml:"server"`
-	Port     string   `yaml:"port"`
-	Password string   `yaml:"password"`
-	Username string   `yaml:"username"`
-	From     string   `yaml:"from"`
-	To       []string `yaml:"to"`
+	WarnOnly           bool     `yaml:"warnOnly"`
+	TlsEnabled         bool     `yaml:"tlsEnabled"`
+	InsecureSkipVerify bool     `yaml:"insecureSkipVerify"`
+	Server             string   `yaml:"server"`
+	Port               string   `yaml:"port"`
+	Password           string   `yaml:"password"`
+	Username           string   `yaml:"username"`
+	From               string   `yaml:"from"`
+	To                 []string `yaml:"to"`
 }
 
 type Slack struct {
