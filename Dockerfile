@@ -1,4 +1,4 @@
-ARG MONGODB_TOOLS_VERSION=100.5.1
+ARG MONGODB_TOOLS_VERSION=100.5.4
 ARG EN_AWS_CLI=true
 ARG AWS_CLI_VERSION=1.22.46
 ARG EN_AZURE=true
@@ -79,7 +79,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.url="https://github.com/stefanprodan/mgob" \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/stefanprodan/mgob" \
-      org.label-schema.vendor="stefanprodan.com" \
+      org.label-schema.vendor="stefanprodan.com,maxisam" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
 
