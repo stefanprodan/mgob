@@ -22,6 +22,7 @@ type Plan struct {
 	SFTP       *SFTP       `yaml:"sftp"`
 	SMTP       *SMTP       `yaml:"smtp"`
 	Slack      *Slack      `yaml:"slack"`
+	Team       *Team       `yaml:"team"`
 }
 
 type Target struct {
@@ -97,7 +98,11 @@ type SMTP struct {
 	From               string   `yaml:"from"`
 	To                 []string `yaml:"to"`
 }
-
+type Team struct {
+	WebhookURL string `yaml:"webhookUrl"`
+	WarnOnly   bool   `yaml:"warnOnly"`
+	ThemeColor string `yaml:"themeColor"`
+}
 type Slack struct {
 	URL      string `yaml:"url"`
 	Channel  string `yaml:"channel"`

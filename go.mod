@@ -20,6 +20,7 @@ require (
 )
 
 require (
+	github.com/atc0005/go-teams-notify/v2 v2.6.1
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0 // indirect
