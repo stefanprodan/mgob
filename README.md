@@ -144,6 +144,9 @@ smtp:
   to:
     - devops@company.com
     - alerts@company.com
+  # 'true' to notify only on failures
+  warnOnly: false
+
 # Slack notifications (optional)
 slack:
   url: https://hooks.slack.com/services/xxxx/xxx/xx

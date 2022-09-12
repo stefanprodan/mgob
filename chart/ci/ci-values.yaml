@@ -98,6 +98,7 @@ config:
       to:
         - devops@company.com
         - alerts@company.com
+      warnOnly: false
     # Slack notifications (optional)
     slack:
       url: https://hooks.slack.com/services/xxxx/xxx/xx

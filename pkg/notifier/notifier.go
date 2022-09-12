@@ -6,7 +6,7 @@ func SendNotification(subject string, body string, warn bool, plan config.Plan) 
 
 	var err error
 	if plan.SMTP != nil {
-		err = sendEmailNotification(subject, body, plan.SMTP)
+		err = sendEmailNotification(subject, body, warn, plan.SMTP)
 	}
 	if plan.Slack != nil {
 		err = sendSlackNotification(subject, body, warn, plan.Slack)

@@ -87,6 +87,7 @@ type SFTP struct {
 }
 
 type SMTP struct {
+	WarnOnly bool     `yaml:"warnOnly"`
 	Server   string   `yaml:"server"`
 	Port     string   `yaml:"port"`
 	Password string   `yaml:"password"`

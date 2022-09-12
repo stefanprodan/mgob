@@ -142,6 +142,7 @@ config: {}
 #        to:
 #          - devops@company.com
 #          - alerts@company.com
+#        warnOnly: false
 #      # Slack notifications (optional)
 #      slack:
 #        url: https://hooks.slack.com/services/xxxx/xxx/xx
@@ -182,7 +183,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   privileged: false
   ### The current image writes the root filesystem, and needs root. :(
   #readOnlyRootFilesystem: false
