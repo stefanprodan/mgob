@@ -2,8 +2,8 @@ package backup
 
 import (
 	"fmt"
-	"os"
 	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -41,8 +41,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		dump += fmt.Sprintf("%v", plan.Target.Params)
 	}
 
-	// TODO: mask password
-	log.Debugf("dump cmd: %v", dump)
+	log.Debugf("dump cmd: %v", strings.Replace(dump, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
 	output, err := sh.Command("/bin/sh", "-c", dump).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if err != nil {
 		ex := ""
