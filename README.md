@@ -79,6 +79,11 @@ target:
   password: "secret"
   # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
   params: "--ssl --authenticationDatabase admin"
+retry:
+  # number of retries
+  attempts: 3
+  # backoff factor  * (2 ^ attemptCount) seconds
+  backoffFactor: 60
 # Encryption (optional)
 encryption:
   # At the time being, only gpg asymmetric encryption is supported

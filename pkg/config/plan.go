@@ -14,6 +14,7 @@ type Plan struct {
 	Name       string      `yaml:"name"`
 	Target     Target      `yaml:"target"`
 	Scheduler  Scheduler   `yaml:"scheduler"`
+	Retry      Retry       `yaml:"retry"`
 	Encryption *Encryption `yaml:"encryption"`
 	S3         *S3         `yaml:"s3"`
 	GCloud     *GCloud     `yaml:"gcloud"`
@@ -39,6 +40,11 @@ type Scheduler struct {
 	Cron      string `yaml:"cron"`
 	Retention int    `yaml:"retention"`
 	Timeout   int    `yaml:"timeout"`
+}
+
+type Retry struct {
+	Attempts      int     `yaml:"attempts"`
+	BackoffFactor float32 `yaml:"backoffFactor"`
 }
 
 type Encryption struct {

@@ -3,6 +3,7 @@ package backup
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"strings"
 	"time"
@@ -15,46 +16,69 @@ import (
 )
 
 func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error) {
+	retryCount := 0.0
 	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
 	mlog := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
-	dump := fmt.Sprintf("mongodump --archive=%v --gzip ", archive)
+	dumpCmd := buildDumpCmd(archive, plan)
+	timeout := time.Duration(plan.Scheduler.Timeout) * time.Minute
 
-	if plan.Target.Uri != "" {
-		// using uri (New in version 3.4.6)
-		// host/port/username/password are incompatible with uri
-		// https://docs.mongodb.com/manual/reference/program/mongodump/#cmdoption-mongodump-uri
-		dump += fmt.Sprintf(`--uri "%v" `, plan.Target.Uri)
-	} else {
-		// use older host/port
-		dump += fmt.Sprintf("--host %v --port %v ", plan.Target.Host, plan.Target.Port)
-
-		if plan.Target.Username != "" && plan.Target.Password != "" {
-			dump += fmt.Sprintf(`-u "%v" -p "%v" `, plan.Target.Username, plan.Target.Password)
-		}
-	}
-
-	if plan.Target.Database != "" {
-		dump += fmt.Sprintf("--db %v ", plan.Target.Database)
-	}
-
-	if plan.Target.Params != "" {
-		dump += fmt.Sprintf("%v", plan.Target.Params)
-	}
-
-	log.Debugf("dump cmd: %v", strings.Replace(dump, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
-	output, err := sh.Command("/bin/sh", "-c", dump).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
+	log.Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
+	output, retryCount, err := runDump(dumpCmd, plan.Retry, archive, retryCount, timeout)
 	if err != nil {
 		ex := ""
 		if len(output) > 0 {
 			ex = strings.Replace(string(output), "\n", " ", -1)
 		}
-		// Try and clean up tmp file after an error
-		os.Remove(archive)
-		return "", "", errors.Wrapf(err, "mongodump log %v", ex)
+		return "", "", errors.Wrapf(err, "after %v retries, mongodump log %v", retryCount, ex)
 	}
 	logToFile(mlog, output)
 
 	return archive, mlog, nil
+}
+
+func runDump(dumpCmd string, retryPlan config.Retry, archive string, retryAttempt float64, timeout time.Duration) ([]byte, float64, error) {
+	duration := float32(0)
+	output, err := sh.Command("/bin/sh", "-c", dumpCmd).SetTimeout(timeout).CombinedOutput()
+	if err != nil {
+		// Try and clean up tmp file after an error
+		os.Remove(archive)
+		retryAttempt++
+		if retryAttempt > float64(retryPlan.Attempts) {
+			return nil, retryAttempt - 1, err
+		}
+		duration = retryPlan.BackoffFactor * float32(math.Pow(2, retryAttempt)) * float32(time.Second)
+		time.Sleep(time.Duration(duration))
+		log.Debugf("retrying dump: %v after %v second", retryAttempt, duration)
+		return runDump(dumpCmd, retryPlan, archive, retryAttempt, timeout)
+	}
+	return output, retryAttempt, nil
+}
+
+func buildDumpCmd(archive string, plan config.Plan) string {
+	dumpCmd := fmt.Sprintf("mongodump --archive=%v --gzip ", archive)
+	// using uri (New in version 3.4.6)
+	// host/port/username/password are incompatible with uri
+	// https://docs.mongodb.com/manual/reference/program/mongodump/#cmdoption-mongodump-uri
+	// use older host/port
+	if plan.Target.Uri != "" {
+		dumpCmd += fmt.Sprintf(`--uri "%v" `, plan.Target.Uri)
+	} else {
+
+		dumpCmd += fmt.Sprintf("--host %v --port %v ", plan.Target.Host, plan.Target.Port)
+
+		if plan.Target.Username != "" && plan.Target.Password != "" {
+			dumpCmd += fmt.Sprintf(`-u "%v" -p "%v" `, plan.Target.Username, plan.Target.Password)
+		}
+	}
+
+	if plan.Target.Database != "" {
+		dumpCmd += fmt.Sprintf("--db %v ", plan.Target.Database)
+	}
+
+	if plan.Target.Params != "" {
+		dumpCmd += fmt.Sprintf("%v", plan.Target.Params)
+	}
+	return dumpCmd
 }
 
 func logToFile(file string, data []byte) error {
