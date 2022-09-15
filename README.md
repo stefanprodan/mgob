@@ -1,11 +1,25 @@
 # mgob
 
-[![Build Status](https://travis-ci.org/stefanprodan/mgob.svg?branch=master)](https://travis-ci.org/stefanprodan/mgob)
-[![Docker Pulls](https://img.shields.io/docker/pulls/stefanprodan/mgob)](https://hub.docker.com/r/stefanprodan/mgob/)
+[![Release](https://github.com/maxisam/mgob/actions/workflows/release.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/release.yml)
+[![Build Status](https://github.com/maxisam/mgob/actions/workflows/build.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/build.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/maxisam/mgob)](https://hub.docker.com/r/maxisam/mgob/)
 
 MGOB is a MongoDB backup automation tool built with Go.
 
-#### Features
+This is a fork from [stefanprodan](https://github.com/stefanprodan/mgob) with some additional features.
+
+## New Features in this fork
+
+- Add Backup validation
+- Add Retry logic for backup
+- Add MS Team notification support
+- Use github.com/jordan-wright/email for email notification for [certificate issue](https://github.com/stefanprodan/mgob/issues/160)
+- Update Go to 1.19
+- Update other dependencies
+- Add warnOnly option to all notification channels
+- Use Gihub Action for CI/CD
+
+## Original Features
 
 - schedule backups
 - local backups retention
@@ -20,12 +34,12 @@ MGOB is a MongoDB backup automation tool built with Go.
 
 #### Install
 
-MGOB is available on Docker Hub at [stefanprodan/mgob](https://hub.docker.com/r/stefanprodan/mgob/).
+MGOB is available on Docker Hub at [maxisam/mgob](https://hub.docker.com/repository/docker/maxisam/mgob).
 
 Supported tags:
 
-- `stefanprodan/mgob:latest` latest stable [release](https://github.com/stefanprodan/mgob/releases)
-- `stefanprodan/mgob:edge` master branch latest successful [build](https://travis-ci.org/stefanprodan/mgob)
+- `maxisam/mgob:latest` latest stable [release](https://github.com/maxisam/mgob/releases)
+- `maxisam/mgob:edge` master branch latest successful [build](https://github.com/maxisam/mgob/actions/workflows/release.yml)
 
 Compatibility matrix:
 
@@ -84,6 +98,11 @@ retry:
   attempts: 3
   # backoff factor  * (2 ^ attemptCount) seconds
   backoffFactor: 60
+validation:
+  database:
+    host: "127.0.0.1"
+    port: 27017
+    database: test_restore # database name for restore
 # Encryption (optional)
 encryption:
   # At the time being, only gpg asymmetric encryption is supported
@@ -159,6 +178,10 @@ slack:
   username: mgob
   # 'true' to notify only on failures
   warnOnly: false
+team:
+  webhookUrl: https://xxx/services/xxxx/xxx/xx
+  warnOnly: false
+  themeColor: "#f6c344"
 ```
 
 ReplicaSet example:
