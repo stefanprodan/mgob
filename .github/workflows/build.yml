@@ -8,7 +8,7 @@ jobs:
   test-build:
     runs-on: ubuntu-latest
     env:
-      APP_VERSION: 1.8
+      APP_VERSION: dev
       MINIO_ROOT_USER: AKIAIOSFODNN7EXAMPLE
       MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     services:
