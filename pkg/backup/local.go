@@ -2,9 +2,9 @@ package backup
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -19,7 +19,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 	retryCount := 0.0
 	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
 	mlog := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
-	dumpCmd := buildDumpCmd(archive, plan)
+	dumpCmd := BuildDumpCmd(archive, plan.Target)
 	timeout := time.Duration(plan.Scheduler.Timeout) * time.Minute
 
 	log.Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
@@ -31,9 +31,33 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		}
 		return "", "", errors.Wrapf(err, "after %v retries, mongodump log %v", retryCount, ex)
 	}
+	if plan.Validation != nil {
+		backupResult := getDumpedDocMap(string(output))
+		if isValidate, err := ValidateBackup(archive, plan, backupResult); !isValidate || err != nil {
+			return "", "", errors.Wrapf(err, "backup validation failed")
+		}
+	}
 	logToFile(mlog, output)
 
 	return archive, mlog, nil
+}
+
+func getDumpedDocMap(output string) map[string]string {
+	result := map[string]string{}
+	dbDocCapRegex := `done dumping\s.*\.(\S*)\s\((\d*).document`
+	reg := regexp.MustCompile(dbDocCapRegex)
+	lines := strings.Split(output, "\n")
+
+	for _, line := range lines {
+		if strings.Contains(line, "done dumping") {
+			matches := reg.FindStringSubmatch(line)
+			if reg.NumSubexp() == 2 {
+				result[matches[1]] = matches[2]
+				log.Debugf("dumped %v documents from %v", matches[2], matches[1])
+			}
+		}
+	}
+	return result
 }
 
 func runDump(dumpCmd string, retryPlan config.Retry, archive string, retryAttempt float64, timeout time.Duration) ([]byte, float64, error) {
@@ -54,36 +78,9 @@ func runDump(dumpCmd string, retryPlan config.Retry, archive string, retryAttemp
 	return output, retryAttempt, nil
 }
 
-func buildDumpCmd(archive string, plan config.Plan) string {
-	dumpCmd := fmt.Sprintf("mongodump --archive=%v --gzip ", archive)
-	// using uri (New in version 3.4.6)
-	// host/port/username/password are incompatible with uri
-	// https://docs.mongodb.com/manual/reference/program/mongodump/#cmdoption-mongodump-uri
-	// use older host/port
-	if plan.Target.Uri != "" {
-		dumpCmd += fmt.Sprintf(`--uri "%v" `, plan.Target.Uri)
-	} else {
-
-		dumpCmd += fmt.Sprintf("--host %v --port %v ", plan.Target.Host, plan.Target.Port)
-
-		if plan.Target.Username != "" && plan.Target.Password != "" {
-			dumpCmd += fmt.Sprintf(`-u "%v" -p "%v" `, plan.Target.Username, plan.Target.Password)
-		}
-	}
-
-	if plan.Target.Database != "" {
-		dumpCmd += fmt.Sprintf("--db %v ", plan.Target.Database)
-	}
-
-	if plan.Target.Params != "" {
-		dumpCmd += fmt.Sprintf("%v", plan.Target.Params)
-	}
-	return dumpCmd
-}
-
 func logToFile(file string, data []byte) error {
 	if len(data) > 0 {
-		err := ioutil.WriteFile(file, data, 0644)
+		err := os.WriteFile(file, data, 0644)
 		if err != nil {
 			return errors.Wrapf(err, "writing log %v failed", file)
 		}

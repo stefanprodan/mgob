@@ -17,7 +17,7 @@ func rcloneUpload(file string, plan config.Plan) (string, error) {
 	fileName := filepath.Base(file)
 
 	configSection := plan.Rclone.ConfigSection
-	if "" == configSection {
+	if configSection == "" {
 		configSection = plan.Name
 	}
 

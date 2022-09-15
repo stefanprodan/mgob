@@ -15,6 +15,7 @@ type Plan struct {
 	Target     Target      `yaml:"target"`
 	Scheduler  Scheduler   `yaml:"scheduler"`
 	Retry      Retry       `yaml:"retry"`
+	Validation *Validation `yaml:"validation"`
 	Encryption *Encryption `yaml:"encryption"`
 	S3         *S3         `yaml:"s3"`
 	GCloud     *GCloud     `yaml:"gcloud"`
@@ -24,6 +25,10 @@ type Plan struct {
 	SMTP       *SMTP       `yaml:"smtp"`
 	Slack      *Slack      `yaml:"slack"`
 	Team       *Team       `yaml:"team"`
+}
+
+type Validation struct {
+	Database Target `yaml:"database"`
 }
 
 type Target struct {

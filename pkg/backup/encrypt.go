@@ -2,13 +2,14 @@ package backup
 
 import (
 	"fmt"
+	"os"
+	"regexp"
+	"strings"
+
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/stefanprodan/mgob/pkg/config"
-	"os"
-	"regexp"
-	"strings"
 )
 
 func encrypt(file string, encryptedFile string, plan config.Plan, conf *config.AppConfig) (string, error) {

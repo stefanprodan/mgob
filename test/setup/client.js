@@ -13,6 +13,10 @@ async function main() {
       item: "item",
       val: "test",
     });
+    await client.db().collection("test2").insertOne({
+      item: "item2",
+      val: "test2",
+    });
     const result = await client.db().collection("test").findOne({});
     console.log(JSON.stringify(result));
   } catch (e) {
