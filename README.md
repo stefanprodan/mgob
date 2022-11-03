@@ -1,5 +1,12 @@
 # mgob
 
+This project is no longer maintained.
+I lost interest in MongoDB some years ago and I can't drive an OSS project forward in my spare time without being passioned about it.
+
+But MGOB leaves on thanks to [@maxisam](https://github.com/maxisam). The new home of MGOB is https://github.com/maxisam/mgob
+
+---
+
 [![Build Status](https://travis-ci.org/stefanprodan/mgob.svg?branch=master)](https://travis-ci.org/stefanprodan/mgob)
 [![Docker Pulls](https://img.shields.io/docker/pulls/stefanprodan/mgob)](https://hub.docker.com/r/stefanprodan/mgob/)
 
